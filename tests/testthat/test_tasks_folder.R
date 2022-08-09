@@ -30,6 +30,7 @@ test_that("查看目标文件夹下的脚本", {
 })
 
 test_that("执行目标文件夹下的脚本", {
+  set_topic("STATE", "/tmp/glimmer/STATE")
   set_topic("IMPORT", "/tmp/glimmer/IMPORT")
   if(fs::dir_exists("/tmp/glimmer/IMPORT")) {
     fs::dir_delete(get_path("IMPORT"))
@@ -39,10 +40,12 @@ test_that("执行目标文件夹下的脚本", {
   write("f1 <- 1", get_path("IMPORT", "1.R"))
   write("f3 <- f2 + f1", get_path("IMPORT", "3.R"))
   get_path("IMPORT") |> run_task()
+  
   expect_equal(f3, 3)
 })
 
 test_that("执行目标文件夹下的脚本，哪怕是多层子目录", {
+  set_topic("STATE", "/tmp/glimmer/STATE")
   set_topic("IMPORT", "/tmp/glimmer/IMPORT")
   if(fs::dir_exists("/tmp/glimmer/IMPORT")) {
     fs::dir_delete(get_path("IMPORT"))

@@ -4,7 +4,12 @@
 \alias{read_state}
 \title{读取状态信息}
 \usage{
-read_state(taskName, subTopic)
+read_state(taskName, title = "-")
+}
+\arguments{
+\item{taskName}{任务名称}
+
+\item{title}{子主题名称}
 }
 \description{
 读取状态信息

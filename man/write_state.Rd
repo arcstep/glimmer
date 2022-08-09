@@ -6,7 +6,7 @@
 \usage{
 write_state(
   taskName,
-  subTopic,
+  title = "-",
   datasetName = "-",
   rowID = "-",
   flag = "",
@@ -16,7 +16,7 @@ write_state(
 \arguments{
 \item{taskName}{任务名称，一般为“导入“，”构建“，”上传“等}
 
-\item{subTopic}{子主题名称，可以是导入文件夹或某日构建等，也可以区分取数任务和取数明细}
+\item{title}{子主题名称，可以是导入文件夹或某日构建等，也可以区分取数任务和取数明细}
 
 \item{datasetName}{数据集名称}
 
@@ -27,7 +27,7 @@ write_state(
 \item{info}{状态信息的详细描述}
 }
 \description{
-状态信息一定保存在STATE主题的目录下：{STATE}/{taskName}/{subTopic}
+状态信息一定保存在STATE主题的目录下：{STATE}/{taskName}
 }
 \details{
 应注意状态记录并非覆盖写入，而是追加，且一般不做删除或修改

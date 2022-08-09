@@ -52,8 +52,14 @@ get_task_plan <- function(path, glob = "*.R") {
 #' @description 应当按照脚本顺序执行
 #' @family TaskFolder functions
 #' @export
-run_task <- function(path) {
+run_task <- function(path, title = "-") {
   get_task_plan(path) |> purrr::pmap(function(name, path) {
+    message("执行任务：", path)
+    beginTime <- lubridate::now()
     source(path)
+    topic <- lubridate::now() |> lubridate::as_date()
+    msg <- paste0("任务耗时：", as.character.Date(lubridate::now() - beginTime))
+    write_state(taskName = "RUN_TASK", title = title, flag = path, detail = msg)
+    message(msg)
   })
 }
