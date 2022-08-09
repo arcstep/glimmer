@@ -33,3 +33,27 @@ get_path <- function(topic, ...) {
 set_topic <- function(topic, path) {
   assign(topic, path, envir = TASK.ENV)
 }
+
+#' @title 查看执行计划
+#' @description 按执行顺序罗列需要执行的脚本
+#' @param path 文件夹位置
+#' @param glob 要执行的源文件默认以.R结尾
+#' @family TaskFolder functions
+#' @export
+get_task_plan <- function(path, glob = "*.R") {
+  fs::dir_ls(path, recurse = T, glob = glob, type = "file") |>
+    purrr::map_df(function(item) {
+      name <- fs::path_file(item)
+      list("name" = name, "path" = item)
+    })
+}
+
+#' @title 执行目标路径下的任务脚本
+#' @description 应当按照脚本顺序执行
+#' @family TaskFolder functions
+#' @export
+run_task <- function(path) {
+  get_task_plan(path) |> purrr::pmap(function(name, path) {
+    source(path)
+  })
+}

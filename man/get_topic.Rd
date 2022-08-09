@@ -15,7 +15,9 @@ get_topic(topic)
 \seealso{
 Other TaskFolder functions: 
 \code{\link{get_path}()},
+\code{\link{get_task_plan}()},
 \code{\link{get_topics}()},
+\code{\link{run_task}()},
 \code{\link{set_topic}()}
 }
 \concept{TaskFolder functions}
