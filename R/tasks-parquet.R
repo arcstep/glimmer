@@ -13,7 +13,7 @@ write_dataset <- function(d, dsName, topic = "CACHE", partColumns = c(), keyColu
   
   ## 确定数据集不为空
   if(rlang::is_empty(d)) stop("Empty Dataset to write >>> ", path)
-  if(!tibble::is_tibble(as_tibble(d))) stop("Not Tibble Object to write >>> ", path)
+  if(!is.data.frame(d)) stop("Not Tibble Object to write >>> ", path)
   if(nrow(d)==0) warning("No Content in New Dataset to write >>> ", path)
   
   ## 如果旧数据集已经存在
@@ -166,3 +166,14 @@ ds_diff_dataset <- function(ds1, ds2) {
   ds_diff_schema(ds_schema(ds1), ds_schema(ds2))
 }
 
+
+#' @title 去除重复行
+#' @description
+#' 按键值列去除重复行。
+#' @param ds 要确认的数据集
+#' @param columns 要确认的列名或其向量、列表
+#' @family dataset function
+#' @export
+ds_as_unique <- function(ds, keyColumns) {
+  ds[!duplicated(ds[,keyColumns]),]
+}

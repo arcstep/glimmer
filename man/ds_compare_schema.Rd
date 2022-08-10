@@ -25,6 +25,7 @@ contained为TRUE，否则为FALSE。
 }
 \seealso{
 Other dataset function: 
+\code{\link{ds_as_unique}()},
 \code{\link{ds_diff_dataset}()},
 \code{\link{ds_diff_schema}()},
 \code{\link{ds_remove_path}()},

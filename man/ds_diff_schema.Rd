@@ -16,6 +16,7 @@ ds_diff_schema(schema1, schema2)
 }
 \seealso{
 Other dataset function: 
+\code{\link{ds_as_unique}()},
 \code{\link{ds_compare_schema}()},
 \code{\link{ds_diff_dataset}()},
 \code{\link{ds_remove_path}()},
