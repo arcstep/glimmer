@@ -22,7 +22,7 @@ write_state <- function(taskName, title = "-", datasetName = "-", rowID = "-", f
   month <- lastModified |> lubridate::month()
   ## 如果文件夹不存在，那就创建出来
   confirm_STATE()
-  p <- get_path("STATE", taskName, title, paste0("year=", year), paste0("month=", month))
+  p <- get_path("STATE", taskName, paste0("year=", year), paste0("month=", month))
   if(!fs::dir_exists(p)) {
     fs::dir_create(p)
   }
@@ -45,9 +45,9 @@ write_state <- function(taskName, title = "-", datasetName = "-", rowID = "-", f
 #' @param taskName 任务名称
 #' @param title 子主题名称
 #' @export
-read_state <- function(taskName, title = "-") {
+read_state <- function(taskName) {
   confirm_STATE()
-  p <- get_path("STATE", taskName, title)
+  p <- get_path("STATE", taskName)
   if(fs::dir_exists(p)) {
     arrow::open_dataset(p) |> arrange(desc(lastModified))
   } else {

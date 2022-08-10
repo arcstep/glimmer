@@ -4,7 +4,7 @@
 \alias{read_state}
 \title{读取状态信息}
 \usage{
-read_state(taskName, title = "-")
+read_state(taskName)
 }
 \arguments{
 \item{taskName}{任务名称}
