@@ -11,7 +11,7 @@ test_that("写入一个简单的文件", {
     mutate(cyl = as.integer(cyl)) |>
     glimmer::write_dataset("车数据")
   read_dataset("车数据") |> nrow() |>
-    expect_equal(nrow(mtcars))
+    testthat::expect_equal(nrow(mtcars))
 })
 
 test_that("按分区写入文件", {
@@ -44,7 +44,7 @@ test_that("更新部分文件分区", {
   all |> filter(cyl == 6 & am == 1) |>
     glimmer::write_dataset("车数据", partColumns = c("cyl", "am"))
   part1 <- (fs::file_info(get_path("CACHE", "车数据", "cyl=6/am=1/part-0.parquet")))$modification_time
-  Sys.sleep(1)
+  # Sys.sleep(1)
 
   ## 将数据写入不重叠的另一个分区，此时不应更新旧文件
   all |> filter(cyl == 4 & am == 1) |>
@@ -69,7 +69,7 @@ test_that("当关键列所在分区被修改", {
   all |> filter(cyl == 6 & am == 1) |>
     glimmer::write_dataset("车数据", partColumns = c("cyl", "am"), keyColumns = "id")
   part1 <- (fs::file_info(get_path("CACHE", "车数据", "cyl=6/am=1/part-0.parquet")))$modification_time
-  Sys.sleep(1)
+  # Sys.sleep(1)
   
   ## 将数据写入不重叠的另一个分区，此时不应更新旧文件
   all |> filter(id %in% c(3:4)) |>
@@ -134,3 +134,53 @@ test_that("写入磁盘时对数据去重", {
   glimmer::read_dataset("车数据") |> nrow() |> testthat::expect_equal(4)
 })
 
+test_that("提取读取重写过分区的数据集文件", {
+  ds_remove_path("车数据")
+  all <- mtcars |> as_tibble() |>
+    mutate(cyl = as.integer(cyl), am = as.integer(am)) |>
+    mutate(id = row_number())
+  
+  ## 提前写入一个分区数据
+  all |> filter(cyl == 6 & am == 1) |>
+    glimmer::write_dataset("车数据", partColumns = c("cyl", "am"), keyColumns = "id")
+
+  ## 将数据写入不重叠的另一个分区，此时不应更新旧文件
+  all |> filter(id %in% c(3:4)) |>
+    glimmer::write_dataset("车数据", partColumns = c("cyl", "am"), keyColumns = "id")
+  (read_state("write_dataset") |> filter(datasetName == "车数据") |> collect())$detail[[1]] |>
+  read_affected_parts() |>
+  nrow() |>
+  testthat::expect_equal(2)
+  
+  all |> filter(id %in% c(7:9)) |>
+    glimmer::write_dataset("车数据", partColumns = c("cyl", "am"), keyColumns = "id")
+  (read_state("write_dataset") |> filter(datasetName == "车数据") |> collect())$detail[[1]] |>
+    read_affected_parts() |>
+    nrow() |>
+    testthat::expect_equal(3)
+})
+
+test_that("提取最近一次重写过分区的数据集文件", {
+  ds_remove_path("车数据")
+  all <- mtcars |> as_tibble() |>
+    mutate(cyl = as.integer(cyl), am = as.integer(am)) |>
+    mutate(id = row_number())
+  
+  ## 提前写入一个分区数据
+  all |> filter(cyl == 6 & am == 1) |>
+    glimmer::write_dataset("车数据", partColumns = c("cyl", "am"), keyColumns = "id")
+  
+  ## 将数据写入不重叠的另一个分区，此时不应更新旧文件
+  all |> filter(id %in% c(3:4)) |>
+    glimmer::write_dataset("车数据", partColumns = c("cyl", "am"), keyColumns = "id")
+  
+  ## 交互环境下，快速定位受影响数据行
+  last_affected_parts() |>
+    nrow() |>
+    testthat::expect_equal(2)
+
+  ## 在有可能并发执行的情况下，指定数据集快速获取受影响行
+  last_affected_parts("车数据") |>
+    nrow() |>
+    testthat::expect_equal(2)
+})

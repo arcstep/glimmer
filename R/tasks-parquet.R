@@ -48,29 +48,58 @@ write_dataset <- function(d, dsName, topic = "CACHE", partColumns = c(), keyColu
     }
   }
   
-  ## 写入分区
-  to_write <- affected_data |> rbind(d)
-  
-  arrow::write_dataset(
-    to_write,
-    path,
-    format = "parquet",
-    partitioning = partColumns,
-    version = "2.0",
-    existing_data_behavior = "delete_matching")
-  
-  ## 登记已写入分区状态，方便按分区增量变化做其他处理
-  
-  if(rlang::is_empty(partColumns)) {
-    toWritePartsInfo <- "-"
-  } else {
-    toWritePartsInfo <- to_write |>
-      count(!!!syms(partColumns)) |>
-      tidyr::pivot_wider(names_from = partColumns, values_from = n) |>
-      names() |> paste(collapse = ",")
+  ## 当写入数据到磁盘时
+  if(nrow(d) > 0) {
+    to_write <- affected_data |> rbind(d)
+    beginTimestamp <- lubridate::now()
+    # Sys.sleep(1)
+    ## 写入分区
+    arrow::write_dataset(
+      to_write,
+      path,
+      format = "parquet",
+      partitioning = partColumns,
+      version = "2.0",
+      existing_data_behavior = "delete_matching")
+    
+    ## 登记已写入分区状态，方便按分区增量变化做其他处理
+    allPartsInfo <- fs::dir_ls(path, type = "file", recurse = T) |> fs::file_info()
+    affectedParts <- allPartsInfo |> filter(modification_time > beginTimestamp)
+    toWritePartsInfo <- affectedParts$path |> paste(collapse = ",")
+    toWriteTitle <- paste("affected:", nrow(to_write), "rows", "/", nrow(affectedParts), "parts")
+    write_state(
+      taskName = "write_dataset",
+      title = toWriteTitle,
+      datasetName = dsName,
+      flag = "DONE",
+      detail = toWritePartsInfo)    
   }
-  toWriteTitle <- paste("affected:", nrow(to_write), "rows", "/", stringr::str_count(toWritePartsInfo, ",") + 1, "part files")
-  write_state(taskName = "write_dataset", title = toWriteTitle, datasetName = dsName, flag = "DONE", detail = toWritePartsInfo)
+}
+
+#' @title 读取重写过分区的数据集文件
+#' @family dataset function
+#' @export
+read_affected_parts <- function(affectedParts) {
+  affectedParts |>
+    stringr::str_split(",") |>
+    unlist() |>
+    arrow::open_dataset(format = "parquet") |>
+    collect()
+}
+
+#' @title 读取最近一次更新时重写过分区的数据集文件
+#' @family dataset function
+#' @export
+last_affected_parts <- function(dsName = c()) {
+  if(rlang::is_empty(dsName)) {
+    affected <- read_state("write_dataset") |>
+      arrange(desc(lastModified)) |> collect()
+  } else {
+    affected <- read_state("write_dataset") |>
+      filter(.data$datasetName == dsName) |>
+      arrange(desc(lastModified)) |> collect()
+  }
+  affected$detail[[1]] |> read_affected_parts()
 }
 
 #' @title 读取数据集

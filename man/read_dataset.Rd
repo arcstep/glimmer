@@ -17,6 +17,8 @@ Other dataset function:
 \code{\link{ds_diff_schema}()},
 \code{\link{ds_remove_path}()},
 \code{\link{ds_schema}()},
+\code{\link{last_affected_parts}()},
+\code{\link{read_affected_parts}()},
 \code{\link{write_dataset}()}
 }
 \concept{dataset function}
