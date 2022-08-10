@@ -4,7 +4,7 @@
 \alias{last_affected_parts}
 \title{读取最近一次更新时重写过分区的数据集文件}
 \usage{
-last_affected_parts(datasetName = c())
+last_affected_parts(dsName = c())
 }
 \description{
 读取最近一次更新时重写过分区的数据集文件

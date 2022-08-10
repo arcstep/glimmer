@@ -65,14 +65,27 @@ write_dataset <- function(d, dsName, topic = "CACHE", partColumns = c(), keyColu
     ## 登记已写入分区状态，方便按分区增量变化做其他处理
     allPartsInfo <- fs::dir_ls(path, type = "file", recurse = T) |> fs::file_info()
     affectedParts <- allPartsInfo |> filter(modification_time > beginTimestamp)
-    toWritePartsInfo <- affectedParts$path |> paste(collapse = ",")
-    toWriteTitle <- paste("affected:", nrow(to_write), "rows", "/", nrow(affectedParts), "parts")
+    lastAffected <- affectedParts$path |> paste(collapse = ",")
+    lastUpdate <- paste("affected:", nrow(to_write), "rows", "/", nrow(affectedParts), "parts")
     write_state(
       taskName = "write_dataset",
-      title = toWriteTitle,
+      title = lastUpdate,
       datasetName = dsName,
       flag = "DONE",
-      detail = toWritePartsInfo)    
+      detail = lastAffected)
+    
+    ## 更新元数据集元件
+    updateTimestamp <- lubridate::now()
+    datasetMeta <- list(
+      "datasetId" = digest::digest(dsName, algo = "xxhash32"),
+      "name" = dsName,
+      "desc" = desc,
+      "updateAt" = lubridate::as_datetime(updateTimestamp, tz = "Asia/Shanghai") |> as.character(),
+      "updateTime" = updateTimestamp |> as.integer(),
+      "lastUpdate" = lastUpdate,
+      "lastAffected" = lastAffected
+    )
+    yaml::write_yaml(datasetMeta, get_path("CACHE", dsName, ".metadata.yml"))
   }
 }
 
@@ -194,7 +207,6 @@ ds_diff_dataset <- function(ds1, ds2) {
   }
   ds_diff_schema(ds_schema(ds1), ds_schema(ds2))
 }
-
 
 #' @title 去除重复行
 #' @description

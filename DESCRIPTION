@@ -17,4 +17,6 @@ Imports:
     fs,
     purrr,
     arrow,
-    lubridate
+    lubridate,
+    yaml,
+    digest
