@@ -44,10 +44,6 @@ write_state <- function(stateName, tibbleNew, topic = "STATE") {
   f <- fs::path_join(c(p, "data.parquet"))
   if(fs::file_exists(f)) {
     d_old <- arrow::read_parquet(f)
-    resp <- ds_diff_dataset(d_new, d_old) |> filter(!equal)
-    if(nrow(resp) > 0) {
-      stop("DIFF SCHEMA: ", d_old, d_new, resp)
-    }
     rbind(d_old, d_new) |> arrow::write_parquet(f, version = "2.0")
   } else {
     d_new |> arrow::write_parquet(f, version = "2.0")

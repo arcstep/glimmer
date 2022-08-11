@@ -4,7 +4,7 @@
 \alias{taskfolder_redo}
 \title{手工指定要处理的任务文件夹}
 \usage{
-taskfolder_redo(taskFolder = "IMPORT", taskScript = "TASK/IMPORT", todo = c())
+taskfolder_redo(todo = c(), taskTopic = "IMPORT", taskScript = "TASK/IMPORT")
 }
 \description{
 手工指定要处理的任务文件夹

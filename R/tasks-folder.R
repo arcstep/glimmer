@@ -63,7 +63,7 @@ taskfolder_todo <- function(taskFolder = "IMPORT", taskScript = "TASK/IMPORT") {
   s <- read_state("__TASK_FOLDER__")
   if(!rlang::is_empty(s)) {
     d <- s |> select(taskFolder) |> collect()
-    tasks[tasks %in% d$taskFolder] |> batch_tasks(taskFolder, taskScript)
+    tasks[tasks %nin% d$taskFolder] |> batch_tasks(taskFolder, taskScript)
   } else {
     tasks |> batch_tasks(taskFolder, taskScript)
   }
@@ -71,24 +71,31 @@ taskfolder_todo <- function(taskFolder = "IMPORT", taskScript = "TASK/IMPORT") {
 
 #' @title 手工指定要处理的任务文件夹
 #' @export
-taskfolder_redo <- function(taskFolder = "IMPORT", taskScript = "TASK/IMPORT", todo = c()) {
-  tasks <- find_tasks(taskFolder)
-  tasks[tasks %in% todo] |>  batch_tasks(taskFolder, taskScript)
+taskfolder_redo <- function(todo = c(), taskTopic = "IMPORT", taskScript = "TASK/IMPORT") {
+  taskfolders <- find_tasks(taskTopic)
+  taskfolders[taskfolders %in% todo] |>  batch_tasks(taskTopic, taskScript)
 }
 
 #
-find_tasks <- function(taskFolder) {
-  path = get_path(taskFolder)
+find_tasks <- function(taskTopic) {
+  path = get_path(taskTopic)
   fs::dir_ls(path, type = "directory", recurse = FALSE) |>
     sort() |>
     fs::path_file()
 }
 
 # 枚举任务文件夹
-batch_tasks <- function(tasks, taskFolder, taskScript) {
-  lapply(tasks, function(item) {
+batch_tasks <- function(taskfolders, taskTopic, taskScript) {
+  lapply(taskfolders, function(item) {
     set_topic("__DOING_TASK_FOLDER__", item)
     run_task_scripts(taskScript, batch = T)
+    set_topic("__DOING_TASK_FOLDER__", NULL)
+    write_state("__TASK_FOLDER__", tibble(
+      "taskTopic" = taskTopic,
+      "taskFolder" = item,
+      "status" = "DONE",
+      "taskScript" = taskScript
+    ))
   })
 }
 
