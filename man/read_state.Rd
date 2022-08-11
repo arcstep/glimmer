@@ -4,12 +4,10 @@
 \alias{read_state}
 \title{读取状态信息}
 \usage{
-read_state(stateName)
+read_state(stateName, topic = "STATE")
 }
 \arguments{
-\item{stateName}{状态数据名称}
-
-\item{title}{子主题名称}
+\item{stateName}{状态数据集名称}
 }
 \description{
 读取状态信息

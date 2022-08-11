@@ -72,27 +72,33 @@ write_dataset <- function(d, dsName, topic = "CACHE", partColumns = c(), keyColu
     allPartsInfo <- fs::dir_ls(path, type = "file", recurse = T, glob = "*.parquet") |> fs::file_info()
     affectedParts <- allPartsInfo |> filter(modification_time > beginTimestamp)
     affected <- affectedParts$path |> paste(collapse = ",")
-    lastUpdate <- paste("affected ", nrow(to_write), "rows", ",", nrow(affectedParts), "parts")
+    updated <- paste("affected ", nrow(to_write), "rows", ",", nrow(affectedParts), "parts")
     write_state(
+      stateName = "__WRITE_DATASET__",
       tibble(
-        stateName = "__WRITE_DATASET__",
-        dsName = dsName,
-        update = update,
-        affected = affected
+        "dataset" = dsName,
+        "updated" = updated,
+        "affected" = affected
       ))
     
     ## 更新元数据集元件
+    d <- arrow::open_dataset(path, format = "parquet")
     updateTimestamp <- lubridate::now()
     datasetMeta <- list(
-      "datasetId" = digest::digest(dsName, algo = "xxhash32"),
+      "datasetId" = digest::digest(fs::path_join(c(topic, dsName)), algo = "xxhash32"),
+      "topic" = topic,
       "name" = dsName,
       "desc" = desc,
+      "columns" = names(d) |> paste(collapse = ","),
+      "rows" = nrow(d),
+      "partColumns" = partColumns |> paste(collapse = ","),
+      "keyColumns" = keyColumns |> paste(collapse = ","),
       "updateAt" = lubridate::as_datetime(updateTimestamp, tz = "Asia/Shanghai") |> as.character(),
       "updateTime" = updateTimestamp |> as.integer(),
-      "lastUpdate" = lastUpdate,
-      "lastAffected" = lastAffected
+      "lastUpdate" = updated,
+      "lastAffected" = affected
     )
-    yaml::write_yaml(datasetMeta, get_path("CACHE", dsName, ".metadata.yml"))
+    yaml::write_yaml(datasetMeta, get_path(topic, dsName, ".metadata.yml"))
   }
 }
 
@@ -110,13 +116,13 @@ read_affected_parts <- function(affectedParts) {
 #' @title 读取最近一次更新时重写过分区的数据集文件
 #' @family dataset function
 #' @export
-last_affected_parts <- function(dsName = c()) {
-  if(rlang::is_empty(dsName)) {
+last_affected_parts <- function(dataset = c()) {
+  if(rlang::is_empty(dataset)) {
     state <- read_state("__WRITE_DATASET__") |>
       arrange(desc(lastModified)) |> collect()
   } else {
     state <- read_state("__WRITE_DATASET__") |>
-      filter(.data$dsName == dsName) |>
+      filter(.data$dataset == dataset) |>
       arrange(desc(lastModified)) |> collect()
   }
   state$affected[[1]] |> read_affected_parts()
@@ -128,6 +134,16 @@ last_affected_parts <- function(dsName = c()) {
 read_dataset <- function(dsName, topic = "CACHE") {
   path <- get_path(topic, dsName)
   arrow::open_dataset(path, format = "parquet")
+}
+
+#' @ttile 列举所有数据集
+#' @family dataset function
+#' @export
+all_dataset <- function(topic = "CACHE") {
+  fs::dir_ls(get_path(topic), type = "file", all = T, glob = "*.yml", recurse = T) |>
+    purrr::map_df(function(path) {
+      yaml::read_yaml(path)
+    })
 }
 
 #' @title 移除数据文件夹

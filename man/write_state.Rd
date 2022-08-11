@@ -2,29 +2,28 @@
 % Please edit documentation in R/tasks-state.R
 \name{write_state}
 \alias{write_state}
-\title{写入状态信息}
+\title{写入数据到状态数据集}
 \usage{
-write_state(stateName, dataNew)
+write_state(stateName, tibbleNew, topic = "STATE")
 }
 \arguments{
-\item{taskName}{任务名称，一般为“导入“，”构建“，”上传“等}
+\item{stateName}{状态数据集名称，存储时使用该名称构造路径，允许带斜线}
 
-\item{title}{子主题名称，可以是导入文件夹或某日构建等，也可以区分取数任务和取数明细}
-
-\item{datasetName}{数据集名称}
-
-\item{rowID}{数据行ID，一般为唯一关键列，可用于比对数据是否处理过等}
-
-\item{flag}{状态标志，方便读取状态信息时过滤}
-
-\item{info}{状态信息的详细描述}
+\item{dataNew}{保存状态内容的数据框，可以根据状态数据集扩展要保存的列}
 }
 \description{
-状态信息一定保存在STATE主题的目录下：{STATE}/{taskName}
+状态数据集一定保存在STATE主题的目录下：{STATE}/{stateName}
 }
 \details{
-应注意状态记录并非覆盖写入，而是追加，且一般不做删除或修改
-有明确约定的状态数据包括：
+状态数据集保存在STATE主题的目录下：{STATE}/{stateName}
+按写入时间的年和月建立分区
+操作状态数据集是消耗IO的操作，需要对分区文件频繁覆写
+
+状态数据集的内容是通过传入的数据框（dataNew）扩展的，
+管理状态数据集的模块，要自己负责保障状态数据集结构不变
+
+应注意状态记录主要是追加写入，一般不做删除或修改
+以下是有明确约定的状态数据集名称：
 
 1、标记处理完成的任务文件夹时，stateName = "\strong{TASK_FOLDER}"
 2、写入parquet数据集文件时，stateName = "\strong{WRITE_DATASET}"
