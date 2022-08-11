@@ -1,6 +1,6 @@
 # 一个高效的R数据处理框架
 
-实现这个**R**语言工具包，是为了方便管理数据处理的脚本任务。
+实现这个**R**语言工具包，是为了方便管理R数据处理的任务流。
 
 ## 一、功能特性
 
@@ -12,17 +12,7 @@
 -   写入数据集时支持增量写入，且仅保存修改过的分区文件
 -   可识别最近修改过的数据集分区，方便做增量处理
 
-## 二、使用指南：导入任务
-
-下面实现一个简单的示例，用来解释如何实施数据导入任务。
-
-简单来说，使用**glimmer**包的数据处理过程主要是三步骤：
-
-（1）将导入数据保存在**IMPORT**文件夹中
-
-（2）将处理脚本保存在**TASK**文件夹中
-
-（3）执行处理后，在**CACHE**文件夹中查看处理结果
+## 二、安装和使用
 
 ### 1、安装
 
@@ -40,13 +30,58 @@ devtools::install_github("https://github.com/arcstep/glimmer")
 library(glimmer)
 set_topic("STATE", "~/glimmer/STATE")
 set_topic("IMPORT", "~/glimmer/IMPORT")
-set_topic("TASK", "~/glimmer/TASK")
+set_topic("TASK/IMPORT", "~/glimmer/TASK/IMPORT")
+set_topic("TASK/BUILD", "~/glimmer/TASK/BUILD")
 set_topic("CACHE", "~/glimmer/CACHE")
 ```
 
 这初看起来啰嗦，但至少清楚明白。 实际上让你有能力灵活地切换处理目标。
 
-### 3、准备导入文件（从 IMPORT 导入）
+## 三、使用指南：加工任务
+
+使用**glimmer**包的数据处理框架，主要是两个步骤：
+
+（1）将数据处理脚本保存在**TASK/BUILD**文件夹中
+
+（3）执行批处理，然在**CACHE**文件夹中查看处理结果
+
+下面实现一个简单的数据处理例子。
+
+### 1、准备一个处理脚本（在 TASK/BUILD 中执行）
+
+我们准备一个最简单的处理脚本。
+
+脚本应当保存在 `~/glimmer/BUILD` 中。
+
+脚本内容如下：
+
+```{r}
+mtcars |> as_tibble() |> write_dataset("this_is_my_dataset")
+```
+
+### 2、执行任务（结果保存在 CACHE）
+
+执行如下脚本就可以导入上面的数据，并生成新的数据集。
+
+```{r}
+run_task_scripts(taskScript = "TASK/BUILD")
+```
+
+可以使用`read_dataset("this_is_my_dataset") |> collect()`查看刚刚添加过的数据集。
+
+## 四、使用指南：导入任务
+
+使用**glimmer**包的导入数据处理框架，主要是三个步骤：
+
+（1）将导入数据保存在**IMPORT**文件夹中
+
+（2）将处理脚本保存在**TASK/IMPORT**文件夹中
+
+（3）执行处理批处理脚本，然后在**CACHE**文件夹中查看处理结果
+
+下面实现一个导入数据的示例。
+
+### 1、准备导入文件（从 IMPORT 导入）
 
 我们要在`~/glimmer/IMPORT文件夹`中准备一个 **CSV** 文件：
 
@@ -87,7 +122,7 @@ a, b,
 ~/glimmer/IMPORT/task1/mycsv/1.csv
 ```
 
-### 4、准备一个处理脚本（在 TASK 中执行）
+### 2、准备一个处理脚本（在 TASK/IMPORT 中执行）
 
 我们同样准备一个最简单的处理脚本，导入数据，并为数据集增加一列。
 
@@ -128,7 +163,7 @@ get_path("IMPORT", get_topic("__DOING_TASK_FOLDER__"), "mycsv") |>
   write_dataset(dsName)
 ```
 
-### 5、执行任务（结果保存在 CACHE）
+### 3、执行任务（结果保存在 CACHE）
 
 如果是首次运行，执行如下脚本就可以导入上面的数据，并生成新的数据集。
 
@@ -138,13 +173,10 @@ taskfolder_todo()
 
 这一命令是增量运行的，即使运行多次，之前准备的脚本也只会被运行一次。这是因为，导入文件夹`task1`已经被处理的状态被记录到**STATE**文件夹中了，如果删除其中的那条记录或整个文件夹，则上面的命令就可以重新生效。
 
-增量运行会很有用，但有时候仍然希望重新处理。使用`taskfolder_redo("task1")`可以再次处理`task1`文件夹的数据，即使`task1`已经被处理过。
+增量运行会很有用，但有时候仍然希望重新处理。使用`taskfolder_redo("task1")`可以再次处理`task1`文件夹的数据，即使`task1`已经被处理过。如果要重新处理多个任务文件夹，则可以使用字符串向量作为参数实现批处理，例如：`taskfolder_redo(c("task1", "task2"))`。
 
-
-如果没有报错，那么恭喜你：成功部署了一个数据导入任务！
-
-### 6、查看加工过的数据集
-
-可以使用`read_dataset("mycsv")`查看刚刚添加过的数据集
+可以使用`read_dataset("mycsv") |> collect()`查看刚刚添加过的数据集。
 
 如果你想看看都曾经保存过哪些数据集，可以使用`all_datasets()`。
+
+如果没有报错，那么恭喜你：成功部署了一个数据导入任务！
