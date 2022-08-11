@@ -19,4 +19,5 @@ Imports:
     arrow,
     lubridate,
     yaml,
-    digest
+    digest,
+    stringr

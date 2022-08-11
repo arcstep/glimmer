@@ -3,7 +3,7 @@ library(tibble)
 
 set_topic("STATE", "/tmp/glimmer/STATE")
 set_topic("CACHE", "/tmp/glimmer/CACHE")
-ds_remove_path("write_dataset", topic = "STATE")
+ds_remove_path("__WRITE_DATASET__", topic = "STATE")
 
 test_that("写入一个简单的文件", {
   ds_remove_path("车数据")
@@ -147,14 +147,14 @@ test_that("提取读取重写过分区的数据集文件", {
   ## 将数据写入不重叠的另一个分区，此时不应更新旧文件
   all |> filter(id %in% c(3:4)) |>
     glimmer::write_dataset("车数据", partColumns = c("cyl", "am"), keyColumns = "id")
-  (read_state("write_dataset") |> filter(datasetName == "车数据") |> collect())$detail[[1]] |>
+  (read_state("__WRITE_DATASET__") |> filter(dsName == "车数据") |> collect())$detail[[1]] |>
   read_affected_parts() |>
   nrow() |>
   testthat::expect_equal(2)
   
   all |> filter(id %in% c(7:9)) |>
     glimmer::write_dataset("车数据", partColumns = c("cyl", "am"), keyColumns = "id")
-  (read_state("write_dataset") |> filter(datasetName == "车数据") |> collect())$detail[[1]] |>
+  (read_state("__WRITE_DATASET__") |> filter(dsName == "车数据") |> collect())$detail[[1]] |>
     read_affected_parts() |>
     nrow() |>
     testthat::expect_equal(3)

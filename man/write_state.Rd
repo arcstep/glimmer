@@ -4,14 +4,7 @@
 \alias{write_state}
 \title{写入状态信息}
 \usage{
-write_state(
-  taskName,
-  title = "-",
-  datasetName = "-",
-  rowID = "-",
-  flag = "",
-  detail = ""
-)
+write_state(stateName, dataNew)
 }
 \arguments{
 \item{taskName}{任务名称，一般为“导入“，”构建“，”上传“等}
@@ -31,4 +24,8 @@ write_state(
 }
 \details{
 应注意状态记录并非覆盖写入，而是追加，且一般不做删除或修改
+有明确约定的状态数据包括：
+
+1、标记处理完成的任务文件夹时，stateName = "\strong{TASK_FOLDER}"
+2、写入parquet数据集文件时，stateName = "\strong{WRITE_DATASET}"
 }

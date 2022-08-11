@@ -4,7 +4,27 @@
 \alias{write_dataset}
 \title{写入ApachheParquet文件集}
 \usage{
-write_dataset(d, dsName, topic = "CACHE", partColumns = c(), keyColumns = c())
+write_dataset(
+  d,
+  dsName,
+  topic = "CACHE",
+  partColumns = c(),
+  keyColumns = c(),
+  desc = "-"
+)
+}
+\arguments{
+\item{d}{要写入的数据}
+
+\item{dsName}{数据集名称}
+
+\item{topic}{数据集保存的主题目录，默认为CACHE}
+
+\item{partColumns}{分区列，可以是字符串向量}
+
+\item{keyColumns}{关键列，可以是字符串向量}
+
+\item{desc}{对数据集的额外描述}
 }
 \description{
 更新受影响的分区

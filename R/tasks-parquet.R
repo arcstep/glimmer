@@ -1,4 +1,10 @@
 #' @title 写入ApachheParquet文件集
+#' @param d 要写入的数据
+#' @param dsName 数据集名称
+#' @param topic 数据集保存的主题目录，默认为CACHE
+#' @param partColumns 分区列，可以是字符串向量
+#' @param keyColumns 关键列，可以是字符串向量
+#' @param desc 对数据集的额外描述
 #' @description 更新受影响的分区
 #' @family dataset function
 #' @details
@@ -7,7 +13,7 @@
 #' 如果不设置关键列，则为追加模式；否则按关键列替换
 #' 
 #' @export
-write_dataset <- function(d, dsName, topic = "CACHE", partColumns = c(), keyColumns = c()) {
+write_dataset <- function(d, dsName, topic = "CACHE", partColumns = c(), keyColumns = c(), desc = "-") {
   ## 默认从CACHE任务目录读写数据集
   path <- get_path(topic, dsName)
   
@@ -63,16 +69,17 @@ write_dataset <- function(d, dsName, topic = "CACHE", partColumns = c(), keyColu
       existing_data_behavior = "delete_matching")
     
     ## 登记已写入分区状态，方便按分区增量变化做其他处理
-    allPartsInfo <- fs::dir_ls(path, type = "file", recurse = T) |> fs::file_info()
+    allPartsInfo <- fs::dir_ls(path, type = "file", recurse = T, glob = "*.parquet") |> fs::file_info()
     affectedParts <- allPartsInfo |> filter(modification_time > beginTimestamp)
-    lastAffected <- affectedParts$path |> paste(collapse = ",")
-    lastUpdate <- paste("affected:", nrow(to_write), "rows", "/", nrow(affectedParts), "parts")
+    affected <- affectedParts$path |> paste(collapse = ",")
+    lastUpdate <- paste("affected ", nrow(to_write), "rows", ",", nrow(affectedParts), "parts")
     write_state(
-      taskName = "write_dataset",
-      title = lastUpdate,
-      datasetName = dsName,
-      flag = "DONE",
-      detail = lastAffected)
+      tibble(
+        stateName = "__WRITE_DATASET__",
+        dsName = dsName,
+        update = update,
+        affected = affected
+      ))
     
     ## 更新元数据集元件
     updateTimestamp <- lubridate::now()
@@ -105,14 +112,14 @@ read_affected_parts <- function(affectedParts) {
 #' @export
 last_affected_parts <- function(dsName = c()) {
   if(rlang::is_empty(dsName)) {
-    affected <- read_state("write_dataset") |>
+    state <- read_state("__WRITE_DATASET__") |>
       arrange(desc(lastModified)) |> collect()
   } else {
-    affected <- read_state("write_dataset") |>
-      filter(.data$datasetName == dsName) |>
+    state <- read_state("__WRITE_DATASET__") |>
+      filter(.data$dsName == dsName) |>
       arrange(desc(lastModified)) |> collect()
   }
-  affected$detail[[1]] |> read_affected_parts()
+  state$affected[[1]] |> read_affected_parts()
 }
 
 #' @title 读取数据集
