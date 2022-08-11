@@ -12,6 +12,8 @@
 -   写入数据集时支持增量写入，且仅保存修改过的分区文件
 -   可识别最近修改过的数据集分区，方便做增量处理
 
+[Apache Arrow](https://arrow.apache.org/) 库内置了[Apache Parquet存储格式](https://github.com/apache/parquet-format) ，并且包含了很多种语言的实现，包括 R语言的[arrow](https://arrow.apache.org/docs/r/)包。
+
 ## 二、安装和使用
 
 ### 1、安装
