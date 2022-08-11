@@ -12,9 +12,9 @@ get_topics()
 \seealso{
 Other TaskFolder functions: 
 \code{\link{get_path}()},
-\code{\link{get_task_plan}()},
+\code{\link{get_task_scripts}()},
 \code{\link{get_topic}()},
-\code{\link{run_task}()},
+\code{\link{run_task_scripts}()},
 \code{\link{set_topic}()}
 }
 \concept{TaskFolder functions}
