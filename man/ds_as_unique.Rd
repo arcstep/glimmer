@@ -16,6 +16,7 @@ ds_as_unique(ds, keyColumns)
 }
 \seealso{
 Other dataset function: 
+\code{\link{all_dataset}()},
 \code{\link{ds_compare_schema}()},
 \code{\link{ds_diff_dataset}()},
 \code{\link{ds_diff_schema}()},

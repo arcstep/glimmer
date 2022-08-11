@@ -11,6 +11,7 @@ read_affected_parts(affectedParts)
 }
 \seealso{
 Other dataset function: 
+\code{\link{all_dataset}()},
 \code{\link{ds_as_unique}()},
 \code{\link{ds_compare_schema}()},
 \code{\link{ds_diff_dataset}()},

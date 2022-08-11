@@ -136,7 +136,7 @@ read_dataset <- function(dsName, topic = "CACHE") {
   arrow::open_dataset(path, format = "parquet")
 }
 
-#' @ttile 列举所有数据集
+#' @title 列举所有数据集
 #' @family dataset function
 #' @export
 all_dataset <- function(topic = "CACHE") {
