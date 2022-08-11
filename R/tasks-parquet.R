@@ -140,10 +140,15 @@ read_dataset <- function(dsName, topic = "CACHE") {
 #' @family dataset function
 #' @export
 all_dataset <- function(topic = "CACHE") {
-  fs::dir_ls(get_path(topic), type = "file", all = T, glob = "*.yml", recurse = T) |>
-    purrr::map_df(function(path) {
-      yaml::read_yaml(path)
-    })
+  path <- get_path(topic)
+  if(fs::dir_exists(path)) {
+    fs::dir_ls(path, type = "file", all = T, glob = "*.yml", recurse = T) |>
+      purrr::map_df(function(path) {
+        yaml::read_yaml(path)
+      })
+  } else {
+    tibble()
+  }
 }
 
 #' @title 移除数据文件夹

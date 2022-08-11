@@ -4,10 +4,10 @@
 \alias{get_task_scripts}
 \title{查看执行计划}
 \usage{
-get_task_scripts(taskScriptPath, glob = "*.R")
+get_task_scripts(taskScript, glob = "*.R")
 }
 \arguments{
-\item{taskScriptPath}{脚本文件夹位置}
+\item{taskScript}{脚本文件夹主题}
 
 \item{glob}{要执行的源文件默认以.R结尾}
 }

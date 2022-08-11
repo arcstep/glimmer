@@ -4,7 +4,7 @@
 \alias{run_task_scripts}
 \title{执行目标路径下的任务脚本}
 \usage{
-run_task_scripts(taskScript = "TASK/IMPORT")
+run_task_scripts(taskScript = "TASK/IMPORT", batch = F)
 }
 \description{
 应当按照脚本顺序执行

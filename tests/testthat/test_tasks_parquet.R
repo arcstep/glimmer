@@ -2,8 +2,14 @@ library(dplyr)
 library(tibble)
 
 set_topic("STATE", "/tmp/glimmer/STATE")
+if(fs::dir_exists("/tmp/glimmer/STATE")) {
+  fs::dir_delete(get_path("STATE"))
+}
+
 set_topic("CACHE", "/tmp/glimmer/CACHE")
-ds_remove_path("__WRITE_DATASET__", topic = "STATE")
+if(fs::dir_exists("/tmp/glimmer/CACHE")) {
+  fs::dir_delete(get_path("CACHE"))
+}
 
 test_that("写入一个简单的文件", {
   ds_remove_path("车数据")
