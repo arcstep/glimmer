@@ -73,6 +73,7 @@ write_dataset <- function(d, dsName, topic = "CACHE", partColumns = c(), keyColu
     affectedParts <- allPartsInfo |> filter(modification_time > beginTimestamp)
     affected <- affectedParts$path |> paste(collapse = ",")
     updated <- paste("affected ", nrow(to_write), "rows", ",", nrow(affectedParts), "parts")
+    message("write_dataset << ", dsName, " >>", updated)
     write_state(
       stateName = "__WRITE_DATASET__",
       tibble(
@@ -109,8 +110,7 @@ read_affected_parts <- function(affectedParts) {
   affectedParts |>
     stringr::str_split(",") |>
     unlist() |>
-    arrow::open_dataset(format = "parquet") |>
-    collect()
+    arrow::open_dataset(format = "parquet")
 }
 
 #' @title 读取最近一次更新时重写过分区的数据集文件

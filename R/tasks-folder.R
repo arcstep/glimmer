@@ -86,8 +86,9 @@ find_tasks <- function(taskTopic) {
 
 # 枚举任务文件夹
 batch_tasks <- function(taskfolders, taskTopic, taskScript) {
-  lapply(taskfolders, function(item) {
+  taskfolders |> purrr::walk(function(item) {
     set_topic("__DOING_TASK_FOLDER__", item)
+    message("扫描任务文件夹：", item)
     run_task_scripts(taskScript, batch = T)
     set_topic("__DOING_TASK_FOLDER__", NULL)
     write_state("__TASK_FOLDER__", tibble(
@@ -104,9 +105,10 @@ batch_tasks <- function(taskfolders, taskTopic, taskScript) {
 #' @family TaskFolder functions
 #' @export
 run_task_scripts <- function(taskScript = "TASK/IMPORT", batch = F) {
-  get_task_scripts(taskScript) |> purrr::pmap(function(name, path) {
+  get_task_scripts(taskScript) |> purrr::pwalk(function(name, path) {
     message("执行任务：", name)
     beginTime <- lubridate::now()
+    # 执行脚本
     source(path)
     used <- lubridate::now() - beginTime
     msg <- paste0("任务耗时：", as.character.Date(used))

@@ -26,7 +26,7 @@ devtools::install_github("https://github.com/arcstep/glimmer")
 
 ### 2、使用
 
-引入**glimmer**包后，应当设置四个文件夹位置。
+引入**glimmer**包后，应当设置如下个文件夹位置。
 
 ```{r}
 library(glimmer)
