@@ -18,9 +18,14 @@ write_dataset <- function(d, dsName, topic = "CACHE", partColumns = c(), keyColu
   path <- get_path(topic, dsName)
   
   ## 确定数据集不为空
-  if(rlang::is_empty(d)) stop("Empty Dataset to write >>> ", path)
   if(!is.data.frame(d)) stop("Not Tibble Object to write >>> ", path)
-  if(nrow(d)==0) warning("No Content in New Dataset to write >>> ", path)
+  if(rlang::is_empty(d)) {
+    warning("Empty Dataset to write >>> ", path)
+  } else {
+    if(nrow(d)==0) {
+      warning("No Content in New Dataset to write >>> ", path)
+    }
+  }
   
   ## 如果旧数据集已经存在
   affected_data <- tibble()
@@ -73,7 +78,7 @@ write_dataset <- function(d, dsName, topic = "CACHE", partColumns = c(), keyColu
     affectedParts <- allPartsInfo |> filter(modification_time > beginTimestamp)
     affected <- affectedParts$path |> paste(collapse = ",")
     updated <- paste("affected ", nrow(to_write), "rows", ",", nrow(affectedParts), "parts")
-    message("write_dataset << ", dsName, " >>", updated)
+    message("write_dataset << ", dsName, " >> ", updated)
     write_state(
       stateName = "__WRITE_DATASET__",
       tibble(

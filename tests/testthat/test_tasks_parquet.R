@@ -32,7 +32,7 @@ test_that("按分区写入文件", {
 test_that("数据集准备异常时尝试写入", {
   ds_remove_path("车数据")
   tibble() |> glimmer::write_dataset("车数据") |>
-    testthat::expect_error("Empty Dataset")
+    testthat::expect_warning("Empty Dataset")
   
   c("abc") |> glimmer::write_dataset("车数据") |>
     testthat::expect_error("Not Tibble")
