@@ -14,6 +14,7 @@ get_topic(topic)
 }
 \seealso{
 Other TaskFolder functions: 
+\code{\link{ds_import}()},
 \code{\link{get_path}()},
 \code{\link{get_task_scripts}()},
 \code{\link{get_topics}()},

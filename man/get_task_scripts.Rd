@@ -16,6 +16,7 @@ get_task_scripts(taskScript, glob = "*.R")
 }
 \seealso{
 Other TaskFolder functions: 
+\code{\link{ds_import}()},
 \code{\link{get_path}()},
 \code{\link{get_topics}()},
 \code{\link{get_topic}()},
