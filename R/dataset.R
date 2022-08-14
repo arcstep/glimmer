@@ -13,7 +13,7 @@
 #' 如果不设置关键列，则为追加模式；否则按关键列替换
 #' 
 #' @export
-write_dataset <- function(d, dsName, topic = "CACHE", partColumns = c(), keyColumns = c(), desc = "-") {
+ds_write <- function(d, dsName, topic = "CACHE", partColumns = c(), keyColumns = c(), desc = "-") {
   ## 默认从CACHE任务目录读写数据集
   path <- get_path(topic, dsName)
   
@@ -79,7 +79,7 @@ write_dataset <- function(d, dsName, topic = "CACHE", partColumns = c(), keyColu
     affected <- affectedParts$path |> paste(collapse = ",")
     updated <- paste("affected ", nrow(to_write), "rows", ",", nrow(affectedParts), "parts")
     message("write_dataset << ", dsName, " >> ", updated)
-    write_state(
+    state_write(
       stateName = "__WRITE_DATASET__",
       tibble(
         "dataset" = dsName,
@@ -111,7 +111,7 @@ write_dataset <- function(d, dsName, topic = "CACHE", partColumns = c(), keyColu
 #' @title 读取重写过分区的数据集文件
 #' @family dataset function
 #' @export
-read_affected_parts <- function(affectedParts) {
+ds_read_affected <- function(affectedParts) {
   affectedParts |>
     stringr::str_split(",") |>
     unlist() |>
@@ -121,22 +121,22 @@ read_affected_parts <- function(affectedParts) {
 #' @title 读取最近一次更新时重写过分区的数据集文件
 #' @family dataset function
 #' @export
-last_affected_parts <- function(dataset = c()) {
+ds_last_affected <- function(dataset = c()) {
   if(rlang::is_empty(dataset)) {
-    state <- read_state("__WRITE_DATASET__") |>
+    state <- state_read("__WRITE_DATASET__") |>
       arrange(desc(lastModified)) |> collect()
   } else {
-    state <- read_state("__WRITE_DATASET__") |>
+    state <- state_read("__WRITE_DATASET__") |>
       filter(.data$dataset == dataset) |>
       arrange(desc(lastModified)) |> collect()
   }
-  state$affected[[1]] |> read_affected_parts()
+  state$affected[[1]] |> ds_read_affected()
 }
 
 #' @title 读取数据集
 #' @family dataset function
 #' @export
-read_dataset <- function(dsName, topic = "CACHE") {
+ds_read <- function(dsName, topic = "CACHE") {
   path <- get_path(topic, dsName)
   arrow::open_dataset(path, format = "parquet")
 }
@@ -144,7 +144,7 @@ read_dataset <- function(dsName, topic = "CACHE") {
 #' @title 列举所有数据集
 #' @family dataset function
 #' @export
-all_dataset <- function(topic = "CACHE") {
+ds_all <- function(topic = "CACHE") {
   path <- get_path(topic)
   if(fs::dir_exists(path)) {
     fs::dir_ls(path, type = "file", all = T, glob = "*.yml", recurse = T) |>

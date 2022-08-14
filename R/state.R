@@ -24,7 +24,7 @@
 #' 2、写入parquet数据集文件时，stateName = "__WRITE_DATASET__"
 #' 
 #' @export
-write_state <- function(stateName, tibbleNew, topic = "STATE") {
+state_write <- function(stateName, tibbleNew, topic = "STATE") {
   ##
   lastModified <- lubridate::now()
   year <- lastModified |> lubridate::year()
@@ -71,7 +71,7 @@ write_state <- function(stateName, tibbleNew, topic = "STATE") {
 #' @title 读取状态信息
 #' @param stateName 状态数据集名称
 #' @export
-read_state <- function(stateName, topic = "STATE") {
+state_read <- function(stateName, topic = "STATE") {
   confirm_STATE(topic)
   p <- get_path(topic, stateName)
   if(fs::dir_exists(p)) {

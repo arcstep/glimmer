@@ -37,7 +37,7 @@ test_that("查看目标文件夹下的脚本", {
   fs::file_touch(get_path("IMPORT", "2.R"))
   fs::file_touch(get_path("IMPORT", "1.R"))
   fs::file_touch(get_path("IMPORT", "3.R"))
-  get_task_scripts("IMPORT") |>
+  task_read("IMPORT") |>
     testthat::expect_equal(
       tribble(
         ~name, ~path,
@@ -54,7 +54,7 @@ test_that("执行目标文件夹下的脚本", {
   write("f2 <- f1 + 1", get_path("TASK/BUILD", "2.R"))
   write("f1 <- 1", get_path("TASK/BUILD", "1.R"))
   write("f3 <- f2 + f1", get_path("TASK/BUILD", "3.R"))
-  run_task_scripts(taskScript = "TASK/BUILD")
+  task_run(taskScript = "TASK/BUILD")
 
   expect_equal(f3, 3)
   fs::dir_delete(get_path("TASK/BUILD"))
@@ -66,7 +66,7 @@ test_that("执行目标文件夹下的脚本，哪怕是多层子目录", {
   write("f2 <- f1 + 1", get_path("TASK/BUILD", "1-FF/2.R"))
   write("f1 <- 1", get_path("TASK/BUILD", "1-FF/1.R"))
   write("f3 <- f2 + f1", get_path("TASK/BUILD", "2-EE/1.R"))
-  run_task_scripts(taskScript = "TASK/BUILD")
+  task_run(taskScript = "TASK/BUILD")
   expect_equal(f3, 3)
   fs::dir_delete(get_path("TASK/BUILD"))
 })
@@ -89,12 +89,12 @@ test_that("根据导入文件夹，执行导入计划", {
   '
   path <- get_path("IMPORT", get_topic("__DOING_TASK_FOLDER__"), "车型")
   if(path |> fs::dir_exists()) {
-    arrow::open_dataset(path, format = "csv") |> collect() |> write_dataset("车型")
+    arrow::open_dataset(path, format = "csv") |> collect() |> ds_write("车型")
   }
   ' |> write(get_path("TASK/IMPORT", "1.R"))
 
-  taskfolder_todo()
-  testthat::expect_equal(nrow(read_dataset("车型")), 30)
+  import_todo()
+  testthat::expect_equal(nrow(ds_read("车型")), 30)
 
   fs::dir_delete(get_path("STATE"))
   fs::dir_delete(get_path("CACHE"))
@@ -110,16 +110,16 @@ test_that("仅对未处理文件夹执行导入计划", {
   '
   path <- get_path("IMPORT", get_topic("__DOING_TASK_FOLDER__"), "车型")
   if(path |> fs::dir_exists()) {
-    arrow::open_dataset(path, format = "csv") |> collect() |> write_dataset("车型")
+    arrow::open_dataset(path, format = "csv") |> collect() |> ds_write("车型")
   }
   ' |> write(get_path("TASK/IMPORT", "1.R"))
   
-  taskfolder_todo(taskScript = "TASK/IMPORT")
-  testthat::expect_equal(nrow(read_dataset("车型")), 20)
+  import_todo(taskScript = "TASK/IMPORT")
+  testthat::expect_equal(nrow(ds_read("车型")), 20)
   
   prepare_csv(21:30, taskFolder = "task003", dsName = "车型")
-  taskfolder_todo(taskScript = "TASK/IMPORT")
-  testthat::expect_equal(nrow(read_dataset("车型")), 30)
+  import_todo(taskScript = "TASK/IMPORT")
+  testthat::expect_equal(nrow(ds_read("车型")), 30)
   
   fs::dir_delete(get_path("STATE"))
   fs::dir_delete(get_path("CACHE"))
@@ -139,19 +139,19 @@ test_that("手工指定导入文件夹，执行导入脚本", {
   '
   path <- get_path("IMPORT", get_topic("__DOING_TASK_FOLDER__"), "车型")
   if(path |> fs::dir_exists()) {
-    arrow::open_dataset(path, format = "csv") |> collect() |> write_dataset("车型")
+    arrow::open_dataset(path, format = "csv") |> collect() |> ds_write("车型")
   }
   ' |> write(get_path("TASK/IMPORT", "1.R"))
   '
   path <- get_path("IMPORT", get_topic("__DOING_TASK_FOLDER__"), "cars")
   if(path |> fs::dir_exists()) {
-    arrow::open_dataset(path, format = "csv") |> collect() |> write_dataset("cars")
+    arrow::open_dataset(path, format = "csv") |> collect() |> ds_write("cars")
   }
   ' |> write(get_path("TASK/IMPORT", "2.R"))
 
-  taskfolder_redo(todo = c("task002", "task003"), taskScript = "TASK/IMPORT")
-  testthat::expect_equal(nrow(read_dataset("车型")), 4)
-  testthat::expect_equal(nrow(read_dataset("cars")), 2)
+  import_redo(todo = c("task002", "task003"), taskScript = "TASK/IMPORT")
+  testthat::expect_equal(nrow(ds_read("车型")), 4)
+  testthat::expect_equal(nrow(ds_read("cars")), 2)
   
   fs::dir_delete(get_path("STATE"))
   fs::dir_delete(get_path("CACHE"))

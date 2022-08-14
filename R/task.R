@@ -58,9 +58,9 @@ set_topic <- function(topic, path) {
 #' 具体的任务脚本中，例如导入数据，按如下方法判断是否有数据集可导入：
 #' get_path("IMPORT", get_topic("__DOING_TASK_FOLDER__"), "{dataset_name}") |> fs::dir_exists()
 #' @export
-taskfolder_todo <- function(taskFolder = "IMPORT", taskScript = "TASK/IMPORT") {
+import_todo <- function(taskFolder = "IMPORT", taskScript = "TASK/IMPORT") {
   tasks <- find_tasks(taskFolder)
-  s <- read_state("__TASK_FOLDER__")
+  s <- state_read("__TASK_FOLDER__")
   if(!rlang::is_empty(s)) {
     d <- s |> select(taskFolder) |> collect()
     tasks[tasks %nin% d$taskFolder] |> batch_tasks(taskFolder, taskScript)
@@ -71,7 +71,7 @@ taskfolder_todo <- function(taskFolder = "IMPORT", taskScript = "TASK/IMPORT") {
 
 #' @title 手工指定要处理的任务文件夹
 #' @export
-taskfolder_redo <- function(todo = c(), taskTopic = "IMPORT", taskScript = "TASK/IMPORT") {
+import_redo <- function(todo = c(), taskTopic = "IMPORT", taskScript = "TASK/IMPORT") {
   taskfolders <- find_tasks(taskTopic)
   taskfolders[taskfolders %in% todo] |>  batch_tasks(taskTopic, taskScript)
 }
@@ -86,12 +86,13 @@ find_tasks <- function(taskTopic) {
 
 # 枚举任务文件夹
 batch_tasks <- function(taskfolders, taskTopic, taskScript) {
+  message(length(taskfolders), " task folders todo.")
   taskfolders |> purrr::walk(function(item) {
     set_topic("__DOING_TASK_FOLDER__", item)
-    message("扫描任务文件夹：", item)
-    run_task_scripts(taskScript, batch = T)
+    message("SCAN TASK FOLDER：", item)
+    task_run(taskScript, batch = T)
     set_topic("__DOING_TASK_FOLDER__", NULL)
-    write_state("__TASK_FOLDER__", tibble(
+    state_write("__TASK_FOLDER__", tibble(
       "taskTopic" = taskTopic,
       "taskFolder" = item,
       "status" = "DONE",
@@ -104,14 +105,14 @@ batch_tasks <- function(taskfolders, taskTopic, taskScript) {
 #' @description 应当按照脚本顺序执行
 #' @family TaskFolder functions
 #' @export
-run_task_scripts <- function(taskScript = "TASK/IMPORT", batch = F) {
-  get_task_scripts(taskScript) |> purrr::pwalk(function(name, path) {
-    message("执行任务：", name)
+task_run <- function(taskScript = "TASK/BUILD", batch = F) {
+  task_read(taskScript) |> purrr::pwalk(function(name, path) {
+    message("RUN TASK SCRIPT：", name)
     beginTime <- lubridate::now()
     # 执行脚本
     source(path)
     used <- lubridate::now() - beginTime
-    msg <- paste0("任务耗时：", as.character.Date(used))
+    msg <- paste0("TASK USED：", as.character.Date(used))
     message(msg)
     # 记录任务执行结果
     if(batch) {
@@ -119,7 +120,7 @@ run_task_scripts <- function(taskScript = "TASK/IMPORT", batch = F) {
     } else {
       tf <- "-"
     }
-    write_state("__TASK_RUN__",
+    state_write("__TASK_RUN__",
       tibble(
         "name" = name,
         "script" = path,
@@ -137,39 +138,10 @@ run_task_scripts <- function(taskScript = "TASK/IMPORT", batch = F) {
 #' @param glob 要执行的源文件默认以.R结尾
 #' @family TaskFolder functions
 #' @export
-get_task_scripts <- function(taskScript, glob = "*.R") {
+task_read <- function(taskScript, glob = "*.R") {
   fs::dir_ls(get_path(taskScript), recurse = T, glob = glob, type = "file") |>
     purrr::map_df(function(item) {
       name <- fs::path_file(item)
       list("name" = name, "path" = item)
     })
-}
-
-#' @title 定义从任务文件夹导入数据集的函数
-#' @description 在定义增量导入任务时需要定义按数据集导入的函数
-#' @details 
-#' 所定义的导入函数，需要读取数据，就要组装数据所在位置，规则如下：
-#' {IMPORT}/{__DOING_TASK_FOLDER__}/{dsName}
-#' 其中，__DOING_TASK_FOLDER__就是当前正在处理的任务文件夹名称，
-#' 而dsName就是任务文件夹下的数据集文件夹，数据应当放在dsName文件夹内
-#' 
-#' 举一个例子，如果IMPORT目录位置是："~/glimmer/IMPORT"
-#' 要导入的数据位置是："~/glimmer/IMPORT/task1/mycsv/1.csv"
-#' 其中，task1就是导入文件夹，mycsv就是数据集。
-#' 
-#' 考虑增量导入的情况，在新的数据到位后，
-#' 可能多了一个这样的文件："~/glimmer/IMPORT/task2/mycsv/1.csv"
-#' 此时要做的，就是针对task2进行导入。
-#' 而glimmer包提供的taskfolder_todo函数就是自动识别出新增的task2，并执行导入脚本。
-#' 
-#' @param dsName 要导入的数据集名称
-#' @param fun 导入函数定义，要求是一个匿名函数
-#' @param topic 导入文件夹所在的主题
-#' @family TaskFolder functions
-#' @export
-ds_import <- function(dsName, fun, topic = "IMPORT") {
-  path <- get_path(topic, get_topic("__DOING_TASK_FOLDER__"), dsName)
-  if(path |> fs::dir_exists()) {
-    fun(path)
-  }
 }

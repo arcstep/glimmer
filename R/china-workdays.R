@@ -132,9 +132,9 @@ workdays <- function(fromDay = "2019-01-01", toDay = "2022-12-31") {
   workdays_confirm <- as.Date(workdays_gov)
   workmarkers[days %in% workdays_confirm] <- T
   ## 返回数据框
-  tibble(day = days, workday = workmarkers) |>
-    mutate(seq_day = ifelse(workday, 1, 0)) |>
-    mutate(cum_day = cumsum(seq_day))
+  tibble("day" = days, "workday" = workmarkers) |>
+    mutate("seq_day" = ifelse(workday, 1, 0)) |>
+    mutate("cum_day" = cumsum(seq_day))
 }
 
 #' @title 计算工作日
