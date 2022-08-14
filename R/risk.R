@@ -69,8 +69,22 @@ confirm_RISKMODEL <- function(topic = "RISKMODEL") {
 #' @family risk function
 #' @export
 risk_model_run <- function(dataset = "疑点数据", targetTopic = "CACHE", topic = "RISKMODEL") {
-  
-  ds_write(dsName = dataset, topic = targetTopic)
+  models <- risk_model_read(topic = topic)
+  seq(1:nrow(models)) |> purrr::walk(function(i) {
+    item <- slice(models, i) |> as.list()
+    d <- item$dataset |> ds_read(topic = targetTopic)
+    seq(1:length(item$filter)) |> purrr::walk(function(j) {
+      column <- item$filter[[j]]$column
+      op <- item$filter[[j]]$op
+      value <- item$filter[[j]]$value
+      if(op %in% c(">", "<", ">=", "<=", "==", "!=")) {
+        d <<- d |> filter(do.call(!!sym(op), args = list(!!sym(column), value[[1]])))
+      } else {
+        warning("RISK MODEL", item$modelName, "UNKNOWN OP", op)
+      }
+    })
+    d |> collect() |> ds_write(dsName = dataset, topic = targetTopic)
+  })
 }
 
 #' @title 查看疑点数据

@@ -38,7 +38,6 @@ test_that("执行模型", {
     dataset = "车辆数据",
     filter = list(list(column = "mpg", op = ">", value = 20)),
     overwrite = TRUE)
-  fs::file_exists("/tmp/glimmer/RISKMODEL/问题车辆/耗油车型.yml") |>
-    as.logical() |>
-    testthat::expect_equal(TRUE)
+  risk_model_run()
+
 })
