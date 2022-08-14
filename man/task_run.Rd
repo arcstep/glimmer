@@ -10,11 +10,13 @@ task_run(taskScript = "TASK/BUILD", batch = F)
 应当按照脚本顺序执行
 }
 \seealso{
-Other TaskFolder functions: 
+Other task functions: 
 \code{\link{get_path}()},
 \code{\link{get_topics}()},
 \code{\link{get_topic}()},
+\code{\link{import_redo}()},
+\code{\link{import_todo}()},
 \code{\link{set_topic}()},
 \code{\link{task_read}()}
 }
-\concept{TaskFolder functions}
+\concept{task functions}

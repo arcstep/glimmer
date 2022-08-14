@@ -31,3 +31,14 @@ set_topic("\strong{DOING_TASK_FOLDER}", item)
 具体的任务脚本中，例如导入数据，按如下方法判断是否有数据集可导入：
 get_path("IMPORT", get_topic("\strong{DOING_TASK_FOLDER}"), "{dataset_name}") |> fs::dir_exists()
 }
+\seealso{
+Other task functions: 
+\code{\link{get_path}()},
+\code{\link{get_topics}()},
+\code{\link{get_topic}()},
+\code{\link{import_redo}()},
+\code{\link{set_topic}()},
+\code{\link{task_read}()},
+\code{\link{task_run}()}
+}
+\concept{task functions}

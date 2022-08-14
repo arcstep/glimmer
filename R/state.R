@@ -23,10 +23,11 @@
 #' 1、标记处理完成的任务文件夹时，stateName = "__TASK_FOLDER__"
 #' 2、写入parquet数据集文件时，stateName = "__WRITE_DATASET__"
 #' 
+#' @family state function
 #' @export
 state_write <- function(stateName, tibbleNew, topic = "STATE") {
   ##
-  lastModified <- lubridate::now()
+  lastModified <- lubridate::now(tz = "Asia/Shanghai")
   year <- lastModified |> lubridate::year()
   month <- lastModified |> lubridate::month()
   
@@ -60,7 +61,7 @@ state_write <- function(stateName, tibbleNew, topic = "STATE") {
     "rows" = nrow(d),
     "partColumns" = "year, month",
     "keyColumns" = "",
-    "updateAt" = lubridate::as_datetime(lastModified, tz = "Asia/Shanghai") |> as.character(),
+    "updateAt" = lubridate::as_datetime(lastModified) |> as.character.Date(),
     "updateTime" = lastModified |> as.integer(),
     "lastUpdate" = "-",
     "lastAffected" = "-"
@@ -70,6 +71,7 @@ state_write <- function(stateName, tibbleNew, topic = "STATE") {
 
 #' @title 读取状态信息
 #' @param stateName 状态数据集名称
+#' @family state function
 #' @export
 state_read <- function(stateName, topic = "STATE") {
   confirm_STATE(topic)
@@ -83,5 +85,5 @@ state_read <- function(stateName, topic = "STATE") {
 
 ##
 confirm_STATE <- function(topic = "STATE") {
-  if(!(topic %in% get_topics())) stop("需要先使用'set_topic()'函数指定STATE文件夹")
+  if(!(topic %in% get_topics())) stop("需要先使用'set_topic()'函数设置STATE文件夹")
 }

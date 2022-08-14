@@ -28,3 +28,8 @@ state_write(stateName, tibbleNew, topic = "STATE")
 1、标记处理完成的任务文件夹时，stateName = "\strong{TASK_FOLDER}"
 2、写入parquet数据集文件时，stateName = "\strong{WRITE_DATASET}"
 }
+\seealso{
+Other state function: 
+\code{\link{state_read}()}
+}
+\concept{state function}

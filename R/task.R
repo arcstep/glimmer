@@ -3,14 +3,14 @@ TASK.ENV <- new.env(hash = TRUE)
 
 #' @title 获取配置
 #' @param topic 任务主题
-#' @family TaskFolder functions
+#' @family task functions
 #' @export
 get_topic <- function(topic) {
   get(topic, envir = TASK.ENV)
 }
 
 #' @title 获得所有主题
-#' @family TaskFolder functions
+#' @family task functions
 #' @export
 get_topics <- function() {
   ls(envir = TASK.ENV)
@@ -18,7 +18,7 @@ get_topics <- function() {
 
 #' @title 根据配置构造数据路径
 #' @param topic 任务主题
-#' @family TaskFolder functions
+#' @family task functions
 #' @export
 get_path <- function(topic, ...) {
   p <- list(...)
@@ -28,7 +28,7 @@ get_path <- function(topic, ...) {
 #' @title 设置主题目录
 #' @param topic 任务主题
 #' @param path 文件夹位置
-#' @family TaskFolder functions
+#' @family task functions
 #' @export
 set_topic <- function(topic, path) {
   assign(topic, path, envir = TASK.ENV)
@@ -57,6 +57,7 @@ set_topic <- function(topic, path) {
 #' 
 #' 具体的任务脚本中，例如导入数据，按如下方法判断是否有数据集可导入：
 #' get_path("IMPORT", get_topic("__DOING_TASK_FOLDER__"), "{dataset_name}") |> fs::dir_exists()
+#' @family task functions
 #' @export
 import_todo <- function(taskFolder = "IMPORT", taskScript = "TASK/IMPORT") {
   tasks <- find_tasks(taskFolder)
@@ -70,6 +71,7 @@ import_todo <- function(taskFolder = "IMPORT", taskScript = "TASK/IMPORT") {
 }
 
 #' @title 手工指定要处理的任务文件夹
+#' @family task functions
 #' @export
 import_redo <- function(todo = c(), taskTopic = "IMPORT", taskScript = "TASK/IMPORT") {
   taskfolders <- find_tasks(taskTopic)
@@ -103,15 +105,15 @@ batch_tasks <- function(taskfolders, taskTopic, taskScript) {
 
 #' @title 执行目标路径下的任务脚本
 #' @description 应当按照脚本顺序执行
-#' @family TaskFolder functions
+#' @family task functions
 #' @export
 task_run <- function(taskScript = "TASK/BUILD", batch = F) {
   task_read(taskScript) |> purrr::pwalk(function(name, path) {
     message("RUN TASK SCRIPT：", name)
-    beginTime <- lubridate::now()
+    beginTime <- lubridate::now(tz = "Asia/Shanghai")
     # 执行脚本
     source(path)
-    used <- lubridate::now() - beginTime
+    used <- lubridate::now(tz = "Asia/Shanghai") - beginTime
     msg <- paste0("TASK USED：", as.character.Date(used))
     message(msg)
     # 记录任务执行结果
@@ -136,7 +138,7 @@ task_run <- function(taskScript = "TASK/BUILD", batch = F) {
 #' @description 按执行顺序罗列需要执行的脚本
 #' @param taskScript 脚本文件夹主题
 #' @param glob 要执行的源文件默认以.R结尾
-#' @family TaskFolder functions
+#' @family task functions
 #' @export
 task_read <- function(taskScript, glob = "*.R") {
   fs::dir_ls(get_path(taskScript), recurse = T, glob = glob, type = "file") |>

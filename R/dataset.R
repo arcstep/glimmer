@@ -62,7 +62,7 @@ ds_write <- function(d, dsName, topic = "CACHE", partColumns = c(), keyColumns =
   ## 当写入数据到磁盘时
   if(nrow(d) > 0) {
     to_write <- affected_data |> rbind(d)
-    beginTimestamp <- lubridate::now()
+    beginTimestamp <- lubridate::now(tz = "Asia/Shanghai")
     # Sys.sleep(1)
     ## 写入分区
     arrow::write_dataset(
@@ -89,7 +89,7 @@ ds_write <- function(d, dsName, topic = "CACHE", partColumns = c(), keyColumns =
     
     ## 更新元数据集元件
     d <- arrow::open_dataset(path, format = "parquet")
-    updateTimestamp <- lubridate::now()
+    updateTimestamp <- lubridate::now(tz = "Asia/Shanghai")
     datasetMeta <- list(
       "datasetId" = digest::digest(fs::path_join(c(topic, dsName)), algo = "xxhash32"),
       "topic" = topic,

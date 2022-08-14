@@ -13,11 +13,13 @@ get_topic(topic)
 获取配置
 }
 \seealso{
-Other TaskFolder functions: 
+Other task functions: 
 \code{\link{get_path}()},
 \code{\link{get_topics}()},
+\code{\link{import_redo}()},
+\code{\link{import_todo}()},
 \code{\link{set_topic}()},
 \code{\link{task_read}()},
 \code{\link{task_run}()}
 }
-\concept{TaskFolder functions}
+\concept{task functions}

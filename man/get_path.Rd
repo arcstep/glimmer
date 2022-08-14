@@ -13,11 +13,13 @@ get_path(topic, ...)
 根据配置构造数据路径
 }
 \seealso{
-Other TaskFolder functions: 
+Other task functions: 
 \code{\link{get_topics}()},
 \code{\link{get_topic}()},
+\code{\link{import_redo}()},
+\code{\link{import_todo}()},
 \code{\link{set_topic}()},
 \code{\link{task_read}()},
 \code{\link{task_run}()}
 }
-\concept{TaskFolder functions}
+\concept{task functions}

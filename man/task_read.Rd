@@ -15,11 +15,13 @@ task_read(taskScript, glob = "*.R")
 按执行顺序罗列需要执行的脚本
 }
 \seealso{
-Other TaskFolder functions: 
+Other task functions: 
 \code{\link{get_path}()},
 \code{\link{get_topics}()},
 \code{\link{get_topic}()},
+\code{\link{import_redo}()},
+\code{\link{import_todo}()},
 \code{\link{set_topic}()},
 \code{\link{task_run}()}
 }
-\concept{TaskFolder functions}
+\concept{task functions}

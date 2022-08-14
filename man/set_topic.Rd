@@ -15,11 +15,13 @@ set_topic(topic, path)
 设置主题目录
 }
 \seealso{
-Other TaskFolder functions: 
+Other task functions: 
 \code{\link{get_path}()},
 \code{\link{get_topics}()},
 \code{\link{get_topic}()},
+\code{\link{import_redo}()},
+\code{\link{import_todo}()},
 \code{\link{task_read}()},
 \code{\link{task_run}()}
 }
-\concept{TaskFolder functions}
+\concept{task functions}

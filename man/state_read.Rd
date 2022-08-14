@@ -12,3 +12,8 @@ state_read(stateName, topic = "STATE")
 \description{
 读取状态信息
 }
+\seealso{
+Other state function: 
+\code{\link{state_write}()}
+}
+\concept{state function}
