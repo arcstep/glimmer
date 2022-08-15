@@ -7,12 +7,11 @@
 risk_model_create(
   modelName,
   dataset,
-  title = NULL,
-  template = NULL,
-  filter = list(list(column = "col_name1", op = ">", value = 0:1)),
+  filter = list(list(column = "col_name1", op = ">", value = 0:1, riskTip = "-", level
+    = 1)),
   modelGroup = modelName,
-  desc = NULL,
-  author = NULL,
+  modelDesc = "-",
+  author = "-",
   online = FALSE,
   overwrite = FALSE,
   topic = "RISKMODEL"
@@ -23,15 +22,11 @@ risk_model_create(
 
 \item{dataset}{筛查目标数据集（该数据集必须存在yml配置文件，且设置了关键列）}
 
-\item{title}{标题列}
-
-\item{template}{风险描述模板}
-
 \item{filter}{筛查条件}
 
 \item{modelGroup}{模型组}
 
-\item{desc}{模型描述}
+\item{modelDesc}{模型描述}
 
 \item{author}{模型作者}
 
@@ -47,6 +42,7 @@ risk_model_create(
 \seealso{
 Other risk function: 
 \code{\link{risk_data_read}()},
+\code{\link{risk_model_all}()},
 \code{\link{risk_model_read}()},
 \code{\link{risk_model_run}()}
 }

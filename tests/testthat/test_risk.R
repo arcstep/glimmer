@@ -32,13 +32,15 @@ test_that("创建模型：支持覆盖", {
 })
 
 test_that("运行模型：要求数据集具有关键列", {
-  mtcars |> as_tibble() |> ds_write("车辆数据")
+  mtcars |> as_tibble() |>
+    mutate(keyId = row_number()) |>
+    ds_write("车辆数据", keyColumns = "keyId", titleColumn = "mpg")
   risk_model_create(
     modelName = "问题车辆/耗油车型",
     dataset = "车辆数据",
-    filter = list(list(column = "mpg", op = ">", value = 20)),
+    filter = list(list(column = "mpg", op = "<=", value = 20, riskTip = "耗油大，每加仑不足20公里", level = 1)),
     overwrite = TRUE)
-  risk_model_run()
+  risk_model_run("问题车辆/耗油车型")
   
 })
 

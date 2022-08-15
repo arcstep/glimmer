@@ -4,13 +4,19 @@
 \alias{risk_data_read}
 \title{查看疑点数据}
 \usage{
-risk_data_read(dataset = "疑点数据", targetTopic = "CACHE")
+risk_data_read(dsName = "疑点数据", targetTopic = "CACHE")
+}
+\arguments{
+\item{dsName}{疑点数据集名称}
+
+\item{targetTopic}{疑点数据集主题域}
 }
 \description{
 查看疑点数据
 }
 \seealso{
 Other risk function: 
+\code{\link{risk_model_all}()},
 \code{\link{risk_model_create}()},
 \code{\link{risk_model_read}()},
 \code{\link{risk_model_run}()}

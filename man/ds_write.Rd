@@ -10,6 +10,7 @@ ds_write(
   topic = "CACHE",
   partColumns = c(),
   keyColumns = c(),
+  titleColumn = c(),
   desc = "-"
 )
 }
@@ -20,9 +21,11 @@ ds_write(
 
 \item{topic}{数据集保存的主题目录，默认为CACHE}
 
-\item{partColumns}{分区列，可以是字符串向量}
+\item{partColumns}{分区列，支持多列}
 
-\item{keyColumns}{关键列，可以是字符串向量}
+\item{keyColumns}{关键列，支持多列}
+
+\item{titleColumn}{标题列，不支持多列}
 
 \item{desc}{对数据集的额外描述}
 }

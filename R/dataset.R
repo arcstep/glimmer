@@ -2,8 +2,9 @@
 #' @param d 要写入的数据
 #' @param dsName 数据集名称
 #' @param topic 数据集保存的主题目录，默认为CACHE
-#' @param partColumns 分区列，可以是字符串向量
-#' @param keyColumns 关键列，可以是字符串向量
+#' @param partColumns 分区列，支持多列
+#' @param keyColumns 关键列，支持多列
+#' @param titleColumn 标题列，不支持多列
 #' @param desc 对数据集的额外描述
 #' @description 更新受影响的分区
 #' @family dataset function
@@ -13,7 +14,7 @@
 #' 如果不设置关键列，则为追加模式；否则按关键列替换
 #' 
 #' @export
-ds_write <- function(d, dsName, topic = "CACHE", partColumns = c(), keyColumns = c(), desc = "-") {
+ds_write <- function(d, dsName, topic = "CACHE", partColumns = c(), keyColumns = c(), titleColumn = c(), desc = "-") {
   ## 默认从CACHE任务目录读写数据集
   path <- get_path(topic, dsName)
   
@@ -39,18 +40,19 @@ ds_write <- function(d, dsName, topic = "CACHE", partColumns = c(), keyColumns =
       stop("Different Schema to write >> ", path)
     }
     
-    ## 找出受影响的分区数据
+    ## 找出受影响的分区文件（如果没有分区就提取整个数据集）
+    ## 注意：要找出的是分区文件，而不是数据
     if(rlang::is_empty(partColumns)) {
       affected_data <- arrow::open_dataset(path, format = "parquet") |>
         collect()
     } else {
       if(rlang::is_empty(keyColumns)) {
-        ## 如果指定关键列，就按关键列去重
+        ## 如果没有指定关键列，就仅按分区列去重
         affected_data <- arrow::open_dataset(path, format = "parquet") |>
           semi_join(d, by = partColumns) |>
           collect()
       } else {
-        ## 如果指定关键列，就按关键列去重
+        ## 如果有指定关键列，就按分区列和关键列去重
         affected_data <- arrow::open_dataset(path, format = "parquet") |>
           semi_join(d, by = partColumns) |>
           anti_join(d, by = keyColumns) |>
@@ -99,6 +101,7 @@ ds_write <- function(d, dsName, topic = "CACHE", partColumns = c(), keyColumns =
       "rows" = nrow(d),
       "partColumns" = partColumns |> paste(collapse = ","),
       "keyColumns" = keyColumns |> paste(collapse = ","),
+      "titleColumn" = titleColumn |> paste(collapse = ","),
       "updateAt" = lubridate::as_datetime(updateTimestamp, tz = "Asia/Shanghai") |> as.character(),
       "updateTime" = updateTimestamp |> as.integer(),
       "lastUpdate" = updated,
@@ -168,10 +171,9 @@ ds_all <- function(topic = "CACHE") {
 #' @family dataset function
 #' @export
 ds_yaml <- function(dsName, topic = "CACHE") {
-  path <- get_path(topic, dsName)
-  if(fs::file_exists(paste0(path, "yml"))) {
-    paste0(path, ".yml") |>
-      yaml::read_yaml()
+  path <- get_path(topic, dsName, ".metadata.yml")
+  if(fs::file_exists(path)) {
+    yaml::read_yaml(path)
   } else {
     list()
   }

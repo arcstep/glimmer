@@ -5,10 +5,21 @@
 \title{执行模型}
 \usage{
 risk_model_run(
-  dataset = "疑点数据",
+  modelName,
+  dsName = "疑点数据",
   targetTopic = "CACHE",
-  topic = "RISKMODEL"
+  topic = "RISKMODEL",
+  veryfy = FALSE
 )
+}
+\arguments{
+\item{dsName}{疑点数据集名称}
+
+\item{targetTopic}{疑点数据集主题域}
+
+\item{topic}{主题名称}
+
+\item{verify}{启用验证模式（不写入模型数据）}
 }
 \description{
 输出风险疑点数据到CACHE目录中
@@ -16,6 +27,7 @@ risk_model_run(
 \seealso{
 Other risk function: 
 \code{\link{risk_data_read}()},
+\code{\link{risk_model_all}()},
 \code{\link{risk_model_create}()},
 \code{\link{risk_model_read}()}
 }
