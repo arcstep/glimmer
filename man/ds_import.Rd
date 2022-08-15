@@ -11,7 +11,7 @@ ds_import(dsName, fun, topic = "IMPORT")
 
 \item{fun}{导入函数定义，要求是一个匿名函数}
 
-\item{topic}{导入文件夹所在的主题}
+\item{topic}{导入文件夹所在的主题域}
 }
 \description{
 在定义增量导入任务时需要定义按数据集导入的函数

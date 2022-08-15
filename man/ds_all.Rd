@@ -6,6 +6,9 @@
 \usage{
 ds_all(topic = "CACHE")
 }
+\arguments{
+\item{topic}{主题域}
+}
 \description{
 列举所有数据集
 }
@@ -20,6 +23,7 @@ Other dataset function:
 \code{\link{ds_read}()},
 \code{\link{ds_remove_path}()},
 \code{\link{ds_schema}()},
-\code{\link{ds_write}()}
+\code{\link{ds_write}()},
+\code{\link{ds_yaml}()}
 }
 \concept{dataset function}

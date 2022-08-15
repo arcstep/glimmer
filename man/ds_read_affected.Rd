@@ -6,6 +6,9 @@
 \usage{
 ds_read_affected(affectedParts)
 }
+\arguments{
+\item{affectedParts}{受影响的分区文件，多个时用逗号间隔表示}
+}
 \description{
 读取重写过分区的数据集文件
 }
@@ -20,6 +23,7 @@ Other dataset function:
 \code{\link{ds_read}()},
 \code{\link{ds_remove_path}()},
 \code{\link{ds_schema}()},
-\code{\link{ds_write}()}
+\code{\link{ds_write}()},
+\code{\link{ds_yaml}()}
 }
 \concept{dataset function}

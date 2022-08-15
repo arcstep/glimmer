@@ -6,6 +6,11 @@
 \usage{
 ds_remove_path(dsName, topic = "CACHE")
 }
+\arguments{
+\item{dsName}{数据集名称}
+
+\item{topic}{主题域}
+}
 \description{
 可以整个移除，也可以组装目录后按分区移除
 }
@@ -20,6 +25,7 @@ Other dataset function:
 \code{\link{ds_read_affected}()},
 \code{\link{ds_read}()},
 \code{\link{ds_schema}()},
-\code{\link{ds_write}()}
+\code{\link{ds_write}()},
+\code{\link{ds_yaml}()}
 }
 \concept{dataset function}

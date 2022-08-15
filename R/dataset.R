@@ -109,6 +109,7 @@ ds_write <- function(d, dsName, topic = "CACHE", partColumns = c(), keyColumns =
 }
 
 #' @title 读取重写过分区的数据集文件
+#' @param affectedParts 受影响的分区文件，多个时用逗号间隔表示
 #' @family dataset function
 #' @export
 ds_read_affected <- function(affectedParts) {
@@ -119,21 +120,25 @@ ds_read_affected <- function(affectedParts) {
 }
 
 #' @title 读取最近一次更新时重写过分区的数据集文件
+#' @param dsName 数据集名称
+#' @param stateTopic 状态数据主题域
 #' @family dataset function
 #' @export
-ds_last_affected <- function(dataset = c()) {
-  if(rlang::is_empty(dataset)) {
-    state <- state_read("__WRITE_DATASET__") |>
+ds_last_affected <- function(dsName = c(), stateTopic = "STATE") {
+  if(rlang::is_empty(dsName)) {
+    state <- state_read("__WRITE_DATASET__", stateTopic) |>
       arrange(desc(lastModified)) |> collect()
   } else {
     state <- state_read("__WRITE_DATASET__") |>
-      filter(.data$dataset == dataset) |>
+      filter(.data$dataset == dsName) |>
       arrange(desc(lastModified)) |> collect()
   }
   state$affected[[1]] |> ds_read_affected()
 }
 
 #' @title 读取数据集
+#' @param dsName 数据集名称
+#' @param topic 主题域
 #' @family dataset function
 #' @export
 ds_read <- function(dsName, topic = "CACHE") {
@@ -142,6 +147,7 @@ ds_read <- function(dsName, topic = "CACHE") {
 }
 
 #' @title 列举所有数据集
+#' @param topic 主题域
 #' @family dataset function
 #' @export
 ds_all <- function(topic = "CACHE") {
@@ -156,8 +162,25 @@ ds_all <- function(topic = "CACHE") {
   }
 }
 
+#' @title 列举所有数据集
+#' @param dsName 数据集名称
+#' @param topic 主题域
+#' @family dataset function
+#' @export
+ds_yaml <- function(dsName, topic = "CACHE") {
+  path <- get_path(topic, dsName)
+  if(fs::file_exists(paste0(path, "yml"))) {
+    paste0(path, ".yml") |>
+      yaml::read_yaml()
+  } else {
+    list()
+  }
+}
+
 #' @title 移除数据文件夹
 #' @description 可以整个移除，也可以组装目录后按分区移除
+#' @param dsName 数据集名称
+#' @param topic 主题域
 #' @family dataset function
 #' @export
 ds_remove_path <- function(dsName, topic = "CACHE") {
@@ -271,7 +294,7 @@ ds_as_unique <- function(ds, keyColumns) {
 #' 
 #' @param dsName 要导入的数据集名称
 #' @param fun 导入函数定义，要求是一个匿名函数
-#' @param topic 导入文件夹所在的主题
+#' @param topic 导入文件夹所在的主题域
 #' @family dataset functions
 #' @export
 ds_import <- function(dsName, fun, topic = "IMPORT") {

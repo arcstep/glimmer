@@ -4,7 +4,12 @@
 \alias{ds_last_affected}
 \title{读取最近一次更新时重写过分区的数据集文件}
 \usage{
-ds_last_affected(dataset = c())
+ds_last_affected(dsName = c(), stateTopic = "STATE")
+}
+\arguments{
+\item{dsName}{数据集名称}
+
+\item{stateTopic}{状态数据主题域}
 }
 \description{
 读取最近一次更新时重写过分区的数据集文件
@@ -20,6 +25,7 @@ Other dataset function:
 \code{\link{ds_read}()},
 \code{\link{ds_remove_path}()},
 \code{\link{ds_schema}()},
-\code{\link{ds_write}()}
+\code{\link{ds_write}()},
+\code{\link{ds_yaml}()}
 }
 \concept{dataset function}
