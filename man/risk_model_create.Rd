@@ -7,14 +7,39 @@
 risk_model_create(
   modelName,
   dataset,
+  title = NULL,
+  template = NULL,
   filter = list(list(column = "col_name1", op = ">", value = 0:1)),
   modelGroup = modelName,
-  desc = "-",
-  author = "-",
+  desc = NULL,
+  author = NULL,
   online = FALSE,
   overwrite = FALSE,
   topic = "RISKMODEL"
 )
+}
+\arguments{
+\item{modelName}{模型名称}
+
+\item{dataset}{筛查目标数据集（该数据集必须存在yml配置文件，且设置了关键列）}
+
+\item{title}{标题列}
+
+\item{template}{风险描述模板}
+
+\item{filter}{筛查条件}
+
+\item{modelGroup}{模型组}
+
+\item{desc}{模型描述}
+
+\item{author}{模型作者}
+
+\item{online}{是否启用}
+
+\item{overwrite}{覆盖旧有模型}
+
+\item{topic}{风险模型的主题域}
 }
 \description{
 初始化风险模型

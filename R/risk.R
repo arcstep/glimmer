@@ -1,20 +1,34 @@
 
 #' @title 初始化风险模型
+#' @param modelName 模型名称
+#' @param dataset 筛查目标数据集（该数据集必须存在yml配置文件，且设置了关键列）
+#' @param title 标题列
+#' @param filter 筛查条件
+#' @param template 生成疑点数据时使用的风险描述模板
+#' @param modelGroup 模型组
+#' @param desc 模型描述
+#' @param author 模型作者
+#' @param online 是否启用
+#' @param overwrite 覆盖旧有模型
+#' @param topic 风险模型的主题域
 #' @family risk function
 #' @export
 risk_model_create <- function(
     modelName,
     dataset,
-    filter = list(list("column" = "col_name1", "op" = ">", "value" = 0:1)),
+    title = NULL,
+    template = NULL,
+    filter = list(list("column" = "col_name1", "op" = ">", "value" = 0:1, "level" = 1)),
     modelGroup = modelName,
-    desc = "-",
-    author = "-",
+    desc = NULL,
+    author = NULL,
     online = FALSE,
     overwrite = FALSE,
     topic = "RISKMODEL") {
   createdAt <- lubridate::now(tz = "Asia/Shanghai")
   lastModified <- lubridate::now(tz = "Asia/Shanghai")
-  
+  ds <- ds_read()
+
   confirm_RISKMODEL(topic)
   
   path <- get_path(topic, paste0(modelName, ".yml"))
@@ -27,6 +41,8 @@ risk_model_create <- function(
     yml <- list(
       "modelName" = modelName,
       "dataset" = dataset,
+      "title" = title,
+      "template" = template,
       "filter" = filter,
       "modelGroup" = modelGroup,
       "desc" = desc,
@@ -68,7 +84,7 @@ confirm_RISKMODEL <- function(topic = "RISKMODEL") {
 #' @description 输出风险疑点数据到CACHE目录中
 #' @family risk function
 #' @export
-risk_model_run <- function(dataset = "疑点数据", targetTopic = "CACHE", topic = "RISKMODEL") {
+risk_model_run <- function(dsName = "疑点数据", targetTopic = "CACHE", topic = "RISKMODEL", ) {
   models <- risk_model_read(topic = topic)
   seq(1:nrow(models)) |> purrr::walk(function(i) {
     item <- slice(models, i) |> as.list()
@@ -83,15 +99,15 @@ risk_model_run <- function(dataset = "疑点数据", targetTopic = "CACHE", topi
         warning("RISK MODEL", item$modelName, "UNKNOWN OP", op)
       }
     })
-    d |> collect() |> ds_write(dsName = dataset, topic = targetTopic)
+    d |> collect() |> ds_write(dsName = dsName, topic = targetTopic)
   })
 }
 
 #' @title 查看疑点数据
 #' @family risk function
 #' @export
-risk_data_read <- function(dataset = "疑点数据", targetTopic = "CACHE") {
-  ds_read(dsName = dataset, topic = targetTopic)
+risk_data_read <- function(dsName = "疑点数据", targetTopic = "CACHE") {
+  ds_read(dsName = dsName, topic = targetTopic)
 }
   
   
