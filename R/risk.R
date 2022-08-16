@@ -74,6 +74,7 @@ risk_model_all <- function(topic = "RISKMODEL") {
 }
 
 #' @title 读取风险模型
+#' @param modelName 模型名称
 #' @param topic 主题名称
 #' @family risk function
 #' @export
@@ -95,13 +96,19 @@ confirm_RISKMODEL <- function(topic = "RISKMODEL") {
 
 #' @title 执行模型
 #' @description 输出风险疑点数据到CACHE目录中
+#' @param modelName 模型名称
+#' @param batchNumber 批次号
 #' @param dsName 疑点数据集名称
 #' @param targetTopic 疑点数据集主题域
 #' @param topic 主题名称
 #' @param verify 启用验证模式（不写入模型数据）
 #' @family risk function
 #' @export
-risk_model_run <- function(modelName, dsName = "疑点数据", targetTopic = "CACHE", topic = "RISKMODEL", veryfy = FALSE) {
+risk_model_run <- function(
+    modelName,
+    batchNumber = lubridate::now(tz = "Asia/Shanghai") |> as.integer(),
+    dsName = "疑点数据",
+    targetTopic = "CACHE", topic = "RISKMODEL", veryfy = FALSE) {
   item <- risk_model_read(modelName = modelName, topic = topic)
   if(rlang::is_empty(item)) {
     stop("Risk Model Not Existing: ", modelName)
@@ -151,13 +158,15 @@ risk_model_run <- function(modelName, dsName = "疑点数据", targetTopic = "CA
         rename(
           dataId = `@dataId`,
           dataTitle = `@dataTitle`,
-          riskLevel = `@level`,
+          riskLevel =  `@level`,
           riskTip = `@riskTip`,
           value = `@value`) |>
         mutate(
+          riskLevel =  as.integer(riskLevel),
           modelName = modelName,
+          batchNumber = batchNumber,
+          runAt = lubridate::now(tz = "Asia/Shanghai"),
           dataset = item$dataset,
-          desc = item$desc,
           modelGroup = item$modelGroup) |>
         
         ds_write(dsName = dsName, topic = targetTopic)

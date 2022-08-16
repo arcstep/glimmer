@@ -6,6 +6,7 @@
 \usage{
 risk_model_run(
   modelName,
+  batchNumber = as.integer(lubridate::now(tz = "Asia/Shanghai")),
   dsName = "疑点数据",
   targetTopic = "CACHE",
   topic = "RISKMODEL",
@@ -13,6 +14,10 @@ risk_model_run(
 )
 }
 \arguments{
+\item{modelName}{模型名称}
+
+\item{batchNumber}{批次号}
+
 \item{dsName}{疑点数据集名称}
 
 \item{targetTopic}{疑点数据集主题域}

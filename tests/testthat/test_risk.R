@@ -32,6 +32,8 @@ test_that("创建模型：支持覆盖", {
 })
 
 test_that("运行模型：要求数据集具有关键列", {
+  d <- mtcars |> as_tibble() |> filter(mpg <= 20)
+  
   mtcars |> as_tibble() |>
     mutate(keyId = row_number()) |>
     ds_write("车辆数据", keyColumns = "keyId", titleColumn = "mpg")
@@ -40,8 +42,15 @@ test_that("运行模型：要求数据集具有关键列", {
     dataset = "车辆数据",
     filter = list(list(column = "mpg", op = "<=", value = 20, riskTip = "耗油大，每加仑不足20公里", level = 1)),
     overwrite = TRUE)
-  risk_model_run("问题车辆/耗油车型")
-  
+  risk_model_run(modelName = "问题车辆/耗油车型", batchNumber = 1)
+  r <- risk_data_read("疑点数据")
+  r |>
+    filter(batchNumber == 1) |>
+    nrow() |>
+    testthat::expect_equal(nrow(d))
+  c("dataId", "dataTitle", "riskLevel", "value", "riskTip", "runAt",
+    "modelName", "batchNumber", "dataset", "modelGroup") %in% names(r) |>
+    purrr::walk(function(item) testthat::expect_true(item))
 })
 
 # 运行模型：支持一元操作过滤条件，包括数值、时间和文本

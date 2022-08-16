@@ -7,6 +7,8 @@
 risk_model_read(modelName, topic = "RISKMODEL")
 }
 \arguments{
+\item{modelName}{模型名称}
+
 \item{topic}{主题名称}
 }
 \description{
