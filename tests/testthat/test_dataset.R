@@ -29,6 +29,18 @@ test_that("按分区写入文件", {
     expect_equal(nrow(mtcars))
 })
 
+test_that("更新分区文件", {
+  ds_remove_path("车数据")
+  mtcars |> as_tibble() |>
+    mutate(cyl = as.integer(cyl)) |>
+    glimmer::ds_write("车数据", partColumns = c("cyl"))
+  mtcars |> as_tibble() |>
+    mutate(cyl = as.integer(1000)) |>
+    glimmer::ds_write("车数据", partColumns = c("cyl"))
+  (ds_read("车数据") |> collect())$cyl[[1]] |>
+    expect_equal(1000)
+})
+
 test_that("数据集准备异常时尝试写入", {
   ds_remove_path("车数据")
   tibble() |> glimmer::ds_write("车数据") |>

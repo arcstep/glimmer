@@ -85,6 +85,7 @@ test_that("运行模型：支持一元操作过滤条件", {
   fs::dir_delete(get_path("CACHE"))
 })
 
+
 test_that("运行模型：文本多选、正则表达式", {
   d <- iris |> as_tibble()
   d |> as_tibble() |>
@@ -105,7 +106,7 @@ test_that("运行模型：文本多选、正则表达式", {
     filter(batchNumber == 1) |> nrow() |>
     testthat::expect_equal(
       d |> filter(Species %in% c("setosa", "virginica") ) |> nrow())
-
+  
   risk_model_create(
     modelName = "鸾尾花2",
     dataset = "iris",
@@ -133,6 +134,45 @@ test_that("运行模型：文本多选、正则表达式", {
     filter(batchNumber == 3) |> nrow() |>
     testthat::expect_equal(
       d |> filter(Species %in% c("setosa", "virginica") ) |> nrow())
+  
+  fs::dir_delete(get_path("RISKMODEL"))
+  fs::dir_delete(get_path("CACHE"))
+})
+
+test_that("运行模型：时间和日期的逻辑", {
+  d <- tibble(
+    n = 1:5,
+    day = c("2020-05-01", "2020-06-01", "2020-05-11", "2020-07-3", "2019-12-30") |> lubridate::as_date(tz = "Asia/Shanghai"),
+    dt = c("2020-05-01 11:11:11", "2020-06-01 11:11:11", "2020-05-11 11:11:11", "2020-07-3 11:11:11", "2019-12-30 11:11:11") |> lubridate::as_datetime(tz = "Asia/Shanghai")
+    )
+  d |> mutate(keyId = row_number()) |>
+    ds_write("胜利日", keyColumns = "keyId", titleColumn = "day")
+  
+  risk_model_create(
+    modelName = "胜利日在7月",
+    dataset = "胜利日",
+    riskTip = "在7月",
+    level = "L",
+    filter = list(
+      list(column = "dt", op = "%time%>=", value = c("2020-07-1"))))
+  risk_model_run(modelName = "胜利日在7月", batchNumber = 1L)
+  risk_data_read("疑点数据") |> 
+    filter(batchNumber == 1L) |> nrow() |>
+    testthat::expect_equal(
+      d |> filter(dt >= lubridate::as_datetime("2020-07-1", tz = "Asia/Shanghai")) |> nrow())
+
+  risk_model_create(
+    modelName = "胜利日在7月2",
+    dataset = "胜利日",
+    riskTip = "在7月",
+    level = "L",
+    filter = list(
+      list(column = "day", op = "%date%>=", value = c("2020-07-1"))))
+  risk_model_run(modelName = "胜利日在7月", batchNumber = 2L)
+  risk_data_read("疑点数据") |> 
+    filter(batchNumber == 2L) |> nrow() |>
+    testthat::expect_equal(
+      d |> filter(dt >= lubridate::as_datetime("2020-07-1", tz = "Asia/Shanghai")) |> nrow())
   
   fs::dir_delete(get_path("RISKMODEL"))
   fs::dir_delete(get_path("CACHE"))

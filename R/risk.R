@@ -144,20 +144,40 @@ risk_model_run <- function(
       value <- item$filter[[j]]$value
       if(op %in% c(">", "<", ">=", "<=", "==", "!=", "%in%")) {
         d <<- d |>
-          filter(do.call(!!sym(op), args = list(!!sym(column), unlist(value)))) |>
+          filter(do.call(
+            !!sym(op),
+            args = list(!!sym(column), unlist(value)))) |>
+          collect()
+      } else if(stringr::str_detect(op, "%time%")) {
+        myop <- stringr::str_replace(op, "%time%", "")
+        d <<- d |>
+          filter(do.call(
+            !!sym(myop),
+            args = list(!!sym(column), unlist(value) |> lubridate::as_datetime(tz = "Asia/Shanghai")))) |>
+          collect()
+      } else if(stringr::str_detect(op, "%date%")) {
+        myop <- stringr::str_replace(op, "%date%", "")
+        d <<- d |>
+          filter(do.call(
+            !!sym(myop),
+            args = list(!!sym(column), unlist(value) |> lubridate::as_date(tz = "Asia/Shanghai")))) |>
           collect()
       } else if(op %in% c("%nin%")) {
         ## 将 %nin% 转换为可以惰性执行的 %in%
         d <<- d |>
-          filter(!do.call("%in%", args = list(!!sym(column), unlist(value)))) |>
+          filter(!do.call(
+            "%in%",
+            args = list(!!sym(column), unlist(value)))) |>
           collect()
       } else if(op %in% c("%regex%", "%not-regex%")) {
         ## 正则表达式需要不能惰性执行，需要提前collect数据
         d <<- d |>
           collect() |>
-          filter(do.call(!!sym(op), args = list(!!sym(column), unlist(value))))
+          filter(do.call(
+            !!sym(op),
+            args = list(!!sym(column), unlist(value))))
       } else {
-        stop("Risk Model ", item$modelName, "Unknown OP: ", op)
+        stop("Risk Model: ", item$modelName, " >> Unknown OP: ", op)
       }
     })
     
