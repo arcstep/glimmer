@@ -13,7 +13,7 @@ risk_model_create(
   modelGroup = modelName,
   modelDesc = "-",
   author = "-",
-  online = FALSE,
+  online = TRUE,
   overwrite = FALSE,
   topic = "RISKMODEL"
 )

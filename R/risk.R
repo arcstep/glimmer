@@ -32,7 +32,7 @@ risk_model_create <- function(
     modelGroup = modelName,
     modelDesc = "-",
     author = "-",
-    online = FALSE,
+    online = TRUE,
     overwrite = FALSE,
     topic = "RISKMODEL") {
   createdAt <- lubridate::now(tz = "Asia/Shanghai")
@@ -125,87 +125,94 @@ risk_model_run <- function(
     stop("Risk Model Not Existing: ", modelName)
   }
   
-  yml <- ds_yaml(item$dataset)
-  if(rlang::is_empty(yml$keyColumns)) {
-    stop("Risk Model Config Invalid: ", modelName, " / ", "No KeyColumns in dataset ", item$dataset)
-  }
-  if(rlang::is_empty(yml$titleColumn)) {
-    stop("Risk Model Config Invalid: ", modelName, " / ", "No TitleColumn in dataset ", item$dataset)
-  }
-  
-  keyColumns <- yml$keyColumns |> stringr::str_split(",")
-  
-  d <- item$dataset |> ds_read(topic = targetTopic)
-  if(length(item$filter) > 0) {
-    seq(1:length(item$filter)) |> purrr::walk(function(j) {
-      message("Risk Model Runing: modelName")
-      column <- item$filter[[j]]$column
-      op <- item$filter[[j]]$op
-      value <- item$filter[[j]]$value
-      if(op %in% c(">", "<", ">=", "<=", "==", "!=", "%in%")) {
-        d <<- d |>
-          filter(do.call(
-            !!sym(op),
-            args = list(!!sym(column), unlist(value)))) |>
-          collect()
-      } else if(stringr::str_detect(op, "%time%")) {
-        myop <- stringr::str_replace(op, "%time%", "")
-        d <<- d |>
-          filter(do.call(
-            !!sym(myop),
-            args = list(!!sym(column), unlist(value) |> lubridate::as_datetime(tz = "Asia/Shanghai")))) |>
-          collect()
-      } else if(stringr::str_detect(op, "%date%")) {
-        myop <- stringr::str_replace(op, "%date%", "")
-        d <<- d |>
-          filter(do.call(
-            !!sym(myop),
-            args = list(!!sym(column), unlist(value) |> lubridate::as_date()))) |>
-          collect()
-      } else if(op %in% c("%nin%")) {
-        ## 将 %nin% 转换为可以惰性执行的 %in%
-        d <<- d |>
-          filter(!do.call(
-            "%in%",
-            args = list(!!sym(column), unlist(value)))) |>
-          collect()
-      } else if(op %in% c("%regex%", "%not-regex%")) {
-        ## 正则表达式需要不能惰性执行，需要提前collect数据
-        d <<- d |>
-          collect() |>
-          filter(do.call(
-            !!sym(op),
-            args = list(!!sym(column), unlist(value))))
-      } else {
-        stop("Risk Model: ", item$modelName, " >> Unknown OP: ", op)
-      }
-    })
+  if(!item$online) {
+    message("Risk Model Offline: ", modelName)
     
-    if(!veryfy && nrow(d) > 0) {
-      ## 执行模型并生成疑点数据
-      columns <- item$filte |> lapply(function(item) item$column) |> unlist()
-      d |>
-        unite("@dataId", !!!syms(keyColumns), sep = "--", remove = FALSE) |>
-        unite("@dataTitle", !!!syms(yml$titleColumn), sep = "--", remove = FALSE) |>
-        unite("@value", !!!syms(columns), sep = ",", remove = FALSE) |>
-        select(`@dataId`, `@dataTitle`, `@value`) |>
-        rename(
-          dataId = `@dataId`,
-          dataTitle = `@dataTitle`,
-          value = `@value`) |>
-        mutate(
-          riskLevel =  item$level,
-          riskTip = item$riskTip,
-          modelName = modelName,
-          batchNumber = batchNumber,
-          runAt = lubridate::now(tz = "Asia/Shanghai"),
-          dataset = item$dataset,
-          modelGroup = item$modelGroup) |>
-        
-        ds_write(dsName = dsName, topic = targetTopic, keyColumns = c("modelGroup", "dataId"), mode = "append")
-    } else {
-      ## 启用验证模式
-      message("Risk Model ", item$modelName, " OK !!")
+  } else {
+    yml <- ds_yaml(item$dataset)
+    if(rlang::is_empty(yml$keyColumns)) {
+      stop("Risk Model Config Invalid: ", modelName, " / ", "No KeyColumns in dataset ", item$dataset)
+    }
+    if(rlang::is_empty(yml$titleColumn)) {
+      stop("Risk Model Config Invalid: ", modelName, " / ", "No TitleColumn in dataset ", item$dataset)
+    }
+    
+    keyColumns <- yml$keyColumns |> stringr::str_split(",")
+    
+    d <- item$dataset |> ds_read(topic = targetTopic)
+    if(length(item$filter) > 0) {
+      seq(1:length(item$filter)) |> purrr::walk(function(j) {
+        message("Risk Model Runing: ", modelName)
+        column <- item$filter[[j]]$column
+        op <- item$filter[[j]]$op
+        value <- item$filter[[j]]$value
+        if(op %in% c(">", "<", ">=", "<=", "==", "!=", "%in%")) {
+          d <<- d |>
+            filter(do.call(
+              !!sym(op),
+              args = list(!!sym(column), unlist(value)))) |>
+            collect()
+        } else if(stringr::str_detect(op, "%time%")) {
+          myop <- stringr::str_replace(op, "%time%", "")
+          d <<- d |>
+            filter(do.call(
+              !!sym(myop),
+              args = list(!!sym(column), unlist(value) |> lubridate::as_datetime(tz = "Asia/Shanghai")))) |>
+            collect()
+        } else if(stringr::str_detect(op, "%date%")) {
+          myop <- stringr::str_replace(op, "%date%", "")
+          d <<- d |>
+            filter(do.call(
+              !!sym(myop),
+              args = list(!!sym(column), unlist(value) |> lubridate::as_date()))) |>
+            collect()
+        } else if(op %in% c("%nin%")) {
+          ## 将 %nin% 转换为可以惰性执行的 %in%
+          d <<- d |>
+            filter(!do.call(
+              "%in%",
+              args = list(!!sym(column), unlist(value)))) |>
+            collect()
+        } else if(op %in% c("%regex%", "%not-regex%")) {
+          ## 正则表达式需要不能惰性执行，需要提前collect数据
+          d <<- d |>
+            collect() |>
+            filter(do.call(
+              !!sym(op),
+              args = list(!!sym(column), unlist(value))))
+        } else {
+          stop("Risk Model: ", item$modelName, " >> Unknown OP: ", op)
+        }
+      })
+      
+      if(!veryfy && nrow(d) > 0) {
+        ## 执行模型并生成疑点数据
+        runAt <- lubridate::now(tz = "Asia/Shanghai")
+        columns <- item$filte |> lapply(function(item) item$column) |> unlist()
+        d |>
+          unite("@dataId", !!!syms(keyColumns), sep = "--", remove = FALSE) |>
+          unite("@dataTitle", !!!syms(yml$titleColumn), sep = "--", remove = FALSE) |>
+          unite("@value", !!!syms(columns), sep = ",", remove = FALSE) |>
+          select(`@dataId`, `@dataTitle`, `@value`) |>
+          rename(
+            dataId = `@dataId`,
+            dataTitle = `@dataTitle`,
+            value = `@value`) |>
+          mutate(
+            riskLevel =  item$level,
+            riskTip = item$riskTip,
+            modelName = modelName,
+            batchNumber = batchNumber,
+            runAt = runAt,
+            lastModifiedAt = runAt,
+            flag = "__NEW__",
+            dataset = item$dataset,
+            modelGroup = item$modelGroup) |>
+          write_risk_data(dsName, targetTopic, mode = "append")
+      } else {
+        ## 启用验证模式
+        message("Risk Model ", item$modelName, " OK !!")
+      }
     }
   }
 }
@@ -218,5 +225,52 @@ risk_model_run <- function(
 risk_data_read <- function(dsName = "疑点数据", targetTopic = "CACHE") {
   ds_read(dsName = dsName, topic = targetTopic)
 }
-  
-  
+
+#' @title 设置疑点标记
+#' @param dataId 数据ID
+#' @param modelGroup 模型组名称
+#' @param dsName 疑点数据集名称
+#' @param targetTopic 疑点数据集主题域
+#' @export
+risk_data_set <- function(dataId, modelGroup, flag_new = "__NEW__", dsName = "疑点数据", targetTopic = "CACHE") {
+  ds_read(dsName = dsName, topic = targetTopic) |>
+    semi_join(tibble("dataId" = dataId, "modelGroup" = modelGroup), by = c("dataId", "modelGroup")) |>
+    collect() |>
+    mutate(flag = flag_new) |>
+    write_risk_data(dsName, targetTopic)
+}
+
+#' @title 清理模型遗留数据
+#' @param modelName 模型名称
+#' @param modelGroup 模型组名称
+#' @param dsName 疑点数据集名称
+#' @param targetTopic 疑点数据集主题域
+#' @export
+risk_data_clear <- function(modelName, modelGroup, dsName = "疑点数据", targetTopic = "CACHE") {
+  ## 提取需要排除的数据
+  partReserve <-  ds_read(dsName = dsName, topic = targetTopic) |>
+    semi_join(tibble("modelName" = modelName, "modelGroup" = modelGroup), by = c("modelName", "modelGroup")) |>
+    filter(flag != "__NEW__") |>
+    collect()
+  path <- get_path(topic = targetTopic, dsName, paste0("modelGroup=", modelGroup)) |>
+    fs::dir_ls(type = "file")
+  if(rlang::is_empty(partReserve)) {
+    ## 删除该组分区文件
+    fs::dir_delete(path)
+  } else {
+    ## 回写保留的数据到指定分区文件
+    partReserve |>
+      arrow::write_parquet(path, version = "2.0")
+  }
+}
+
+# 
+write_risk_data <- function(d, dsName, targetTopic, mode = "update") {
+  ds_write(
+    d,
+    dsName = dsName,
+    topic = targetTopic,
+    partColumns = c("modelGroup"),
+    keyColumns = c("modelGroup", "dataId"),
+    mode = mode)
+}

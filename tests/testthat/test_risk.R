@@ -220,7 +220,7 @@ test_that("运行模型：在同一组中使用多个模型，不重复生成疑
   
   risk_model_create(
     modelName = "鸾尾花/萼片大1",
-    modelGroup = "鸾尾花/萼片大",
+    modelGroup = "鸾尾花",
     dataset = "iris",
     riskTip = "够大",
     level = "L",
@@ -228,7 +228,7 @@ test_that("运行模型：在同一组中使用多个模型，不重复生成疑
     overwrite = TRUE)
   risk_model_create(
     modelName = "鸾尾花/萼片大2",
-    modelGroup = "鸾尾花/萼片大",
+    modelGroup = "鸾尾花",
     dataset = "iris",
     riskTip = "够大",
     level = "L",
@@ -282,5 +282,110 @@ test_that("运行模型：不同组的不同模型，应重复生成疑点数据
 })
 
 # 运行模型：支持是否启用模型
+test_that("运行模型：支持是否启用模型", {
+  d <- iris |> as_tibble()
+  d |> as_tibble() |>
+    mutate(keyId = row_number()) |>
+    unite(title, c("Species", "Sepal.Length"), sep = "-", remove = FALSE) |>
+    ds_write("iris", keyColumns = "keyId", titleColumn = "title")
+  
+  risk_model_create(
+    modelName = "鸾尾花/萼片大1",
+    modelGroup = "鸾尾花",
+    online = FALSE,
+    dataset = "iris",
+    riskTip = "够大",
+    level = "L",
+    filter = list(list(column = "Sepal.Length", op = ">", value = 6)),
+    overwrite = TRUE)
+  risk_model_create(
+    modelName = "鸾尾花/萼片大2",
+    modelGroup = "鸾尾花",
+    online = TRUE,
+    dataset = "iris",
+    riskTip = "够大",
+    level = "L",
+    filter = list(list(column = "Sepal.Width", op = ">", value = 3)),
+    overwrite = TRUE)
+  risk_model_run(modelName = "鸾尾花/萼片大1", batchNumber = 1)
+  risk_model_run(modelName = "鸾尾花/萼片大2", batchNumber = 1)
+  risk_data_read("疑点数据") |>
+    filter(batchNumber == 1) |>
+    nrow() |>
+    testthat::expect_equal(
+      d |> filter(Sepal.Width > 3) |> nrow())
+  
+  fs::dir_delete(get_path("RISKMODEL"))
+  fs::dir_delete(get_path("CACHE"))
+})
 
-# 停用模型：清理已经生成的疑点数据
+test_that("运行模型：设置疑点数据状态到__TODO__", {
+  d <- iris |> as_tibble()
+  d |> as_tibble() |>
+    mutate(keyId = row_number()) |>
+    unite(title, c("Species", "Sepal.Length"), sep = "-", remove = FALSE) |>
+    ds_write("iris", keyColumns = "keyId", titleColumn = "title")
+  
+  risk_model_create(
+    modelName = "鸾尾花/萼片大",
+    dataset = "iris",
+    riskTip = "够大",
+    level = "L",
+    filter = list(
+      list(column = "Sepal.Length", op = ">", value = 6),
+      list(column = "Sepal.Width", op = ">", value = 3)),
+    overwrite = TRUE)
+  risk_model_run(modelName = "鸾尾花/萼片大", batchNumber = 1)
+  risk_data_set("51", "鸾尾花", flag = "__TODO__")
+  (risk_data_read("疑点数据") |> filter(dataId == "51") |> collect())$flag |>
+    testthat::expect_equal("__TODO__")
+
+  fs::dir_delete(get_path("RISKMODEL"))
+  fs::dir_delete(get_path("CACHE"))
+})
+
+test_that("停用模型：清理已经生成的疑点数据", {
+  d <- iris |> as_tibble()
+  d |> as_tibble() |>
+    mutate(keyId = row_number()) |>
+    unite(title, c("Species", "Sepal.Length"), sep = "-", remove = FALSE) |>
+    ds_write("iris", keyColumns = "keyId", titleColumn = "title")
+  
+  risk_model_create(
+    modelName = "鸾尾花/萼片大1",
+    modelGroup = "鸾尾花",
+    online = TRUE,
+    dataset = "iris",
+    riskTip = "够大",
+    level = "L",
+    filter = list(list(column = "Sepal.Length", op = ">", value = 6)),
+    overwrite = TRUE)
+  risk_model_create(
+    modelName = "鸾尾花/萼片大2",
+    modelGroup = "鸾尾花",
+    online = TRUE,
+    dataset = "iris",
+    riskTip = "够大",
+    level = "L",
+    filter = list(list(column = "Sepal.Width", op = ">", value = 3)),
+    overwrite = TRUE)
+  risk_model_run(modelName = "鸾尾花/萼片大1", batchNumber = 1)
+  risk_model_run(modelName = "鸾尾花/萼片大2", batchNumber = 1)
+  risk_data_set(dataId = "51", modelGroup = "鸾尾花", flag = "__TODO__")
+  risk_data_clear(modelName = "鸾尾花/萼片大1", modelGroup = "鸾尾花")
+  risk_data_read("疑点数据") |>
+    filter(modelName == "鸾尾花/萼片大1") |>
+    nrow() |>
+    testthat::expect_equal(1)
+
+  risk_data_set(dataId = "51", modelGroup = "鸾尾花", flag = "__NEW__")
+  risk_data_clear(modelName = "鸾尾花/萼片大1", modelGroup = "鸾尾花")
+  risk_data_read("疑点数据") |>
+    filter(modelName == "鸾尾花/萼片大1") |>
+    nrow() |>
+    testthat::expect_equal(0)
+  
+  fs::dir_delete(get_path("RISKMODEL"))
+  fs::dir_delete(get_path("CACHE"))
+})
+
