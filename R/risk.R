@@ -142,9 +142,14 @@ risk_model_run <- function(
       column <- item$filter[[j]]$column
       op <- item$filter[[j]]$op
       value <- item$filter[[j]]$value
-      if(op %in% c(">", "<", ">=", "<=", "==", "!=", "%in%", "%nin%")) {
+      if(op %in% c(">", "<", ">=", "<=", "==", "!=", "%in%")) {
         d <<- d |>
           filter(do.call(!!sym(op), args = list(!!sym(column), unlist(value)))) |>
+          collect()
+      } else if(op %in% c("%nin%")) {
+        ## 将 %nin% 转换为可以惰性执行的 %in%
+        d <<- d |>
+          filter(!do.call("%in%", args = list(!!sym(column), unlist(value)))) |>
           collect()
       } else if(op %in% c("%regex%", "%not-regex%")) {
         ## 正则表达式需要不能惰性执行，需要提前collect数据

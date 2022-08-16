@@ -75,10 +75,9 @@ test_that("运行模型：支持一元操作过滤条件", {
     filter = list(
       list(column = "Species", op = "==", value = "setosa")),
     overwrite = TRUE)
-  batch1 <- 1
-  risk_model_run(modelName = "鸾尾花/setosa", batchNumber = batch1)
+  risk_model_run(modelName = "鸾尾花/setosa", batchNumber = 1)
   risk_data_read("疑点数据") |> 
-    filter(batchNumber == batch1) |> nrow() |>
+    filter(batchNumber == 1) |> nrow() |>
     testthat::expect_equal(
       d |> filter(Species == "setosa") |> nrow())
 
@@ -94,32 +93,44 @@ test_that("运行模型：文本多选、正则表达式", {
     ds_write("iris", keyColumns = "keyId", titleColumn = "title")
   
   risk_model_create(
-    modelName = "鸾尾花/setosa_virginica",
+    modelName = "鸾尾花1",
     dataset = "iris",
     riskTip = "setosa和virginica",
     level = "L",
     filter = list(
       list(column = "Species", op = "%in%", value = c("setosa", "virginica"))),
     overwrite = TRUE)
-  batch2 <- 2
-  risk_model_run(modelName = "鸾尾花/setosa_virginica", batchNumber = batch2)
+  risk_model_run(modelName = "鸾尾花1", batchNumber = 1)
   risk_data_read("疑点数据") |> 
-    filter(batchNumber == batch2) |> nrow() |>
+    filter(batchNumber == 1) |> nrow() |>
     testthat::expect_equal(
       d |> filter(Species %in% c("setosa", "virginica") ) |> nrow())
-  
+
   risk_model_create(
-    modelName = "鸾尾花/setosa_virginica",
+    modelName = "鸾尾花2",
     dataset = "iris",
     riskTip = "setosa和virginica",
     level = "L",
     filter = list(
-      list(column = "Species", op = "%regex%", value = "$a")),
+      list(column = "Species", op = "%nin%", value = c("setosa", "virginica"))),
     overwrite = TRUE)
-  batch2 <- 2
-  risk_model_run(modelName = "鸾尾花/setosa_virginica", batchNumber = batch2)
+  risk_model_run(modelName = "鸾尾花2", batchNumber = 2)
   risk_data_read("疑点数据") |> 
-    filter(batchNumber == batch2) |> nrow() |>
+    filter(batchNumber == 2) |> nrow() |>
+    testthat::expect_equal(
+      d |> filter(Species %nin% c("setosa", "virginica") ) |> nrow())
+  
+  risk_model_create(
+    modelName = "鸾尾花3",
+    dataset = "iris",
+    riskTip = "setosa和virginica",
+    level = "L",
+    filter = list(
+      list(column = "Species", op = "%regex%", value = "a$")),
+    overwrite = TRUE)
+  risk_model_run(modelName = "鸾尾花3", batchNumber = 3)
+  risk_data_read("疑点数据") |> 
+    filter(batchNumber == 3) |> nrow() |>
     testthat::expect_equal(
       d |> filter(Species %in% c("setosa", "virginica") ) |> nrow())
   
@@ -144,10 +155,9 @@ test_that("运行模型：支持多重组合过滤条件", {
       list(column = "Sepal.Length", op = ">", value = 6),
       list(column = "Sepal.Width", op = ">", value = 3)),
     overwrite = TRUE)
-  batch <- lubridate::now() |> as.integer()
-  risk_model_run(modelName = "鸾尾花/萼片大", batchNumber = batch)
+  risk_model_run(modelName = "鸾尾花/萼片大", batchNumber = 1)
   risk_data_read("疑点数据") |>
-    filter(batchNumber == batch) |>
+    filter(batchNumber == 1) |>
     nrow() |>
     testthat::expect_equal(
       d |> filter(Sepal.Length > 6 & Sepal.Width > 3) |> nrow())
