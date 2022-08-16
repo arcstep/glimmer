@@ -11,7 +11,8 @@ ds_write(
   partColumns = c(),
   keyColumns = c(),
   titleColumn = c(),
-  desc = "-"
+  desc = "-",
+  mode = "update"
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ ds_write(
 \item{titleColumn}{标题列，不支持多列}
 
 \item{desc}{对数据集的额外描述}
+
+\item{append}{默认使用update方式（用新数据覆盖旧数据），若使用append模式则不会覆盖旧数据}
 }
 \description{
 更新受影响的分区

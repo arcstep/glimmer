@@ -6,6 +6,7 @@
 #' @param keyColumns 关键列，支持多列
 #' @param titleColumn 标题列，不支持多列
 #' @param desc 对数据集的额外描述
+#' @param append 默认使用update方式（用新数据覆盖旧数据），若使用append模式则不会覆盖旧数据
 #' @description 更新受影响的分区
 #' @family dataset function
 #' @details
@@ -14,7 +15,7 @@
 #' 如果不设置关键列，则为追加模式；否则按关键列替换
 #' 
 #' @export
-ds_write <- function(d, dsName, topic = "CACHE", partColumns = c(), keyColumns = c(), titleColumn = c(), desc = "-") {
+ds_write <- function(d, dsName, topic = "CACHE", partColumns = c(), keyColumns = c(), titleColumn = c(), desc = "-", mode = "update") {
   ## 默认从CACHE任务目录读写数据集
   path <- get_path(topic, dsName)
   
@@ -43,27 +44,31 @@ ds_write <- function(d, dsName, topic = "CACHE", partColumns = c(), keyColumns =
     ## 找出受影响的分区文件（如果没有分区就提取整个数据集）
     ## 注意：要找出的是分区文件，而不是数据
     if(rlang::is_empty(partColumns)) {
-      affected_data <- arrow::open_dataset(path, format = "parquet") |>
-        collect()
+      affected_data <- arrow::open_dataset(path, format = "parquet") |> collect()
     } else {
-      if(rlang::is_empty(keyColumns)) {
-        ## 如果没有指定关键列，就仅按分区列去重
-        affected_data <- arrow::open_dataset(path, format = "parquet") |>
-          semi_join(d, by = partColumns) |>
-          collect()
-      } else {
-        ## 如果有指定关键列，就按分区列和关键列去重
-        affected_data <- arrow::open_dataset(path, format = "parquet") |>
-          semi_join(d, by = partColumns) |>
-          anti_join(d, by = keyColumns) |>
-          collect()
-      }
+      affected_data <- arrow::open_dataset(path, format = "parquet") |>
+        semi_join(d, by = partColumns) |> collect()
     }
   }
   
   ## 当写入数据到磁盘时
   if(nrow(d) > 0) {
-    to_write <- affected_data |> rbind(d)
+    ## 没有设置关键列，直接追加到旧数据分区文件中
+    if(rlang::is_empty(keyColumns)) {
+      to_write <- affected_data |> rbind(d)
+    } else {
+      if(mode == "append") {
+        ## 追加模式，按关键列剔除新数据
+        to_write <- affected_data |> rbind(d |> anti_join(affected_data, by = keyColumns))
+      } else {
+        ## 更新模式，按关键列剔除旧数据
+        if(rlang::is_empty(affected_data)) {
+          to_write <- d
+        } else {
+          to_write <- (affected_data |> anti_join(d, by = keyColumns)) |> rbind(d)
+        }
+      }
+    }
     beginTimestamp <- lubridate::now(tz = "Asia/Shanghai")
     # Sys.sleep(1)
     ## 写入分区

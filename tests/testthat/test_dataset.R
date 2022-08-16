@@ -2,11 +2,12 @@ library(dplyr)
 library(tibble)
 
 set_topic("STATE", "/tmp/glimmer/STATE")
+set_topic("CACHE", "/tmp/glimmer/CACHE")
+
 if(fs::dir_exists("/tmp/glimmer/STATE")) {
   fs::dir_delete(get_path("STATE"))
 }
 
-set_topic("CACHE", "/tmp/glimmer/CACHE")
 if(fs::dir_exists("/tmp/glimmer/CACHE")) {
   fs::dir_delete(get_path("CACHE"))
 }
@@ -18,27 +19,46 @@ test_that("写入一个简单的文件", {
     glimmer::ds_write("车数据")
   ds_read("车数据") |> nrow() |>
     testthat::expect_equal(nrow(mtcars))
+  
+  fs::dir_delete(get_path("CACHE"))
 })
 
-test_that("按分区写入文件", {
-  ds_remove_path("车数据")
-  mtcars |> as_tibble() |>
-    mutate(cyl = as.integer(cyl)) |>
-    glimmer::ds_write("车数据", partColumns = c("cyl"))
-  ds_read("车数据") |> nrow() |>
-    expect_equal(nrow(mtcars))
+test_that("按分区写入文件：无关键列", {
+  ds_remove_path("dd")
+  d1 <- tibble(n = 1:3, p = c("a", "a", "b"))
+  d2 <- tibble(n = 2:4, p = c("a", "b", "b"))
+  d1 |> glimmer::ds_write("dd", partColumns = c("p"))
+  ds_read("dd") |> nrow() |> testthat::expect_equal(nrow(d1))
+  d2 |> glimmer::ds_write("dd", partColumns = c("p"))
+  ds_read("dd") |> nrow() |> testthat::expect_equal(6)
+  
+  fs::dir_delete(get_path("CACHE"))
 })
 
-test_that("更新分区文件", {
-  ds_remove_path("车数据")
-  mtcars |> as_tibble() |>
-    mutate(cyl = as.integer(cyl)) |>
-    glimmer::ds_write("车数据", partColumns = c("cyl"))
-  mtcars |> as_tibble() |>
-    mutate(cyl = as.integer(1000)) |>
-    glimmer::ds_write("车数据", partColumns = c("cyl"))
-  (ds_read("车数据") |> collect())$cyl[[1]] |>
-    expect_equal(1000)
+test_that("按分区写入文件：默认更新旧数据", {
+  ds_remove_path("dd")
+  d1 <- tibble(n = 1:3, p = c("a", "a", "b"), x = 11:13)
+  d2 <- tibble(n = 2:4, p = c("a", "b", "b"), x = 21:23)
+  d1 |> glimmer::ds_write("dd", partColumns = c("p"), keyColumns = c("n"))
+  ds_read("dd") |> nrow() |> testthat::expect_equal(nrow(d1))
+  d2 |> glimmer::ds_write("dd", partColumns = c("p"), keyColumns = c("n"))
+  ds_read("dd") |> nrow() |> testthat::expect_equal(4)
+  (ds_read("dd") |> collect() |> arrange(x))$x |> testthat::expect_equal(c(11, 21:23))
+  
+  fs::dir_delete(get_path("CACHE"))
+})
+
+test_that("按分区写入文件：设置为追加模式（不更新旧数据）", {
+  ds_remove_path("dd")
+  d1 <- tibble(n = 1:3, p = c("a", "a", "b"), x = 11:13)
+  d2 <- tibble(n = 2:4, p = c("a", "b", "b"), x = 21:23)
+  d1 |> glimmer::ds_write("dd", partColumns = c("p"), keyColumns = c("n"))
+  ds_read("dd") |> nrow() |> testthat::expect_equal(nrow(d1))
+  d2 |> glimmer::ds_write("dd", partColumns = c("p"), keyColumns = c("n"), mode = "append")
+  ds_read("dd") |> nrow() |> testthat::expect_equal(4)
+  (ds_read("dd") |> collect() |> arrange(x))$x |> testthat::expect_equal(c(11:13, 23))
+  
+  fs::dir_delete(get_path("CACHE"))
 })
 
 test_that("数据集准备异常时尝试写入", {
@@ -75,6 +95,8 @@ test_that("更新部分文件分区", {
     glimmer::ds_write("车数据", partColumns = c("cyl", "am"))
   part3 <- (fs::file_info(get_path("CACHE", "车数据", "cyl=6/am=1/part-0.parquet")))$modification_time
   testthat::expect_gt(part3, part1)
+  
+  fs::dir_delete(get_path("CACHE"))
 })
 
 test_that("当关键列所在分区被修改", {
@@ -107,6 +129,7 @@ test_that("当关键列所在分区被修改", {
   part4 <- (fs::file_info(get_path("CACHE", "车数据", "cyl=6/am=1/part-0.parquet")))$modification_time
   testthat::expect_gt(part4, part1)
   
+  fs::dir_delete(get_path("CACHE"))
 })
 
 test_that("内存中对数据去重", {
@@ -150,6 +173,8 @@ test_that("写入磁盘时对数据去重", {
   all |> filter(id %in% 2:4) |>
     glimmer::ds_write("车数据", partColumns = c("cyl", "am"), keyColumns = "id")
   glimmer::ds_read("车数据") |> nrow() |> testthat::expect_equal(4)
+  
+  fs::dir_delete(get_path("CACHE"))
 })
 
 test_that("提取读取重写过分区的数据集文件", {
@@ -176,6 +201,8 @@ test_that("提取读取重写过分区的数据集文件", {
     ds_read_affected() |>
     nrow() |>
     testthat::expect_equal(3)
+  
+  fs::dir_delete(get_path("CACHE"))
 })
 
 test_that("提取最近一次重写过分区的数据集文件", {
@@ -201,4 +228,6 @@ test_that("提取最近一次重写过分区的数据集文件", {
   ds_last_affected("车数据") |>
     nrow() |>
     testthat::expect_equal(2)
+  
+  fs::dir_delete(get_path("CACHE"))
 })
