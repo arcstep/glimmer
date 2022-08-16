@@ -49,6 +49,7 @@ test_that("运行模型：要求数据集具有关键列", {
   r <- risk_data_read("疑点数据")
   r |>
     filter(batchNumber == 1) |>
+    collect() |>
     nrow() |>
     testthat::expect_equal(nrow(d))
   c("dataId", "dataTitle", "riskLevel", "value", "riskTip", "runAt",
@@ -59,7 +60,7 @@ test_that("运行模型：要求数据集具有关键列", {
   fs::dir_delete(get_path("CACHE"))
 })
 
-test_that("运行模型：支持一元操作过滤条件，包括数值、时间和文本", {
+test_that("运行模型：支持一元操作过滤条件", {
   d <- iris |> as_tibble()
   d |> as_tibble() |>
     mutate(keyId = row_number()) |>
@@ -74,12 +75,56 @@ test_that("运行模型：支持一元操作过滤条件，包括数值、时间
     filter = list(
       list(column = "Species", op = "==", value = "setosa")),
     overwrite = TRUE)
-  risk_model_run(modelName = "鸾尾花/setosa", batchNumber = 1)
+  batch1 <- 1
+  risk_model_run(modelName = "鸾尾花/setosa", batchNumber = batch1)
   risk_data_read("疑点数据") |> 
-    filter(batchNumber == 1) |>
-    collect() |>
-    nrow() |>
-    testthat::expect_equal(50)
+    filter(batchNumber == batch1) |> nrow() |>
+    testthat::expect_equal(
+      d |> filter(Species == "setosa") |> nrow())
+
+  fs::dir_delete(get_path("RISKMODEL"))
+  fs::dir_delete(get_path("CACHE"))
+})
+
+test_that("运行模型：文本多选、正则表达式", {
+  d <- iris |> as_tibble()
+  d |> as_tibble() |>
+    mutate(keyId = row_number()) |>
+    unite(title, c("Species", "Sepal.Length"), sep = "-", remove = FALSE) |>
+    ds_write("iris", keyColumns = "keyId", titleColumn = "title")
+  
+  risk_model_create(
+    modelName = "鸾尾花/setosa_virginica",
+    dataset = "iris",
+    riskTip = "setosa和virginica",
+    level = "L",
+    filter = list(
+      list(column = "Species", op = "%in%", value = c("setosa", "virginica"))),
+    overwrite = TRUE)
+  batch2 <- 2
+  risk_model_run(modelName = "鸾尾花/setosa_virginica", batchNumber = batch2)
+  risk_data_read("疑点数据") |> 
+    filter(batchNumber == batch2) |> nrow() |>
+    testthat::expect_equal(
+      d |> filter(Species %in% c("setosa", "virginica") ) |> nrow())
+  
+  risk_model_create(
+    modelName = "鸾尾花/setosa_virginica",
+    dataset = "iris",
+    riskTip = "setosa和virginica",
+    level = "L",
+    filter = list(
+      list(column = "Species", op = "%regex%", value = "$a")),
+    overwrite = TRUE)
+  batch2 <- 2
+  risk_model_run(modelName = "鸾尾花/setosa_virginica", batchNumber = batch2)
+  risk_data_read("疑点数据") |> 
+    filter(batchNumber == batch2) |> nrow() |>
+    testthat::expect_equal(
+      d |> filter(Species %in% c("setosa", "virginica") ) |> nrow())
+  
+  fs::dir_delete(get_path("RISKMODEL"))
+  fs::dir_delete(get_path("CACHE"))
 })
 
 # 运行模型：支持多重组合过滤条件
@@ -99,9 +144,16 @@ test_that("运行模型：支持多重组合过滤条件", {
       list(column = "Sepal.Length", op = ">", value = 6),
       list(column = "Sepal.Width", op = ">", value = 3)),
     overwrite = TRUE)
-  risk_model_run(modelName = "鸾尾花/萼片大", batchNumber = 1)
-  r <- risk_data_read("疑点数据")
+  batch <- lubridate::now() |> as.integer()
+  risk_model_run(modelName = "鸾尾花/萼片大", batchNumber = batch)
+  risk_data_read("疑点数据") |>
+    filter(batchNumber == batch) |>
+    nrow() |>
+    testthat::expect_equal(
+      d |> filter(Sepal.Length > 6 & Sepal.Width > 3) |> nrow())
   
+  fs::dir_delete(get_path("RISKMODEL"))
+  fs::dir_delete(get_path("CACHE"))
 })
 
 # 运行模型：支持二元操作过滤条件，包括数值、时间和文本

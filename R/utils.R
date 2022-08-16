@@ -5,6 +5,15 @@
   }, error = function(e) defaultValue)
 }
 
+## %regex%正则表达式
+`%regex%` <- function(a, b) {
+  stringr::str_detect(a, b)
+}
+
+`%not-regex%` <- function(a, b) {
+  stringr::str_detect(a, b, negate = TRUE)
+}
+
 ## %in%取反
 `%nin%` <- Negate(`%in%`)
 
