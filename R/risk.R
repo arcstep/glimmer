@@ -1,7 +1,16 @@
 
 #' @title 初始化风险模型
+#' @description 按照指定列的阈值条件过滤风险数据
+#' @details 
+#' 1、风险模型应以模型名为关键列，模型名中可携带版本号
+#' 2、已生成数据的过期风险模型不应直接删除，而应注意停用，停用时应清理过期数据
+#' 3、要支持不同级别的风险数据，应设置多个风险模型，但可设置为同一模型组
+#' 4、同一个风险模型的多个分支也可以设置为同一组
+#' 
 #' @param modelName 模型名称
 #' @param dataset 筛查目标数据集（该数据集必须存在yml配置文件，且设置了关键列）
+#' @param riskTip 风险提示说明
+#' @param level 风险级别，L为低风险，M为中风险，H为高风险
 #' @param filter 筛查条件
 #' @param modelGroup 模型组
 #' @param modelDesc 模型描述
@@ -14,12 +23,12 @@
 risk_model_create <- function(
     modelName,
     dataset,
+    riskTip = "-",
+    level = "L",
     filter = list(list(
       "column" = "col_name1",
       "op" = ">",
-      "value" = 0:1,
-      "riskTip" = "-",
-      "level" = 1)),
+      "value" = 0:1)),
     modelGroup = modelName,
     modelDesc = "-",
     author = "-",
@@ -41,6 +50,8 @@ risk_model_create <- function(
     yml <- list(
       "modelName" = modelName,
       "dataset" = dataset,
+      "riskTip" = riskTip,
+      "level" = level,
       "filter" = filter,
       "modelGroup" = modelGroup,
       "modelDesc" = modelDesc,
@@ -124,26 +135,17 @@ risk_model_run <- function(
   
   keyColumns <- yml$keyColumns |> stringr::str_split(",")
   
-  d <- tibble()
-  d_fact <- item$dataset |> ds_read(topic = targetTopic) |>
-    select(!!!syms(keyColumns), !!!syms(yml$titleColumn))
+  d <- item$dataset |> ds_read(topic = targetTopic)
   if(length(item$filter) > 0) {
     seq(1:length(item$filter)) |> purrr::walk(function(j) {
       message("Risk Model Runing: modelName")
       column <- item$filter[[j]]$column
       op <- item$filter[[j]]$op
       value <- item$filter[[j]]$value
-      level <- item$filter[[j]]$level
-      tip <- item$filter[[j]]$riskTip
       if(op %in% c(">", "<", ">=", "<=", "==", "!=")) {
-        d <<- rbind(
-          d,
-          d_fact |>
-            filter(do.call(!!sym(op), args = list(!!sym(column), value[[1]]))) |>
-            collect() |>
-            mutate("@level" = level, "@riskTip" = tip) |>
-            unite("@value", !!!syms(column), sep = "--", remove = FALSE)
-          )
+        d <<- d |>
+          filter(do.call(!!sym(op), args = list(!!sym(column), value[[1]]))) |>
+          collect()
       } else {
         stop("Risk Model ", item$modelName, "Unknown OP", op)
       }
@@ -151,18 +153,19 @@ risk_model_run <- function(
     
     if(!veryfy && nrow(d) > 0) {
       ## 执行模型并生成疑点数据
+      columns <- item$filte |> lapply(function(item) item$column) |> unlist()
       d |>
-        unite("@dataId", !!!syms(keyColumns), sep = "--") |>
-        unite("@dataTitle", !!!syms(yml$titleColumn), sep = "--") |>
-        select(`@dataId`, `@dataTitle`, `@level`, `@value`, `@riskTip`) |>
+        unite("@dataId", !!!syms(keyColumns), sep = "--", remove = FALSE) |>
+        unite("@dataTitle", !!!syms(yml$titleColumn), sep = "--", remove = FALSE) |>
+        unite("@value", !!!syms(columns), sep = ",", remove = FALSE) |>
+        select(`@dataId`, `@dataTitle`, `@value`) |>
         rename(
           dataId = `@dataId`,
           dataTitle = `@dataTitle`,
-          riskLevel =  `@level`,
-          riskTip = `@riskTip`,
           value = `@value`) |>
         mutate(
-          riskLevel =  as.integer(riskLevel),
+          riskLevel =  item$level,
+          riskTip = item$riskTip,
           modelName = modelName,
           batchNumber = batchNumber,
           runAt = lubridate::now(tz = "Asia/Shanghai"),

@@ -7,8 +7,9 @@
 risk_model_create(
   modelName,
   dataset,
-  filter = list(list(column = "col_name1", op = ">", value = 0:1, riskTip = "-", level
-    = 1)),
+  riskTip = "-",
+  level = "L",
+  filter = list(list(column = "col_name1", op = ">", value = 0:1)),
   modelGroup = modelName,
   modelDesc = "-",
   author = "-",
@@ -21,6 +22,10 @@ risk_model_create(
 \item{modelName}{模型名称}
 
 \item{dataset}{筛查目标数据集（该数据集必须存在yml配置文件，且设置了关键列）}
+
+\item{riskTip}{风险提示说明}
+
+\item{level}{风险级别，L为低风险，M为中风险，H为高风险}
 
 \item{filter}{筛查条件}
 
@@ -37,7 +42,13 @@ risk_model_create(
 \item{topic}{风险模型的主题域}
 }
 \description{
-初始化风险模型
+按照指定列的阈值条件过滤风险数据
+}
+\details{
+1、风险模型应以模型名为关键列，模型名中可携带版本号
+2、已生成数据的过期风险模型不应直接删除，而应注意停用，停用时应清理过期数据
+3、要支持不同级别的风险数据，应设置多个风险模型，但可设置为同一模型组
+4、同一个风险模型的多个分支也可以设置为同一组
 }
 \seealso{
 Other risk function: 
