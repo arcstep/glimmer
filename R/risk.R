@@ -160,7 +160,7 @@ risk_model_run <- function(
         d <<- d |>
           filter(do.call(
             !!sym(myop),
-            args = list(!!sym(column), unlist(value) |> lubridate::as_date(tz = "Asia/Shanghai")))) |>
+            args = list(!!sym(column), unlist(value) |> lubridate::as_date()))) |>
           collect()
       } else if(op %in% c("%nin%")) {
         ## 将 %nin% 转换为可以惰性执行的 %in%
@@ -202,7 +202,7 @@ risk_model_run <- function(
           dataset = item$dataset,
           modelGroup = item$modelGroup) |>
         
-        ds_write(dsName = dsName, topic = targetTopic)
+        ds_write(dsName = dsName, topic = targetTopic, keyColumns = c("modelGroup", "dataId"), mode = "append")
     } else {
       ## 启用验证模式
       message("Risk Model ", item$modelName, " OK !!")

@@ -57,18 +57,19 @@ ds_write <- function(d, dsName, topic = "CACHE", partColumns = c(), keyColumns =
     if(rlang::is_empty(keyColumns)) {
       to_write <- affected_data |> rbind(d)
     } else {
-      if(mode == "append") {
-        ## 追加模式，按关键列剔除新数据
-        to_write <- affected_data |> rbind(d |> anti_join(affected_data, by = keyColumns))
+      if(rlang::is_empty(affected_data)) {
+        to_write <- d
       } else {
-        ## 更新模式，按关键列剔除旧数据
-        if(rlang::is_empty(affected_data)) {
-          to_write <- d
+        if(mode == "append") {
+          ## 追加模式，按关键列剔除新数据
+          to_write <- affected_data |> rbind(d |> anti_join(affected_data, by = keyColumns))
         } else {
+          ## 更新模式，按关键列剔除旧数据
           to_write <- (affected_data |> anti_join(d, by = keyColumns)) |> rbind(d)
         }
       }
     }
+
     beginTimestamp <- lubridate::now(tz = "Asia/Shanghai")
     # Sys.sleep(1)
     ## 写入分区
