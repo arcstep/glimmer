@@ -91,7 +91,7 @@ batch_tasks <- function(importFolders, taskTopic, taskFolder, batchNum) {
     set_topic("__IMPORTING_FOLDER__", item)
     message("SCAN IMPORT FOLDER：", item)
     task_run(taskTopic, taskFolder, batchNum)
-    set_topic("__IMPORTING_FOLDER__", NULL)
+    set_topic("__IMPORTING_FOLDER__", "-")
     state_write("__IMPORTED_FOLDER__", tibble(
       "batchNum" = batchNum,
       "importFolder" = item,
