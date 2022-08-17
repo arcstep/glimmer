@@ -4,13 +4,11 @@
 
 ## 一、功能特性
 
--   支持一套成熟的 **R** 数据处理文件夹约定：取数任务、加工脚本、结果输出
--   支持一套任务流管理约定：批量导入、增量导入、针对数据集处理
+-   支持一套成熟的 **R** 数据处理文件夹约定：导入素材、加工脚本、风险模型、数据集
+-   支持一套任务流管理约定：批量导入、增量导入、数据加工、疑点筛查
 -   使用 **Apache Parquet** 作为数据集的存储格式
--   数据集的磁盘读写和内存处理无序列化过程，非常高效
--   读取数据集支持列存储、文件分区和行组优化
--   写入数据集时支持增量写入，且仅保存修改过的分区文件
--   可识别最近修改过的数据集分区，方便做增量处理
+-   读取数据集支持列存储、文件分区和行组优化，磁盘读写和内存处理无序列化过程
+-   支持增量补写数据集，支持增量识别工作流
 
 [Apache Arrow](https://arrow.apache.org/) 库内置了[Apache Parquet存储格式](https://github.com/apache/parquet-format) ，并且包含了很多种语言的实现，包括 R语言的[arrow](https://arrow.apache.org/docs/r/)包。
 
@@ -58,7 +56,7 @@ set_topic("CACHE", "~/glimmer/CACHE")
 脚本内容如下：
 
 ```{r}
-mtcars |> as_tibble() |> write_dataset("this_is_my_dataset")
+mtcars |> as_tibble() |> ds_write("this_is_my_dataset")
 ```
 
 ### 2、执行任务（结果保存在 CACHE）
@@ -66,10 +64,10 @@ mtcars |> as_tibble() |> write_dataset("this_is_my_dataset")
 执行如下脚本就可以导入上面的数据，并生成新的数据集。
 
 ```{r}
-run_task_scripts(taskScript = "TASK/BUILD")
+run_task(taskTopic = "TASK/BUILD")
 ```
 
-可以使用`read_dataset("this_is_my_dataset") |> collect()`查看刚刚添加过的数据集。
+可以使用`ds_read("this_is_my_dataset") |> collect()`查看刚刚添加过的数据集。
 
 ## 四、使用指南：导入任务
 
@@ -128,60 +126,40 @@ a, b,
 
 我们同样准备一个最简单的处理脚本，导入数据，并为数据集增加一列。
 
-脚本应当保存在 `~/glimmer/TASK` 中。
+脚本应当保存在 `~/glimmer/TASK/IMPORT` 中。
 
 脚本内容如下：
 
 ```{r}
-dsName <- "mycsv"
-path <- get_path("IMPORT", get_topic("__DOING_TASK_FOLDER__"), dsName)
-if(path |> fs::dir_exists()) {
-  arrow::open_dataset(path, format = "csv") |>
+ds_import("mycsv", function(path) {
+  path |> arrow::open_dataset(format = "csv") |>
     collect() |>
     mutate(c = a + b) |>
-    write_dataset(dsName)
-}
+    write_dataset("my_dataset")
+})
 ```
 
-这一段 **R** 代码似乎有点多，但是一个很好的处理框架。
-
-第1行是针对`mycsv`数据集来处理的，如果你有多个数据集就要在每段代码中清楚地指明。
-
-第2行是一个几乎不修改的框架代码，除非你处理的数据不是来自于 **IMPORT** 这个默认主题。批处理时， `get_topic("__DOING_TASK_FOLDER__")` 就是当前迭代的目标文件夹，本例中的循环只有一次，当然就是taask1；而 `get_path`则是一个很方便的组装文件或文件夹路径的工具函数。
-
-第3行是判断组装后的路径是否存在，如果任务文件夹中存在多种不同的数据集需要导入或加工，就可以精确匹配，跳过自己不用处理的部分。
-
-第4行开始，就是具体的数据处理逻辑。
-
-倒数第2行`write_dataset(dsName)`是将数据集按照原有的名字写入 **CACHE** 主题指定的文件夹。
-
-如果不考虑可以解决大问题的处理框架，上面的代码也可以简化为：
-
-```{r}
-get_path("IMPORT", get_topic("__DOING_TASK_FOLDER__"), "mycsv") |>
-  arrow::open_dataset(format = "csv") |>
-  collect() |>
-  mutate(c = a + b) |>
-  write_dataset(dsName)
-```
+**ds_import** 函数是很有用的帮助函数，上面也举例了便携导入任务的范式代码。
 
 ### 3、执行任务（结果保存在 CACHE）
 
 如果是首次运行，执行如下脚本就可以导入上面的数据，并生成新的数据集。
 
 ```{r}
-taskfolder_todo()
+import_todo()
 ```
 
 这一命令是增量运行的，即使运行多次，之前准备的脚本也只会被运行一次。这是因为，导入文件夹`task1`已经被处理的状态被记录到**STATE**文件夹中了，如果删除其中的那条记录或整个文件夹，则上面的命令就可以重新生效。
 
-增量运行会很有用，但有时候仍然希望重新处理。使用`taskfolder_redo("task1")`可以再次处理`task1`文件夹的数据，即使`task1`已经被处理过。如果要重新处理多个任务文件夹，则可以使用字符串向量作为参数实现批处理，例如：`taskfolder_redo(c("task1", "task2"))`。
+增量运行会很有用，但有时候仍然希望重新处理。使用`import_redo("task1")`可以再次处理`task1`文件夹的数据，即使`task1`已经被处理过。如果要重新处理多个任务文件夹，则可以使用字符串向量作为参数实现批处理，例如：`import_redo(c("task1", "task2"))`。
 
-可以使用`read_dataset("mycsv") |> collect()`查看刚刚添加过的数据集。
+可以使用`ds_read("my_dataset") |> collect()`查看刚刚添加过的数据集。
 
-如果你想看看都曾经保存过哪些数据集，可以使用`all_datasets()`。
+如果你想看看都曾经保存过哪些数据集，可以使用`ds_all()`。
 
-如果没有报错，那么恭喜你：成功部署了一个数据导入任务！
+如果你想查看当前导入的任务文件夹，可以使用`get_importing_folder()`。
+
+恭喜你：成功部署了一个数据导入任务！
 
 ## 五、关键概念
 
