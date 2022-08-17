@@ -45,21 +45,20 @@ set_topic("CACHE", "~/glimmer/CACHE")
 
 （2）执行批处理，然在**CACHE**文件夹中查看处理结果
 
-下面实现一个简单的数据处理例子。
+下面是数据处理示例。
 
 ### 1、准备一个处理脚本（在 TASK/BUILD 中执行）
 
-准备两个最简单的任务处理脚本。
-例如：
+准备两个最简单的任务处理脚本。 例如：
 
 ```{r}
 ## 1.R
-mtcars |> as_tibble() |> ds_write("this_is_my_dataset")
+tibble(a = 1:10) |> ds_write("this_is_my_dataset")
 ```
 
 ```{r}
 ## 2.R
-mtcars |> as_tibble() |> ds_write("this_is_my_dataset_2")
+tibble(a = 1:10) |> ds_write("this_is_my_dataset_2")
 ```
 
 将这个文件命名为`1.R`和`2.R`，都保存在 `~/glimmer/BUILD` 文件夹中。
@@ -84,7 +83,7 @@ task_run(taskTopic = "TASK/BUILD")
 
 （3）执行处理批处理脚本，然后在**CACHE**文件夹中查看处理结果
 
-下面实现一个导入数据的示例。
+下面是导入数据的示例。
 
 ### 1、准备导入文件（从 IMPORT 导入）
 
@@ -137,7 +136,79 @@ import_todo()
 
 使用`ds_read("my_dataset") |> collect()`可以查看刚刚导入的数据集。
 
-## 五、关键概念
+## 五、风险模型
+
+风险模型是筛查数据的一种方式。 这里采用了较为简单的约定来配置风险模型，并使用YAML格式存储在主题文件夹中。
+
+### 1、配置风险模型
+
+典型的风险模型配置，例如
+
+``` yaml
+modelName: 鸾尾花/萼片大
+dataset: iris
+riskTip: 够大
+level: L
+filter:
+- column: Sepal.Length
+  op: '>'
+  value: 6.0
+- column: Sepal.Width
+  op: '>'
+  value: 3.0
+modelGroup: 鸾尾花/萼片大
+modelDesc: '-'
+author: '-'
+online: yes
+createdAt: 2022-08-17 15:06:35
+lastModified: 2022-08-17 15:06:35
+```
+
+其中：
+
+-   modelName 模型名称
+-   dataset 要筛查的目标数据集名称
+-   riskTip 风险提示描述
+-   level 风险级别：L低，M中，H高
+-   filter 筛查条件
+    -   column：条件字段
+    -   比较方法：可以是大于、小于等符号
+    -   value：阈值范围
+-   modelGroup 模型组名称
+-   modelDesc 模型描述（可选）
+-   author 作者（可选）
+-   online 是否启用，如果设置为no，则该模型不会被执行
+-   createdAt 创建时间（自动生成）
+-   lastModified 最后修改时间（自动生成）
+
+约定的规则是这样： 在你设定**RISKMODEL**主题文件夹位置后，主题文件夹之后的路径去除**.yml**，就是你的风险模型名称。例如，你可以将该文件保存在`RISKMODEL/鸾尾花/萼片大.yml`，风险模型名称就是**鸾尾花/萼片大**。
+
+### 2、执行风险模型
+
+可以使用**risk_model_run**函数执行风险模型：
+
+``` r
+risk_model_run(modelName = "鸾尾花/萼片大", batchNumber = 1)
+```
+
+这会将疑点数据补充到疑点数据集中。 该数据集拥有约定好的数据结构。
+
+``` yaml
+dataId: string
+dataTitle: string
+value: string
+riskLevel: string
+riskTip: string
+modelName: string
+batchNumber: double
+runAt: timestamp
+lastModifiedAt: timestamp
+flag: string
+dataset: string
+modelGroup: string
+```
+
+## 六、关键概念
 
 -   主题：根据任务主题约定的文件夹，在执行进程内有效
 
