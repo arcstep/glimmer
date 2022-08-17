@@ -37,7 +37,7 @@ set_topic("CACHE", "~/glimmer/CACHE")
 
 这初看起来啰嗦，但至少清楚明白。 实际上让你有能力灵活地切换处理目标。
 
-## 三、使用指南：加工任务
+## 三、使用指南：批量执行加工任务
 
 使用**glimmer**包的数据处理框架，主要是两个步骤：
 
@@ -49,29 +49,34 @@ set_topic("CACHE", "~/glimmer/CACHE")
 
 ### 1、准备一个处理脚本（在 TASK/BUILD 中执行）
 
-我们准备一个最简单的处理脚本。
-
-脚本应当保存在 `~/glimmer/BUILD` 中。
-
-脚本内容如下：
+准备两个最简单的任务处理脚本。
+例如：
 
 ```{r}
+## 1.R
 mtcars |> as_tibble() |> ds_write("this_is_my_dataset")
 ```
 
+```{r}
+## 2.R
+mtcars |> as_tibble() |> ds_write("this_is_my_dataset_2")
+```
+
+将这个文件命名为`1.R`和`2.R`，都保存在 `~/glimmer/BUILD` 文件夹中。
+
 ### 2、执行任务（结果保存在 CACHE）
 
-执行如下脚本就可以导入上面的数据，并生成新的数据集。
+执行**run_task**函数就可以批量执行上面的脚本。
 
 ```{r}
-run_task(taskTopic = "TASK/BUILD")
+task_run(taskTopic = "TASK/BUILD")
 ```
 
 可以使用`ds_read("this_is_my_dataset") |> collect()`查看刚刚添加过的数据集。
 
 ## 四、使用指南：导入任务
 
-使用**glimmer**包的导入数据处理框架，主要是三个步骤：
+使用**glimmer**包导入数据主要分为三个步骤：
 
 （1）将导入数据保存在**IMPORT**文件夹中
 
@@ -91,36 +96,13 @@ a, b,
 3, 4
 ```
 
-接下来，将其保存在`~/glimmer/IMPORT/task1/mycsv/1.csv`的位置。
+接下来，将其保存在`~/glimmer/IMPORT/import1/mycsv/1.csv`的位置。
 
 请注意，文件名之前有两层文件夹`task1`和`mycsv`。
 
-**glimmer**包通过约定替代接口配置。上面保存导入数据时已经使用了约定：用`task1`表示**导入任务**，用`mycsv`表示要导入的**数据集**名称。
+**glimmer**包通过约定替代接口配置。
 
-面对实际问题时，例如爬虫任务，往往是每天或每小时都有新的任务文件夹需要处理，且每个任务文件夹中也包含多个数据集。 一次任务中，也可能包含几个、几十个甚至几百个要处理的导入数据集。你实际要处理的数据集可能长这样：
-
-```{bash}
-~/glimmer/IMPORT/task1/t1/1.csv
-~/glimmer/IMPORT/task1/t1/2.csv
-~/glimmer/IMPORT/task1/t2/1.csv
-~/glimmer/IMPORT/task1/t2/2.csv
-~/glimmer/IMPORT/task1/...
-~/glimmer/IMPORT/task2/t1/1.csv
-~/glimmer/IMPORT/task2/t1/2.csv
-~/glimmer/IMPORT/task2/t2/1.csv
-~/glimmer/IMPORT/task2/t2/2.csv
-...
-(还有很多)
-...
-~/glimmer/IMPORT/task9/t1/1.csv
-...
-```
-
-回到我们刚才的示例，保存好的导入文件结构应该长这样：
-
-```{bash}
-~/glimmer/IMPORT/task1/mycsv/1.csv
-```
+上面保存导入数据时已经使用了约定：用`import1`表示**导入任务**，用`mycsv`表示要导入的**数据集**名称。
 
 ### 2、准备一个处理脚本（在 TASK/IMPORT 中执行）
 
@@ -139,27 +121,21 @@ ds_import("mycsv", function(path) {
 })
 ```
 
-**ds_import** 函数是很有用的帮助函数，上面也举例了便携导入任务的范式代码。
+**ds_import** 函数是很有用的帮助函数，上面是很好的使用范例。
 
 ### 3、执行任务（结果保存在 CACHE）
 
-如果是首次运行，执行如下脚本就可以导入上面的数据，并生成新的数据集。
+执行使用**import_todo**函数就可以批量执行脚本，并导入前面准备好的数据。
 
 ```{r}
 import_todo()
 ```
 
-这一命令是增量运行的，即使运行多次，之前准备的脚本也只会被运行一次。这是因为，导入文件夹`task1`已经被处理的状态被记录到**STATE**文件夹中了，如果删除其中的那条记录或整个文件夹，则上面的命令就可以重新生效。
+这一命令是增量运行的，即使运行多次，之前准备的脚本也只会被运行一次。
 
-增量运行会很有用，但有时候仍然希望重新处理。使用`import_redo("task1")`可以再次处理`task1`文件夹的数据，即使`task1`已经被处理过。如果要重新处理多个任务文件夹，则可以使用字符串向量作为参数实现批处理，例如：`import_redo(c("task1", "task2"))`。
+使用**import_redo**函数可以再次处理`task1`文件夹的数据，例如`import_redo("task1")`，即使`task1`已经被处理过。
 
-可以使用`ds_read("my_dataset") |> collect()`查看刚刚添加过的数据集。
-
-如果你想看看都曾经保存过哪些数据集，可以使用`ds_all()`。
-
-如果你想查看当前导入的任务文件夹，可以使用`get_importing_folder()`。
-
-恭喜你：成功部署了一个数据导入任务！
+使用`ds_read("my_dataset") |> collect()`可以查看刚刚导入的数据集。
 
 ## 五、关键概念
 
