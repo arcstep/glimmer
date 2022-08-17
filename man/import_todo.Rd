@@ -4,7 +4,7 @@
 \alias{import_todo}
 \title{未曾处理过的任务文件夹}
 \usage{
-import_todo(taskFolder = "IMPORT", taskScript = "TASK/IMPORT")
+import_todo(importTopic = "IMPORT", taskTopic = "TASK/IMPORT")
 }
 \description{
 从状态库中比对，哪些任务尚未处理过，然后自动执行
@@ -24,12 +24,6 @@ import_todo(taskFolder = "IMPORT", taskScript = "TASK/IMPORT")
 
 第二种情况，典型的是风险指标加工，这可能不需要指定任何任务文件夹，
 而仅仅是根据已经更新的数据集，做相对复杂的分析和预测，形成疑点数据
-
-在任务文件夹迭代处理时，每次处理完成就执行：
-set_topic("\strong{DOING_TASK_FOLDER}", item)
-
-具体的任务脚本中，例如导入数据，按如下方法判断是否有数据集可导入：
-get_path("IMPORT", get_topic("\strong{DOING_TASK_FOLDER}"), "{dataset_name}") |> fs::dir_exists()
 }
 \seealso{
 Other task functions: 
@@ -38,7 +32,7 @@ Other task functions:
 \code{\link{get_topic}()},
 \code{\link{import_redo}()},
 \code{\link{set_topic}()},
-\code{\link{task_read}()},
+\code{\link{task_files}()},
 \code{\link{task_run}()}
 }
 \concept{task functions}

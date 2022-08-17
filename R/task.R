@@ -52,63 +52,67 @@ set_topic <- function(topic, path) {
 #' 第二种情况，典型的是风险指标加工，这可能不需要指定任何任务文件夹，
 #' 而仅仅是根据已经更新的数据集，做相对复杂的分析和预测，形成疑点数据
 #' 
-#' 在任务文件夹迭代处理时，每次处理完成就执行：
-#' set_topic("__DOING_TASK_FOLDER__", item)
-#' 
-#' 具体的任务脚本中，例如导入数据，按如下方法判断是否有数据集可导入：
-#' get_path("IMPORT", get_topic("__DOING_TASK_FOLDER__"), "{dataset_name}") |> fs::dir_exists()
 #' @family task functions
 #' @export
-import_todo <- function(taskFolder = "IMPORT", taskScript = "TASK/IMPORT") {
-  tasks <- find_tasks(taskFolder)
-  s <- state_read("__TASK_FOLDER__")
+import_todo <- function(importTopic = "IMPORT", taskTopic = "TASK/IMPORT", taskFolder = "") {
+  batchNum <- lubridate::now() |> as.integer()
+  tasks <- find_import_todo(importTopic)
+  s <- state_read("__IMPORTED_FOLDER__")
   if(!rlang::is_empty(s)) {
-    d <- s |> select(taskFolder) |> collect()
-    tasks[tasks %nin% d$taskFolder] |> batch_tasks(taskFolder, taskScript)
+    d <- s |> select(importFolder) |> collect()
+    tasks[tasks %nin% d$importFolder] |> batch_tasks(taskTopic, taskFolder, batchNum)
   } else {
-    tasks |> batch_tasks(taskFolder, taskScript)
+    tasks |> batch_tasks(taskTopic, taskFolder, batchNum)
   }
 }
 
 #' @title 手工指定要处理的任务文件夹
 #' @family task functions
 #' @export
-import_redo <- function(todo = c(), taskTopic = "IMPORT", taskScript = "TASK/IMPORT") {
-  taskfolders <- find_tasks(taskTopic)
-  taskfolders[taskfolders %in% todo] |>  batch_tasks(taskTopic, taskScript)
+import_redo <- function(todo = c(), importTopic = "IMPORT", taskTopic = "TASK/IMPORT", taskFolder = "") {
+  batchNum <- lubridate::now() |> as.integer()
+  import_folders_todo <- find_import_todo(importTopic)
+  import_folders_todo[import_folders_todo %in% todo] |>  batch_tasks(taskTopic, taskFolder, batchNum)
 }
 
-#
-find_tasks <- function(taskTopic) {
-  path = get_path(taskTopic)
+# 罗列导入主题下所有导入任务文件夹
+# 如果希望划分子文件夹管理导入内容（例如按年、月），可以将子文件夹作为导入主题
+find_import_todo <- function(importTopic) {
+  path = get_path(importTopic)
   fs::dir_ls(path, type = "directory", recurse = FALSE) |>
     sort() |>
     fs::path_file()
 }
 
 # 枚举任务文件夹
-batch_tasks <- function(taskfolders, taskTopic, taskScript) {
-  message(length(taskfolders), " task folders todo.")
-  taskfolders |> purrr::walk(function(item) {
+batch_tasks <- function(importFolders, taskTopic, taskFolder, batchNum) {
+  message(length(importFolders), " task folders todo.")
+  importFolders |> purrr::walk(function(item) {
     set_topic("__DOING_TASK_FOLDER__", item)
-    message("SCAN TASK FOLDER：", item)
-    task_run(taskScript, batch = T)
+    message("SCAN IMPORT FOLDER：", item)
+    task_run(taskTopic, taskFolder, batchNum)
     set_topic("__DOING_TASK_FOLDER__", NULL)
-    state_write("__TASK_FOLDER__", tibble(
-      "taskTopic" = taskTopic,
-      "taskFolder" = item,
+    state_write("__IMPORTED_FOLDER__", tibble(
+      "batchNum" = batchNum,
+      "importFolder" = item,
       "status" = "DONE",
-      "taskScript" = taskScript
+      "taskTopic" = taskTopic,
+      "taskFolder" = taskFolder
     ))
   })
 }
 
 #' @title 执行目标路径下的任务脚本
 #' @description 应当按照脚本顺序执行
+#' @param taskTopic 脚本文件夹主题
+#' @param taskFolder 执行脚本文件的目录
 #' @family task functions
 #' @export
-task_run <- function(taskScript = "TASK/BUILD", batch = F) {
-  task_read(taskScript) |> purrr::pwalk(function(name, path) {
+task_run <- function(
+    taskTopic = "TASK/BUILD",
+    taskFolder = "",
+    batchNum = lubridate::now() |> as.integer()) {
+  task_files(taskTopic, taskFolder) |> purrr::pwalk(function(name, path) {
     message("RUN TASK SCRIPT：", name)
     beginTime <- lubridate::now(tz = "Asia/Shanghai")
     # 执行脚本
@@ -117,16 +121,19 @@ task_run <- function(taskScript = "TASK/BUILD", batch = F) {
     msg <- paste0("TASK USED：", as.character.Date(used))
     message(msg)
     # 记录任务执行结果
-    if(batch) {
+    if("__DOING_TASK_FOLDER__" %in% ls(envir = TASK.ENV)) {
       tf <-  get_topic("__DOING_TASK_FOLDER__")
     } else {
       tf <- "-"
     }
     state_write("__TASK_RUN__",
       tibble(
-        "name" = name,
-        "script" = path,
-        "taskFolder" = tf,
+        "batchNum" = batchNum,
+        "taskTopic" = taskTopic,
+        "taskFolder" = taskFolder,
+        "taskName" = name,
+        "taskScript" = path,
+        "importFolder" = tf,
         "usedTime" = used,
         "info" = msg
       )
@@ -135,25 +142,39 @@ task_run <- function(taskScript = "TASK/BUILD", batch = F) {
 }
 
 #' @title 查看执行计划
-#' @description 按执行顺序罗列需要执行的脚本
-#' @param taskScript 脚本文件夹主题
+#' @description 按执行顺序罗列需要执行的脚本。
+#' @param taskTopic 脚本文件夹主题
+#' @param taskFolder 执行脚本文件的目录
 #' @param glob 要执行的源文件默认以.R结尾
 #' @family task functions
 #' @export
-task_read <- function(taskScript = "TASK/BUILD", glob = "*.R") {
-  fs::dir_ls(get_path(taskScript), recurse = T, glob = glob, type = "file") |>
+task_files <- function(taskTopic = "TASK/BUILD", taskFolder = "", glob = "*.R") {
+  fs::dir_ls(get_path(taskTopic, taskFolder), recurse = T, glob = glob, type = "file") |>
     purrr::map_df(function(item) {
       name <- fs::path_file(item)
       list("name" = name, "path" = item)
-    })
+    }) |>
+    arrange(path)
 }
 
 #' @title 列举所有任务
-#' @param taskScript 脚本文件夹主题
+#' @description 使用根目录、子目录管理脚本，目录名应具有管理约定的作用。
+#' @details 
+#' 任务执行脚本是数据处理工作流的核心管控单元。
+#' 
+#' 任务脚本的目录位置应与业务意义相对照。
+#' 例如，导入和构建应分开，需要独立管理的导入单元应各自分开。
+#' 
+#' 任务执行时，可通过\code{taskScript}参数指定根目录或子目录，配合\code{task_run}函数批量执行。
+#' 
+#' @param taskTopic 脚本文件夹主题
+#' @param taskFolder 执行脚本文件的目录
 #' @param glob 要执行的源文件默认以.R结尾
 #' @export
-task_dir <- function(taskScript = "TASK/BUILD", glob = "*.R") {
-  task_read(taskScript, glob) |>
+task_dir <- function(taskTopic = "TASK/BUILD", taskFolder = "", glob = "*.R") {
+  task_read(taskTopic, taskFolder, glob) |>
     mutate(dir = fs::path_dir(path)) |>
-    count(dir)
+    count(dir) |>
+    mutate(taskName = stringr::str_remove(dir, paste0(get_path(taskScript), "/"))) |>
+    select(taskName, dir, n)
 }

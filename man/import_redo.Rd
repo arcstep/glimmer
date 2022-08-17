@@ -4,7 +4,12 @@
 \alias{import_redo}
 \title{手工指定要处理的任务文件夹}
 \usage{
-import_redo(todo = c(), taskTopic = "IMPORT", taskScript = "TASK/IMPORT")
+import_redo(
+  todo = c(),
+  importTopic = "IMPORT",
+  taskTopic = "TASK/IMPORT",
+  taskFolder = ""
+)
 }
 \description{
 手工指定要处理的任务文件夹
@@ -16,7 +21,7 @@ Other task functions:
 \code{\link{get_topic}()},
 \code{\link{import_todo}()},
 \code{\link{set_topic}()},
-\code{\link{task_read}()},
+\code{\link{task_files}()},
 \code{\link{task_run}()}
 }
 \concept{task functions}

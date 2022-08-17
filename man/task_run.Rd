@@ -4,7 +4,16 @@
 \alias{task_run}
 \title{执行目标路径下的任务脚本}
 \usage{
-task_run(taskScript = "TASK/BUILD", batch = F)
+task_run(
+  taskTopic = "TASK/BUILD",
+  taskFolder = "",
+  batchNum = as.integer(lubridate::now())
+)
+}
+\arguments{
+\item{taskTopic}{脚本文件夹主题}
+
+\item{taskFolder}{执行脚本文件的目录}
 }
 \description{
 应当按照脚本顺序执行
@@ -17,6 +26,6 @@ Other task functions:
 \code{\link{import_redo}()},
 \code{\link{import_todo}()},
 \code{\link{set_topic}()},
-\code{\link{task_read}()}
+\code{\link{task_files}()}
 }
 \concept{task functions}

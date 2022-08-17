@@ -4,13 +4,23 @@
 \alias{task_dir}
 \title{列举所有任务}
 \usage{
-task_dir(taskScript = "TASK/BUILD", glob = "*.R")
+task_dir(taskTopic = "TASK/BUILD", taskFolder = "", glob = "*.R")
 }
 \arguments{
-\item{taskScript}{脚本文件夹主题}
+\item{taskTopic}{脚本文件夹主题}
+
+\item{taskFolder}{执行脚本文件的目录}
 
 \item{glob}{要执行的源文件默认以.R结尾}
 }
 \description{
-列举所有任务
+使用根目录、子目录管理脚本，目录名应具有管理约定的作用。
+}
+\details{
+任务执行脚本是数据处理工作流的核心管控单元。
+
+任务脚本的目录位置应与业务意义相对照。
+例如，导入和构建应分开，需要独立管理的导入单元应各自分开。
+
+任务执行时，可通过\code{taskScript}参数指定根目录或子目录，配合\code{task_run}函数批量执行。
 }

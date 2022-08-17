@@ -21,7 +21,7 @@ Other task functions:
 \code{\link{get_topic}()},
 \code{\link{import_redo}()},
 \code{\link{import_todo}()},
-\code{\link{task_read}()},
+\code{\link{task_files}()},
 \code{\link{task_run}()}
 }
 \concept{task functions}
