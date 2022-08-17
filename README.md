@@ -1,6 +1,6 @@
 # 一个高效的R数据处理框架
 
-实现这个**R**语言工具包，是为了方便管理R数据处理的任务流。
+这个**R**语言工具包，是为了方便管理R数据处理的任务流。
 
 ## 一、功能特性
 
@@ -19,23 +19,22 @@
 先从**github**上安装**glimmer**包：
 
 ```{r}
-devtools::install_github("https://github.com/arcstep/glimmer")
+remotes::install_github("arcstep/glimmer")
 ```
 
 ### 2、使用
 
-引入**glimmer**包后，应当设置如下个文件夹位置。
+使用**glimmer**包之前，应当根据自己的实际情况配置主题文件夹。
 
 ```{r}
 library(glimmer)
 set_topic("STATE", "~/glimmer/STATE")
 set_topic("IMPORT", "~/glimmer/IMPORT")
+set_topic("CACHE", "~/glimmer/CACHE")
 set_topic("TASK/IMPORT", "~/glimmer/TASK/IMPORT")
 set_topic("TASK/BUILD", "~/glimmer/TASK/BUILD")
-set_topic("CACHE", "~/glimmer/CACHE")
+set_topic("RISKMODEL", "~/glimmer/RISKMODEL")
 ```
-
-这初看起来啰嗦，但至少清楚明白。 实际上让你有能力灵活地切换处理目标。
 
 ## 三、使用指南：批量执行加工任务
 
@@ -181,7 +180,7 @@ lastModified: 2022-08-17 15:06:35
 -   createdAt 创建时间（自动生成）
 -   lastModified 最后修改时间（自动生成）
 
-约定的规则是这样： 在你设定**RISKMODEL**主题文件夹位置后，主题文件夹之后的路径去除**.yml**，就是你的风险模型名称。例如，你可以将该文件保存在`RISKMODEL/鸾尾花/萼片大.yml`，风险模型名称就是**鸾尾花/萼片大**。
+约定的规则是这样： 在你设定 **RISKMODEL** 主题文件夹位置后，主题文件夹之后的路径去除**.yml**，就是你的风险模型名称。例如，你可以将该文件保存在`RISKMODEL/鸾尾花/萼片大.yml`，风险模型名称就是**鸾尾花/萼片大**。
 
 ### 2、执行风险模型
 
@@ -191,7 +190,9 @@ lastModified: 2022-08-17 15:06:35
 risk_model_run(modelName = "鸾尾花/萼片大", batchNumber = 1)
 ```
 
-这会将疑点数据补充到疑点数据集中。 该数据集拥有约定好的数据结构。
+这会将疑点数据补充到疑点数据集中。 通过 **risk_data_read** 函数可以查看疑点数据集。
+
+该数据集拥有约定好的数据结构。
 
 ``` yaml
 dataId: string
