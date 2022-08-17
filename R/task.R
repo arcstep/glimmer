@@ -140,10 +140,20 @@ task_run <- function(taskScript = "TASK/BUILD", batch = F) {
 #' @param glob 要执行的源文件默认以.R结尾
 #' @family task functions
 #' @export
-task_read <- function(taskScript, glob = "*.R") {
+task_read <- function(taskScript = "TASK/BUILD", glob = "*.R") {
   fs::dir_ls(get_path(taskScript), recurse = T, glob = glob, type = "file") |>
     purrr::map_df(function(item) {
       name <- fs::path_file(item)
       list("name" = name, "path" = item)
     })
+}
+
+#' @title 列举所有任务
+#' @param taskScript 脚本文件夹主题
+#' @param glob 要执行的源文件默认以.R结尾
+#' @export
+task_dir <- function(taskScript = "TASK/BUILD", glob = "*.R") {
+  task_read(taskScript, glob) |>
+    mutate(dir = fs::path_dir(path)) |>
+    count(dir)
 }
