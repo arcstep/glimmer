@@ -4,7 +4,7 @@
 \alias{task_read}
 \title{查看执行计划}
 \usage{
-task_read(taskScript, glob = "*.R")
+task_read(taskScript = "TASK/BUILD", glob = "*.R")
 }
 \arguments{
 \item{taskScript}{脚本文件夹主题}

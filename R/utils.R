@@ -35,3 +35,17 @@
 `%false%` <- function(a, b) {
   if(!a) b
 }
+
+## 如果文件夹存在就删除
+remove_dir <- function(path) {
+  if(fs::dir_exists(path)) {
+    fs::dir_delete(path)
+  }
+}
+
+## 如果文件夹不存在就创建
+create_dir <- function(path) {
+  if(!fs::dir_exists(path)) {
+    fs::dir_create(path)
+  }
+}

@@ -2,28 +2,17 @@ library(dplyr)
 library(tibble)
 
 set_topic("STATE", "/tmp/glimmer/STATE")
-if(fs::dir_exists("/tmp/glimmer/STATE")) {
-  fs::dir_delete(get_path("STATE"))
-}
-
 set_topic("IMPORT", "/tmp/glimmer/IMPORT")
-if(fs::dir_exists("/tmp/glimmer/IMPORT")) {
-  fs::dir_delete(get_path("IMPORT"))
-}
-
 set_topic("CACHE", "/tmp/glimmer/CACHE")
-if(fs::dir_exists("/tmp/glimmer/CACHE")) {
-  fs::dir_delete(get_path("CACHE"))
-}
-
 set_topic("TASK/BUILD", "/tmp/glimmer/TASK/BUILD")
-if(fs::dir_exists("/tmp/glimmer/TASK/BUILD")) {
-  fs::dir_delete(get_path("TASK/BUILD"))
-}
-
 set_topic("TASK/IMPORT", "/tmp/glimmer/TASK/IMPORT")
-if(fs::dir_exists("/tmp/glimmer/TASK/IMPORT")) {
-  fs::dir_delete(get_path("TASK/IMPORT"))
+
+clear_dir <- function() {
+  get_path("STATE") |> remove_dir()
+  get_path("IMPORT") |> remove_dir()
+  get_path("CACHE") |> remove_dir()
+  get_path("TASK/BUILD") |> remove_dir()
+  get_path("TASK/IMPORT") |> remove_dir()
 }
 
 test_that("设置目标文件夹", {
@@ -46,7 +35,7 @@ test_that("查看目标文件夹下的脚本", {
         "3.R", "/tmp/glimmer/IMPORT/3.R"
       ) |> mutate(path = fs::as_fs_path(path))
     )
-  fs::dir_delete(get_path("IMPORT"))
+  clear_dir()
 })
 
 test_that("执行目标文件夹下的脚本", {
@@ -55,9 +44,8 @@ test_that("执行目标文件夹下的脚本", {
   write("f1 <- 1", get_path("TASK/BUILD", "1.R"))
   write("f3 <- f2 + f1", get_path("TASK/BUILD", "3.R"))
   task_run(taskScript = "TASK/BUILD")
-
   expect_equal(f3, 3)
-  fs::dir_delete(get_path("TASK/BUILD"))
+  clear_dir()
 })
 
 test_that("执行目标文件夹下的脚本，哪怕是多层子目录", {
@@ -68,7 +56,7 @@ test_that("执行目标文件夹下的脚本，哪怕是多层子目录", {
   write("f3 <- f2 + f1", get_path("TASK/BUILD", "2-EE/1.R"))
   task_run(taskScript = "TASK/BUILD")
   expect_equal(f3, 3)
-  fs::dir_delete(get_path("TASK/BUILD"))
+  clear_dir()
 })
 
 #
@@ -95,11 +83,7 @@ test_that("根据导入文件夹，执行导入计划", {
 
   import_todo()
   testthat::expect_equal(nrow(ds_read("车型")), 30)
-
-  fs::dir_delete(get_path("STATE"))
-  fs::dir_delete(get_path("CACHE"))
-  fs::dir_delete(get_path("IMPORT"))
-  fs::dir_delete(get_path("TASK/IMPORT"))
+  clear_dir()
 })
 
 test_that("仅对未处理文件夹执行导入计划", {
@@ -120,11 +104,7 @@ test_that("仅对未处理文件夹执行导入计划", {
   prepare_csv(21:30, taskFolder = "task003", dsName = "车型")
   import_todo(taskScript = "TASK/IMPORT")
   testthat::expect_equal(nrow(ds_read("车型")), 30)
-  
-  fs::dir_delete(get_path("STATE"))
-  fs::dir_delete(get_path("CACHE"))
-  fs::dir_delete(get_path("IMPORT"))
-  fs::dir_delete(get_path("TASK/IMPORT"))
+  clear_dir()
 })
 
 
@@ -135,7 +115,7 @@ test_that("手工指定导入文件夹，执行导入脚本", {
   prepare_csv(7:8, taskFolder = "task001", dsName = "cars")
   prepare_csv(9:10, taskFolder = "task002", dsName = "cars")
 
-  fs::dir_create(get_path("TASK/IMPORT"))
+  create_dir(get_path("TASK/IMPORT"))
   '
   path <- get_path("IMPORT", get_topic("__DOING_TASK_FOLDER__"), "车型")
   if(path |> fs::dir_exists()) {
@@ -153,8 +133,5 @@ test_that("手工指定导入文件夹，执行导入脚本", {
   testthat::expect_equal(nrow(ds_read("车型")), 4)
   testthat::expect_equal(nrow(ds_read("cars")), 2)
   
-  fs::dir_delete(get_path("STATE"))
-  fs::dir_delete(get_path("CACHE"))
-  fs::dir_delete(get_path("IMPORT"))
-  fs::dir_delete(get_path("TASK/IMPORT"))
+  clear_dir()
 })

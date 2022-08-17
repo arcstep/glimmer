@@ -6,14 +6,10 @@ set_topic("RISKMODEL", "/tmp/glimmer/RISKMODEL")
 set_topic("CACHE", "/tmp/glimmer/CACHE")
 set_topic("STATE", "/tmp/glimmer/STATE")
 
-if(fs::dir_exists("/tmp/glimmer/RISKMODEL")) {
-  fs::dir_delete(get_path("RISKMODEL"))
-}
-if(fs::dir_exists("/tmp/glimmer/CACHE")) {
-  fs::dir_delete(get_path("CACHE"))
-}
-if(fs::dir_exists("/tmp/glimmer/STATE")) {
-  fs::dir_delete(get_path("STATE"))
+clear_dir <- function() {
+  get_path("RISKMODEL") |> remove_dir()
+  get_path("CACHE") |> remove_dir()
+  get_path("STATE") |> remove_dir()
 }
 
 test_that("创建模型：支持覆盖", {
@@ -30,6 +26,8 @@ test_that("创建模型：支持覆盖", {
   risk_model_create("问题车辆/耗油车型", "车辆数据") |>
     as.logical() |>
     testthat::expect_warning("Existing")
+  
+  clear_dir()
 })
 
 test_that("运行模型：要求数据集具有关键列", {
@@ -56,8 +54,7 @@ test_that("运行模型：要求数据集具有关键列", {
     "modelName", "batchNumber", "dataset", "modelGroup") %in% names(r) |>
     purrr::walk(function(item) testthat::expect_true(item))
   
-  fs::dir_delete(get_path("RISKMODEL"))
-  fs::dir_delete(get_path("CACHE"))
+  clear_dir()
 })
 
 test_that("运行模型：支持一元操作过滤条件", {
@@ -81,8 +78,7 @@ test_that("运行模型：支持一元操作过滤条件", {
     testthat::expect_equal(
       d |> filter(Species == "setosa") |> nrow())
 
-  fs::dir_delete(get_path("RISKMODEL"))
-  fs::dir_delete(get_path("CACHE"))
+  clear_dir()
 })
 
 
@@ -135,8 +131,7 @@ test_that("运行模型：文本多选、正则表达式", {
     testthat::expect_equal(
       d |> filter(Species %in% c("setosa", "virginica") ) |> nrow())
   
-  fs::dir_delete(get_path("RISKMODEL"))
-  fs::dir_delete(get_path("CACHE"))
+  clear_dir()
 })
 
 test_that("运行模型：时间和日期的逻辑", {
@@ -174,8 +169,7 @@ test_that("运行模型：时间和日期的逻辑", {
     testthat::expect_equal(
       d |> filter(dt >= lubridate::as_date("2020-07-1")) |> nrow())
   
-  fs::dir_delete(get_path("RISKMODEL"))
-  fs::dir_delete(get_path("CACHE"))
+  clear_dir()
 })
 
 # 运行模型：支持多重组合过滤条件
@@ -202,8 +196,7 @@ test_that("运行模型：支持多重组合过滤条件", {
     testthat::expect_equal(
       d |> filter(Sepal.Length > 6 & Sepal.Width > 3) |> nrow())
   
-  fs::dir_delete(get_path("RISKMODEL"))
-  fs::dir_delete(get_path("CACHE"))
+  clear_dir()
 })
 
 # 运行模型：支持二元操作过滤条件，包括数值、时间和文本
@@ -242,8 +235,7 @@ test_that("运行模型：在同一组中使用多个模型，不重复生成疑
     testthat::expect_equal(
       d |> filter(Sepal.Length > 6 | Sepal.Width > 3) |> nrow())
   
-  fs::dir_delete(get_path("RISKMODEL"))
-  fs::dir_delete(get_path("CACHE"))
+  clear_dir()
 })
 
 test_that("运行模型：不同组的不同模型，应重复生成疑点数据", {
@@ -277,8 +269,7 @@ test_that("运行模型：不同组的不同模型，应重复生成疑点数据
     testthat::expect_equal(
       d |> filter(Sepal.Length > 6) |> nrow() + d |> filter(Sepal.Width > 3) |> nrow())
   
-  fs::dir_delete(get_path("RISKMODEL"))
-  fs::dir_delete(get_path("CACHE"))
+  clear_dir()
 })
 
 # 运行模型：支持是否启用模型
@@ -315,8 +306,7 @@ test_that("运行模型：支持是否启用模型", {
     testthat::expect_equal(
       d |> filter(Sepal.Width > 3) |> nrow())
   
-  fs::dir_delete(get_path("RISKMODEL"))
-  fs::dir_delete(get_path("CACHE"))
+  clear_dir()
 })
 
 test_that("运行模型：设置疑点数据状态到__TODO__", {
@@ -340,8 +330,7 @@ test_that("运行模型：设置疑点数据状态到__TODO__", {
   (risk_data_read("疑点数据") |> filter(dataId == "51") |> collect())$flag |>
     testthat::expect_equal("__TODO__")
 
-  fs::dir_delete(get_path("RISKMODEL"))
-  fs::dir_delete(get_path("CACHE"))
+  clear_dir()
 })
 
 test_that("停用模型：清理已经生成的疑点数据", {
@@ -385,7 +374,6 @@ test_that("停用模型：清理已经生成的疑点数据", {
     nrow() |>
     testthat::expect_equal(0)
   
-  fs::dir_delete(get_path("RISKMODEL"))
-  fs::dir_delete(get_path("CACHE"))
+  clear_dir()
 })
 
