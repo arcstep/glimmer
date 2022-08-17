@@ -306,7 +306,7 @@ ds_as_unique <- function(ds, keyColumns) {
 #' @family dataset functions
 #' @export
 ds_import <- function(dsName, fun, topic = "IMPORT") {
-  path <- get_path(topic, get_topic("__DOING_TASK_FOLDER__"), dsName)
+  path <- get_path(topic, get_importing_folder(), dsName)
   if(path |> fs::dir_exists()) {
     fun(path)
   }

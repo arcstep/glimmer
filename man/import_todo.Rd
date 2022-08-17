@@ -4,7 +4,7 @@
 \alias{import_todo}
 \title{未曾处理过的任务文件夹}
 \usage{
-import_todo(importTopic = "IMPORT", taskTopic = "TASK/IMPORT")
+import_todo(importTopic = "IMPORT", taskTopic = "TASK/IMPORT", taskFolder = "")
 }
 \description{
 从状态库中比对，哪些任务尚未处理过，然后自动执行

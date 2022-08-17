@@ -88,10 +88,10 @@ find_import_todo <- function(importTopic) {
 batch_tasks <- function(importFolders, taskTopic, taskFolder, batchNum) {
   message(length(importFolders), " task folders todo.")
   importFolders |> purrr::walk(function(item) {
-    set_topic("__DOING_TASK_FOLDER__", item)
+    set_topic("__IMPORTING_FOLDER__", item)
     message("SCAN IMPORT FOLDER：", item)
     task_run(taskTopic, taskFolder, batchNum)
-    set_topic("__DOING_TASK_FOLDER__", NULL)
+    set_topic("__IMPORTING_FOLDER__", NULL)
     state_write("__IMPORTED_FOLDER__", tibble(
       "batchNum" = batchNum,
       "importFolder" = item,
@@ -121,8 +121,8 @@ task_run <- function(
     msg <- paste0("TASK USED：", as.character.Date(used))
     message(msg)
     # 记录任务执行结果
-    if("__DOING_TASK_FOLDER__" %in% ls(envir = TASK.ENV)) {
-      tf <-  get_topic("__DOING_TASK_FOLDER__")
+    if("__IMPORTING_FOLDER__" %in% ls(envir = TASK.ENV)) {
+      tf <-  get_importing_folder()
     } else {
       tf <- "-"
     }
@@ -177,4 +177,10 @@ task_dir <- function(taskTopic = "TASK/BUILD", taskFolder = "", glob = "*.R") {
     count(dir) |>
     mutate(taskName = stringr::str_remove(dir, paste0(get_path(taskScript), "/"))) |>
     select(taskName, dir, n)
+}
+
+#' @title 查看当前导入文件夹
+#' @export
+get_importing_folder <- function() {
+  get_topic("__IMPORTING_FOLDER__")
 }

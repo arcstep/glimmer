@@ -75,7 +75,7 @@ test_that("根据导入文件夹，执行导入计划", {
   
   fs::dir_create(get_path("TASK/IMPORT"))
   '
-  path <- get_path("IMPORT", get_topic("__DOING_TASK_FOLDER__"), "车型")
+  path <- get_path("IMPORT", get_importing_folder(), "车型")
   if(path |> fs::dir_exists()) {
     arrow::open_dataset(path, format = "csv") |> collect() |> ds_write("车型")
   }
@@ -92,7 +92,7 @@ test_that("仅对未处理文件夹执行导入计划", {
   
   fs::dir_create(get_path("TASK/IMPORT"))
   '
-  path <- get_path("IMPORT", get_topic("__DOING_TASK_FOLDER__"), "车型")
+  path <- get_path("IMPORT", get_importing_folder(), "车型")
   if(path |> fs::dir_exists()) {
     arrow::open_dataset(path, format = "csv") |> collect() |> ds_write("车型")
   }
@@ -117,13 +117,13 @@ test_that("手工指定导入文件夹，执行导入脚本", {
 
   create_dir(get_path("TASK/IMPORT"))
   '
-  path <- get_path("IMPORT", get_topic("__DOING_TASK_FOLDER__"), "车型")
+  path <- get_path("IMPORT", get_importing_folder(), "车型")
   if(path |> fs::dir_exists()) {
     arrow::open_dataset(path, format = "csv") |> collect() |> ds_write("车型")
   }
   ' |> write(get_path("TASK/IMPORT", "1.R"))
   '
-  path <- get_path("IMPORT", get_topic("__DOING_TASK_FOLDER__"), "cars")
+  path <- get_path("IMPORT", get_importing_folder(), "cars")
   if(path |> fs::dir_exists()) {
     arrow::open_dataset(path, format = "csv") |> collect() |> ds_write("cars")
   }
