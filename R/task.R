@@ -150,12 +150,17 @@ task_run <- function(
 #' @export
 task_files <- function(taskTopic = "TASK/BUILD", taskFolder = "", glob = "*.R") {
   if(fs::dir_exists(get_path(taskTopic, taskFolder))) {
-    fs::dir_ls(get_path(taskTopic, taskFolder), recurse = T, glob = glob, type = "file") |>
-      purrr::map_df(function(item) {
-        name <- fs::path_file(item)
-        list("name" = name, "path" = item)
-      }) |>
-      arrange(path)
+    files <- fs::dir_ls(get_path(taskTopic, taskFolder), recurse = T, glob = glob, type = "file")
+    if(length(files) > 0) {
+      files |>
+        purrr::map_df(function(item) {
+          name <- fs::path_file(item)
+          list("name" = name, "path" = item)
+        }) |>
+        arrange(path)
+    } else {
+      tibble()
+    }
   } else {
     tibble()
   }
@@ -177,11 +182,16 @@ task_files <- function(taskTopic = "TASK/BUILD", taskFolder = "", glob = "*.R") 
 #' @export
 task_dir <- function(taskTopic = "TASK/BUILD", taskFolder = "", glob = "*.R") {
   if(fs::dir_exists(get_path(taskTopic, taskFolder))) {
-    task_files(taskTopic, taskFolder, glob) |>
-      mutate(dir = fs::path_dir(path)) |>
-      count(dir) |>
-      mutate(taskName = stringr::str_remove(dir, paste0(get_path(taskTopic), "/"))) |>
-      select(taskName, dir, n)
+    files <- task_files(taskTopic, taskFolder, glob)
+    if(nrow(files > 0)) {
+      files|>
+        mutate(dir = fs::path_dir(path)) |>
+        count(dir) |>
+        mutate(taskName = stringr::str_remove(dir, paste0(get_path(taskTopic), "/"))) |>
+        select(taskName, dir, n)
+    } else {
+      tibble()
+    }
   } else {
     tibble()
   }

@@ -28,6 +28,22 @@ test_that("设置目标文件夹", {
   set_topic("IMPORT", "/tmp/glimmer/IMPORT")
   get_topic("IMPORT") |> testthat::expect_equal("/tmp/glimmer/IMPORT")
   get_path("IMPORT", "abc") |> as.character() |> testthat::expect_equal("/tmp/glimmer/IMPORT/abc")
+  # clear_dir()
+})
+
+test_that("任务文件夹尚未建立", {
+  set_topic("TASK/IMPORT", "/tmp/glimmer/TASK/IMPORT")
+  task_dir(taskTopic = "TASK/IMPORT") |> testthat::expect_equal(tibble())
+  task_files(taskTopic = "TASK/IMPORT") |> testthat::expect_equal(tibble())
+  clear_dir()
+})
+
+test_that("任务文件夹内文件为空", {
+  set_topic("TASK/IMPORT", "/tmp/glimmer/TASK/IMPORT")
+  create_dir(get_path("TASK/IMPORT"))
+  task_dir(taskTopic = "TASK/IMPORT") |> testthat::expect_equal(tibble())
+  task_files(taskTopic = "TASK/IMPORT") |> testthat::expect_equal(tibble())
+  clear_dir()
 })
 
 test_that("查看目标文件夹下的脚本", {
