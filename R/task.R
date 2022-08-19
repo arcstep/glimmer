@@ -169,7 +169,7 @@ task_files <- function(taskTopic = "TASK/BUILD", taskFolder = "", glob = "*.R") 
 #' 任务脚本的目录位置应与业务意义相对照。
 #' 例如，导入和构建应分开，需要独立管理的导入单元应各自分开。
 #' 
-#' 任务执行时，可通过\code{taskScript}参数指定根目录或子目录，配合\code{task_run}函数批量执行。
+#' 任务执行时，可通过\code{taskTopic}参数指定根目录或子目录，配合\code{task_run}函数批量执行。
 #' 
 #' @param taskTopic 脚本文件夹主题
 #' @param taskFolder 执行脚本文件的目录
@@ -180,7 +180,7 @@ task_dir <- function(taskTopic = "TASK/BUILD", taskFolder = "", glob = "*.R") {
     task_files(taskTopic, taskFolder, glob) |>
       mutate(dir = fs::path_dir(path)) |>
       count(dir) |>
-      mutate(taskName = stringr::str_remove(dir, paste0(get_path(taskScript), "/"))) |>
+      mutate(taskName = stringr::str_remove(dir, paste0(get_path(taskTopic), "/"))) |>
       select(taskName, dir, n)
   } else {
     tibble()
