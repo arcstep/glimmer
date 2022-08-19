@@ -149,12 +149,16 @@ task_run <- function(
 #' @family task functions
 #' @export
 task_files <- function(taskTopic = "TASK/BUILD", taskFolder = "", glob = "*.R") {
-  fs::dir_ls(get_path(taskTopic, taskFolder), recurse = T, glob = glob, type = "file") |>
-    purrr::map_df(function(item) {
-      name <- fs::path_file(item)
-      list("name" = name, "path" = item)
-    }) |>
-    arrange(path)
+  if(fs::dir_exists(get_path(taskTopic, taskFolder))) {
+    fs::dir_ls(get_path(taskTopic, taskFolder), recurse = T, glob = glob, type = "file") |>
+      purrr::map_df(function(item) {
+        name <- fs::path_file(item)
+        list("name" = name, "path" = item)
+      }) |>
+      arrange(path)
+  } else {
+    tibble()
+  }
 }
 
 #' @title 列举所有任务
@@ -172,11 +176,15 @@ task_files <- function(taskTopic = "TASK/BUILD", taskFolder = "", glob = "*.R") 
 #' @param glob 要执行的源文件默认以.R结尾
 #' @export
 task_dir <- function(taskTopic = "TASK/BUILD", taskFolder = "", glob = "*.R") {
-  task_read(taskTopic, taskFolder, glob) |>
-    mutate(dir = fs::path_dir(path)) |>
-    count(dir) |>
-    mutate(taskName = stringr::str_remove(dir, paste0(get_path(taskScript), "/"))) |>
-    select(taskName, dir, n)
+  if(fs::dir_exists(get_path(taskTopic, taskFolder))) {
+    task_files(taskTopic, taskFolder, glob) |>
+      mutate(dir = fs::path_dir(path)) |>
+      count(dir) |>
+      mutate(taskName = stringr::str_remove(dir, paste0(get_path(taskScript), "/"))) |>
+      select(taskName, dir, n)
+  } else {
+    tibble()
+  }
 }
 
 #' @title 查看当前导入文件夹

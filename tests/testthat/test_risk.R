@@ -24,7 +24,6 @@ test_that("创建模型：支持覆盖", {
     testthat::expect_equal(TRUE)
 
   risk_model_create("问题车辆/耗油车型", "车辆数据") |>
-    as.logical() |>
     testthat::expect_warning("Existing")
   
   clear_dir()

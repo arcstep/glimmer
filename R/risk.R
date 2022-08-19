@@ -223,7 +223,11 @@ risk_model_run <- function(
 #' @family risk function
 #' @export
 risk_data_read <- function(dsName = "疑点数据", targetTopic = "CACHE") {
-  ds_read(dsName = dsName, topic = targetTopic)
+  if(fs::dir_exists(get_path(targetTopic, dsName))) {
+    ds_read(dsName = dsName, topic = targetTopic)
+  } else {
+    tibble()
+  }
 }
 
 #' @title 设置疑点标记
