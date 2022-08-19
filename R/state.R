@@ -83,6 +83,12 @@ state_read <- function(stateName, topic = "STATE") {
   }
 }
 
+#' @title 列举所有状态数据集
+#' @description 与\code{ds_all}相同，但主题域默认为STATE
+#' @family state function
+#' @export
+state_all <- purrr::partial(ds_all, topic = "STATE")
+
 ##
 confirm_STATE <- function(topic = "STATE") {
   if(!(topic %in% get_topics())) stop("需要先使用'set_topic()'函数设置STATE文件夹")

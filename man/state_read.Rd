@@ -14,6 +14,7 @@ state_read(stateName, topic = "STATE")
 }
 \seealso{
 Other state function: 
+\code{\link{state_all}()},
 \code{\link{state_write}()}
 }
 \concept{state function}

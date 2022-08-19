@@ -30,6 +30,7 @@ state_write(stateName, tibbleNew, topic = "STATE")
 }
 \seealso{
 Other state function: 
+\code{\link{state_all}()},
 \code{\link{state_read}()}
 }
 \concept{state function}
