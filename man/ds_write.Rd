@@ -10,6 +10,7 @@ ds_write(
   topic = "CACHE",
   partColumns = c(),
   keyColumns = c(),
+  suggestedColumns = c(),
   titleColumn = c(),
   desc = "-",
   mode = "update"
@@ -22,9 +23,11 @@ ds_write(
 
 \item{topic}{数据集保存的主题目录，默认为CACHE}
 
-\item{partColumns}{分区列，支持多列}
+\item{partColumns}{照此进行分区存储，支持多列}
 
-\item{keyColumns}{关键列，支持多列}
+\item{keyColumns}{要求在所有行中具有唯一值的列向量，支持多列}
+
+\item{suggestedColumns}{查看数据时推荐的显示列向量，支持多列，}
 
 \item{titleColumn}{标题列，不支持多列}
 

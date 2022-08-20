@@ -22,5 +22,5 @@ task_dir(taskTopic = "TASK/BUILD", taskFolder = "", glob = "*.R")
 任务脚本的目录位置应与业务意义相对照。
 例如，导入和构建应分开，需要独立管理的导入单元应各自分开。
 
-任务执行时，可通过\code{taskScript}参数指定根目录或子目录，配合\code{task_run}函数批量执行。
+任务执行时，可通过\code{taskTopic}参数指定根目录或子目录，配合\code{task_run}函数批量执行。
 }

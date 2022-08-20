@@ -1,6 +1,6 @@
 Package: glimmer
 Title: A framework to Manage Tasks for Data
-Version: 0.5.7.9000
+Version: 0.5.8.9000
 Authors@R: 
     person("homeway", "Xue", , "xuehongwei@qq.com", role = c("aut", "cre"))
 Description: Help R uses to write less code and do more.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/dataset.R
 \name{ds_yaml}
 \alias{ds_yaml}
-\title{列举所有数据集}
+\title{查看数据集元数据}
 \usage{
 ds_yaml(dsName, topic = "CACHE")
 }
@@ -12,7 +12,7 @@ ds_yaml(dsName, topic = "CACHE")
 \item{topic}{主题域}
 }
 \description{
-列举所有数据集
+查看数据集元数据
 }
 \seealso{
 Other dataset function: 

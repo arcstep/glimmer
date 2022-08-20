@@ -2,8 +2,9 @@
 #' @param d 要写入的数据
 #' @param dsName 数据集名称
 #' @param topic 数据集保存的主题目录，默认为CACHE
-#' @param partColumns 分区列，支持多列
-#' @param keyColumns 关键列，支持多列
+#' @param partColumns 照此进行分区存储，支持多列
+#' @param keyColumns 要求在所有行中具有唯一值的列向量，支持多列
+#' @param suggestedColumns 查看数据时推荐的显示列向量，支持多列，
 #' @param titleColumn 标题列，不支持多列
 #' @param desc 对数据集的额外描述
 #' @param append 默认使用update方式（用新数据覆盖旧数据），若使用append模式则不会覆盖旧数据
@@ -15,7 +16,10 @@
 #' 如果不设置关键列，则为追加模式；否则按关键列替换
 #' 
 #' @export
-ds_write <- function(d, dsName, topic = "CACHE", partColumns = c(), keyColumns = c(), titleColumn = c(), desc = "-", mode = "update") {
+ds_write <- function(d, dsName, topic = "CACHE",
+                     partColumns = c(), keyColumns = c(),
+                     suggestedColumns = c(), titleColumn = c(),
+                     desc = "-", mode = "update") {
   ## 默认从CACHE任务目录读写数据集
   path <- get_path(topic, dsName)
   
@@ -103,15 +107,16 @@ ds_write <- function(d, dsName, topic = "CACHE", partColumns = c(), keyColumns =
       "topic" = topic,
       "name" = dsName,
       "desc" = desc,
-      "columns" = names(d) |> paste(collapse = ","),
-      "rows" = nrow(d),
-      "partColumns" = partColumns |> paste(collapse = ","),
-      "keyColumns" = keyColumns |> paste(collapse = ","),
-      "titleColumn" = titleColumn |> paste(collapse = ","),
+      "nrow" = nrow(d),
+      "columns" = names(d),
+      "partColumns" = partColumns,
+      "keyColumns" = keyColumns,
+      "suggestedColumns" = suggestedColumns,
+      "titleColumn" = titleColumn,
       "updateAt" = lubridate::as_datetime(updateTimestamp, tz = "Asia/Shanghai") |> as.character(),
       "updateTime" = updateTimestamp |> as.integer(),
       "lastUpdate" = updated,
-      "lastAffected" = affected
+      "lastAffected" = affectedParts$path
     )
     yaml::write_yaml(datasetMeta, get_path(topic, dsName, ".metadata.yml"))
   }
@@ -164,14 +169,30 @@ ds_all <- function(topic = "CACHE") {
   if(fs::dir_exists(path)) {
     fs::dir_ls(path, type = "file", all = T, glob = "*.yml", recurse = T) |>
       purrr::map_df(function(path) {
-        yaml::read_yaml(path)
+        x <- yaml::read_yaml(path)
+        list(
+          "datasetId" = x$datasetId,
+          "topic" = x$topic,
+          "name" = x$name,
+          "desc" = x$desc,
+          "nrow" = x$nrow,
+          "columns" = x$columns |> paste(collapse = ","),
+          "partColumns" = x$partColumns |> paste(collapse = ","),
+          "keyColumns" =  x$keyColumns |> paste(collapse = ","),
+          "suggestedColumns" = x$suggestedColumns |> paste(collapse = ","),
+          "titleColumn" = x$titleColumn |> paste(collapse = ","),
+          "updateAt" = x$updateAt,
+          "updateTime" = x$updateTime,
+          "lastUpdate" = x$lastUpdate,
+          "lastAffected" = x$lastAffected |> paste(collapse = ",")
+        )
       })
   } else {
     tibble()
   }
 }
 
-#' @title 列举所有数据集
+#' @title 查看数据集元数据
 #' @param dsName 数据集名称
 #' @param topic 主题域
 #' @family dataset function
