@@ -231,3 +231,22 @@ test_that("提取最近一次重写过分区的数据集文件", {
   
   clear_dir()
 })
+
+test_that("读写数据时使用推荐的显示列", {
+  ds_remove_path("车数据")
+  all <- mtcars |> as_tibble() |>
+    mutate(cyl = as.integer(cyl), am = as.integer(am)) |>
+    mutate(id = row_number())
+  
+  all |> glimmer::ds_write("车数据", suggestedColumns = c("id"))
+  (glimmer::ds_read("车数据") |> names())[[1]] |>
+    testthat::expect_equal("id")
+  glimmer::ds_read("车数据") |> names() |> length() |>
+    testthat::expect_equal(length(all |> names()))
+  
+  all |> glimmer::ds_write("车数据", suggestedColumns = c("id", "cyl"))
+  (glimmer::ds_read("车数据") |> names())[[2]] |>
+    testthat::expect_equal("cyl")
+  
+  clear_dir()
+})

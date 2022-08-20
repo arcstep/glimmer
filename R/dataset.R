@@ -157,7 +157,13 @@ ds_last_affected <- function(dsName = c(), stateTopic = "STATE") {
 #' @export
 ds_read <- function(dsName, topic = "CACHE") {
   path <- get_path(topic, dsName)
-  arrow::open_dataset(path, format = "parquet")
+  d <- arrow::open_dataset(path, format = "parquet")
+  meta <- ds_yaml(dsName, topic)
+  if(!rlang::is_empty(meta$suggestedColumns)) {
+    d |> select(!!!syms(meta$suggestedColumns), everything())
+  } else {
+    d
+  }
 }
 
 #' @title 列举所有数据集
