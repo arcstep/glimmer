@@ -152,6 +152,7 @@ task_files <- function(taskTopic = "TASK/BUILD", taskFolder = "", glob = "*.R") 
   if(fs::dir_exists(get_path(taskTopic, taskFolder))) {
     files <- fs::dir_ls(get_path(taskTopic, taskFolder), recurse = T, glob = glob, type = "file")
     if(length(files) > 0) {
+      message(length(files), " script files to run.")
       files |>
         purrr::map_df(function(item) {
           name <- fs::path_file(item)
@@ -159,9 +160,11 @@ task_files <- function(taskTopic = "TASK/BUILD", taskFolder = "", glob = "*.R") 
         }) |>
         arrange(path)
     } else {
+      message("NO script files to run.")
       tibble()
     }
   } else {
+    message("NO script dir and files to run.")
     tibble()
   }
 }
