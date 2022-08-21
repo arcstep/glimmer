@@ -47,18 +47,18 @@ test_that("任务文件夹内文件为空", {
 })
 
 test_that("查看目标文件夹下的脚本", {
-  fs::dir_create(get_path("IMPORT"))
+  fs::dir_create(get_path("IMPORT", "ABC"))
   fs::file_touch(get_path("IMPORT", "2.R"))
-  fs::file_touch(get_path("IMPORT", "1.R"))
+  fs::file_touch(get_path("IMPORT", "ABC/1.R"))
   fs::file_touch(get_path("IMPORT", "3.R"))
   task_files("IMPORT") |>
     testthat::expect_equal(
       tribble(
         ~name, ~path,
-        "1.R", "/tmp/glimmer/IMPORT/1.R",
+        "ABC/1.R", "/tmp/glimmer/IMPORT/ABC/1.R",
         "2.R", "/tmp/glimmer/IMPORT/2.R",
         "3.R", "/tmp/glimmer/IMPORT/3.R"
-      ) |> mutate(path = fs::as_fs_path(path))
+      ) |> arrange(path) |> mutate(path = fs::as_fs_path(path))
     )
   clear_dir()
 })

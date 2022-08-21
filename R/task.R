@@ -149,13 +149,14 @@ task_run <- function(
 #' @family task functions
 #' @export
 task_files <- function(taskTopic = "TASK/BUILD", taskFolder = "", glob = "*.R") {
-  if(fs::dir_exists(get_path(taskTopic, taskFolder))) {
-    files <- fs::dir_ls(get_path(taskTopic, taskFolder), recurse = T, glob = glob, type = "file")
+  folder_path <- get_path(taskTopic, taskFolder)
+  if(fs::dir_exists(folder_path)) {
+    files <- fs::dir_ls(folder_path, recurse = T, glob = glob, type = "file")
     if(length(files) > 0) {
       message(length(files), " script files to run.")
       files |>
         purrr::map_df(function(item) {
-          name <- fs::path_file(item)
+          name <- item |> stringr::str_remove(folder_path) |> stringr::str_remove("^/")
           list("name" = name, "path" = item)
         }) |>
         arrange(path)
