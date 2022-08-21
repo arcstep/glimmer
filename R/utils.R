@@ -49,3 +49,8 @@ create_dir <- function(path) {
     fs::dir_create(path)
   }
 }
+
+##
+gen_batchNum <- function() {
+  lubridate::now() |> as.character.Date(format = "SN-%Y-%m%d-%H%M%S")
+}

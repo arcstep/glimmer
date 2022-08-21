@@ -55,7 +55,7 @@ set_topic <- function(topic, path) {
 #' @family task functions
 #' @export
 import_todo <- function(importTopic = "IMPORT", taskTopic = "TASK/IMPORT", taskFolder = "") {
-  batchNum <- lubridate::now() |> as.integer()
+  batchNum <- gen_batchNum()
   tasks <- find_import_todo(importTopic)
   s <- state_read("__IMPORTED_FOLDER__")
   if(!rlang::is_empty(s)) {
@@ -70,7 +70,7 @@ import_todo <- function(importTopic = "IMPORT", taskTopic = "TASK/IMPORT", taskF
 #' @family task functions
 #' @export
 import_redo <- function(todo = c(), importTopic = "IMPORT", taskTopic = "TASK/IMPORT", taskFolder = "") {
-  batchNum <- lubridate::now() |> as.integer()
+  batchNum <- gen_batchNum()
   import_folders_todo <- find_import_todo(importTopic)
   import_folders_todo[import_folders_todo %in% todo] |>  batch_tasks(taskTopic, taskFolder, batchNum)
 }
@@ -111,7 +111,7 @@ batch_tasks <- function(importFolders, taskTopic, taskFolder, batchNum) {
 task_run <- function(
     taskTopic = "TASK/BUILD",
     taskFolder = "",
-    batchNum = lubridate::now() |> as.integer()) {
+    batchNum = gen_batchNum()) {
   task_files(taskTopic, taskFolder) |> purrr::pwalk(function(name, path) {
     message("RUN TASK SCRIPT：", name)
     beginTime <- lubridate::now(tz = "Asia/Shanghai")
