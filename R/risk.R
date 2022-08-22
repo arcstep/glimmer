@@ -190,8 +190,8 @@ risk_model_run <- function(
         runAt <- lubridate::now(tz = "Asia/Shanghai")
         columns <- item$filte |> lapply(function(item) item$column) |> unlist()
         d |>
-          unite("@dataId", !!!syms(keyColumns), sep = "--", remove = FALSE) |>
-          unite("@dataTitle", !!!syms(yml$titleColumn), sep = "--", remove = FALSE) |>
+          unite("@dataId", !!!syms(keyColumns), sep = "#", remove = FALSE) |>
+          unite("@dataTitle", !!!syms(yml$titleColumn), sep = "#", remove = FALSE) |>
           unite("@value", !!!syms(columns), sep = ",", remove = FALSE) |>
           select(`@dataId`, `@dataTitle`, `@value`) |>
           rename(
