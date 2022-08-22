@@ -112,7 +112,7 @@ task_run <- function(
     taskTopic = "TASK/BUILD",
     taskFolder = "",
     batchNum = gen_batchNum()) {
-  task_files(taskTopic, taskFolder) |> purrr::pwalk(function(name, path) {
+  task_files(taskTopic, taskFolder) |> purrr::pwalk(function(topic, folder, name, path) {
     message("RUN TASK SCRIPT：", name)
     beginTime <- lubridate::now(tz = "Asia/Shanghai")
     # 执行脚本
@@ -157,7 +157,7 @@ task_files <- function(taskTopic = "TASK/BUILD", taskFolder = "", glob = "*.R") 
       files |>
         purrr::map_df(function(item) {
           name <- item |> stringr::str_remove(folder_path) |> stringr::str_remove("^/")
-          list("name" = name, "path" = item)
+          list("topic" = taskTopic, "folder" = taskFolder, "name" = name, "path" = item)
         }) |>
         arrange(path)
     } else {
@@ -189,10 +189,10 @@ task_dir <- function(taskTopic = "TASK/BUILD", taskFolder = "", glob = "*.R") {
     files <- task_files(taskTopic, taskFolder, glob)
     if(nrow(files > 0)) {
       files|>
-        mutate(dir = fs::path_dir(path)) |>
-        count(dir) |>
-        mutate(taskName = stringr::str_remove(dir, paste0(get_path(taskTopic), "/"))) |>
-        select(taskName, dir, n)
+        mutate("task" = fs::path_dir(name)) |>
+        mutate("folder_path" = fs::path_dir(path)) |>
+        group_by(topic, folder, task, folder_path) |>
+        summarise(n = n(), .groups = "drop")
     } else {
       tibble()
     }

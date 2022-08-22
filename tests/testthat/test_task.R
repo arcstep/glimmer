@@ -46,7 +46,43 @@ test_that("任务文件夹内文件为空", {
   clear_dir()
 })
 
-test_that("查看目标文件夹下的脚本", {
+test_that("查看脚本目录", {
+  fs::dir_create(get_path("IMPORT", "ABC"))
+  fs::dir_create(get_path("IMPORT", "DEF"))
+  fs::file_touch(get_path("IMPORT", "DEF/2.R"))
+  fs::file_touch(get_path("IMPORT", "ABC/1.R"))
+  fs::file_touch(get_path("IMPORT", "ABC/4.R"))
+  fs::file_touch(get_path("IMPORT", "3.R"))
+  task_dir("IMPORT") |>
+    testthat::expect_equal(
+      tribble(
+        ~topic, ~folder, ~task, ~folder_path, ~n,
+        "IMPORT", "", "ABC", "/tmp/glimmer/IMPORT/ABC", 2,
+        "IMPORT", "", "DEF", "/tmp/glimmer/IMPORT/DEF", 1,
+        "IMPORT", "", ".", "/tmp/glimmer/IMPORT", 1
+      ) |> arrange(folder_path)
+    )
+  clear_dir()
+})
+
+test_that("查看脚本目录：指定文件夹", {
+  fs::dir_create(get_path("IMPORT", "A/BC"))
+  fs::dir_create(get_path("IMPORT", "D/EF"))
+  fs::file_touch(get_path("IMPORT", "D/EF/2.R"))
+  fs::file_touch(get_path("IMPORT", "A/BC/1.R"))
+  fs::file_touch(get_path("IMPORT", "A/BC/4.R"))
+  fs::file_touch(get_path("IMPORT", "3.R"))
+  task_dir("IMPORT", taskFolder = "A") |>
+    testthat::expect_equal(
+      tribble(
+        ~topic, ~folder, ~task, ~folder_path, ~n,
+        "IMPORT", "A", "BC", "/tmp/glimmer/IMPORT/A/BC", 2
+      ) |> arrange(folder_path)
+    )
+  clear_dir()
+})
+
+test_that("查看脚本文件", {
   fs::dir_create(get_path("IMPORT", "ABC"))
   fs::file_touch(get_path("IMPORT", "2.R"))
   fs::file_touch(get_path("IMPORT", "ABC/1.R"))
@@ -54,10 +90,28 @@ test_that("查看目标文件夹下的脚本", {
   task_files("IMPORT") |>
     testthat::expect_equal(
       tribble(
-        ~name, ~path,
-        "ABC/1.R", "/tmp/glimmer/IMPORT/ABC/1.R",
-        "2.R", "/tmp/glimmer/IMPORT/2.R",
-        "3.R", "/tmp/glimmer/IMPORT/3.R"
+        ~topic, ~folder, ~name, ~path,
+        "IMPORT", "", "ABC/1.R", "/tmp/glimmer/IMPORT/ABC/1.R",
+        "IMPORT", "", "2.R", "/tmp/glimmer/IMPORT/2.R",
+        "IMPORT", "", "3.R", "/tmp/glimmer/IMPORT/3.R"
+      ) |> arrange(path) |> mutate(path = fs::as_fs_path(path))
+    )
+  clear_dir()
+})
+
+test_that("查看脚本文件：指定文件夹", {
+  fs::dir_create(get_path("IMPORT", "A/BC"))
+  fs::dir_create(get_path("IMPORT", "D/EF"))
+  fs::file_touch(get_path("IMPORT", "D/EF/2.R"))
+  fs::file_touch(get_path("IMPORT", "A/BC/1.R"))
+  fs::file_touch(get_path("IMPORT", "A/BC/4.R"))
+  fs::file_touch(get_path("IMPORT", "3.R"))
+  task_files("IMPORT", taskFolder = "A") |>
+    testthat::expect_equal(
+      tribble(
+        ~topic, ~folder, ~name, ~path,
+        "IMPORT", "A", "BC/1.R", "/tmp/glimmer/IMPORT/A/BC/1.R",
+        "IMPORT", "A", "BC/4.R", "/tmp/glimmer/IMPORT/A/BC/4.R"
       ) |> arrange(path) |> mutate(path = fs::as_fs_path(path))
     )
   clear_dir()
