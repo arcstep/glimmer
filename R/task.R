@@ -43,20 +43,24 @@ set_topic <- function(topic, path) {
 #' @export
 import_folders <- function(importTopic = "IMPORT", taskTopic = "TASK/IMPORT") {
   root <- get_path(importTopic)
-  all <- fs::dir_ls(root, type = "directory", recurse = FALSE) |>
-    fs::file_info() |>
-    select(path, size, modification_time, user, group, device_id, blocks, block_size) |>
-    mutate(importFolder = stringr::str_remove(path, paste0(root, "/"))) |>
-    mutate(importTopic = importTopic) |>
-    select(importTopic, importFolder, everything())
-  ## 取出所有导入文件夹的状态，用做增量对比
-  s <- state_read("__IMPORTED_FOLDER__") |> collect()
-  if(!rlang::is_empty(s)) {
-    oldTasks <- s |> group_by(importTopic, importFolder) |>
-      summarise(lastImportedAt = max(lastModified), .groups = "drop")
-    all |> left_join(oldTasks, by = c("importTopic", "importFolder"))
+  if(fs::dir_exists(root)) {
+    all <- fs::dir_ls(root, type = "directory", recurse = FALSE) |>
+      fs::file_info() |>
+      select(path, size, modification_time, user, group, device_id, blocks, block_size) |>
+      mutate(importFolder = stringr::str_remove(path, paste0(root, "/"))) |>
+      mutate(importTopic = importTopic) |>
+      select(importTopic, importFolder, everything())
+    ## 取出所有导入文件夹的状态，用做增量对比
+    s <- state_read("__IMPORTED_FOLDER__") |> collect()
+    if(!rlang::is_empty(s)) {
+      oldTasks <- s |> group_by(importTopic, importFolder) |>
+        summarise(lastImportedAt = max(lastModified), .groups = "drop")
+      all |> left_join(oldTasks, by = c("importTopic", "importFolder"))
+    } else {
+      all |> mutate(lastImportedAt = NA)
+    }
   } else {
-    all |> mutate(lastImportedAt = NA)
+    tibble()
   }
 }
 

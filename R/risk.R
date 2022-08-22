@@ -203,8 +203,8 @@ risk_model_run <- function(
             riskTip = item$riskTip,
             modelName = modelName,
             batchNumber = batchNumber,
-            runAt = runAt,
-            lastModifiedAt = runAt,
+            createdAt = runAt,
+            flagModifiedAt = runAt,
             flag = "__NEW__",
             dataset = item$dataset,
             modelGroup = item$modelGroup) |>
@@ -216,6 +216,34 @@ risk_model_run <- function(
     }
   }
 }
+
+#' @title 运行所有模型
+#' @param dsName 疑点数据集名称
+#' @param targetTopic 疑点数据集主题域
+#' @param topic 主题名称
+#' @family risk function
+#' @export
+risk_model_run_all <- function(dsName = "疑点数据", targetTopic = "CACHE", topic = "RISKMODEL") {
+  batchNumber = gen_batchNum()
+  all <- risk_model_all(topic)
+  if(nrow(all) > 0) {
+    all |>
+      filter(online) |>
+      select(modelName) |>
+      arrange(modelName) |>
+      purrr::pwalk(function(modelName) {
+        risk_model_run(
+          modelName = modelName,
+          batchNumber = batchNumber,
+          dsName = dsName,
+          targetTopic = targetTopic,
+          topic = topic)
+      })
+  } else {
+    warning("No Risk Models to RUN!")
+  }
+}
+
 
 #' @title 查看疑点数据
 #' @param dsName 疑点数据集名称

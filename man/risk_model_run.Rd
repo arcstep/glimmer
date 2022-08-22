@@ -34,6 +34,7 @@ Other risk function:
 \code{\link{risk_data_read}()},
 \code{\link{risk_model_all}()},
 \code{\link{risk_model_create}()},
-\code{\link{risk_model_read}()}
+\code{\link{risk_model_read}()},
+\code{\link{risk_model_run_all}()}
 }
 \concept{risk function}
