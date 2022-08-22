@@ -28,7 +28,7 @@ test_that("设置目标文件夹", {
   set_topic("IMPORT", "/tmp/glimmer/IMPORT")
   get_topic("IMPORT") |> testthat::expect_equal("/tmp/glimmer/IMPORT")
   get_path("IMPORT", "abc") |> as.character() |> testthat::expect_equal("/tmp/glimmer/IMPORT/abc")
-  # clear_dir()
+  clear_dir()
 })
 
 test_that("任务文件夹尚未建立", {
@@ -150,8 +150,6 @@ test_that("执行特定脚本文件", {
   testthat::expect_equal(f3, 3)
   clear_dir()
 })
-
-
 
 test_that("根据导入文件夹，执行导入计划", {
   prepare_csv( 1:10, taskFolder = "task001", dsName = "车型")

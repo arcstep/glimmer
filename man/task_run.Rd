@@ -7,6 +7,7 @@
 task_run(
   taskTopic = "TASK/BUILD",
   taskFolder = "",
+  importTopic = "IMPORT",
   batchNum = gen_batchNum(),
   glob = "*.R"
 )
@@ -16,6 +17,8 @@ task_run(
 
 \item{taskFolder}{执行脚本文件的目录}
 
+\item{importTopic}{导入主题域}
+
 \item{glob}{默认加载所有R文件}
 }
 \description{
@@ -23,16 +26,19 @@ task_run(
 }
 \details{
 glob参数可用于运行运行特定的R文件，
-例如 \cdoe{task_run(taskFolder = "abc", glob = "**/1.R")}。
+例如 \code{task_run(taskFolder = "abc", glob = "**/1.R")}。
 }
 \seealso{
 Other task functions: 
+\code{\link{get_importing_folder}()},
 \code{\link{get_path}()},
 \code{\link{get_topics}()},
 \code{\link{get_topic}()},
+\code{\link{import_folders}()},
 \code{\link{import_redo}()},
 \code{\link{import_todo}()},
 \code{\link{set_topic}()},
+\code{\link{task_dir}()},
 \code{\link{task_files}()}
 }
 \concept{task functions}

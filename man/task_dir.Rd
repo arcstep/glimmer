@@ -24,3 +24,17 @@ task_dir(taskTopic = "TASK/BUILD", taskFolder = "", glob = "*.R")
 
 任务执行时，可通过\code{taskTopic}参数指定根目录或子目录，配合\code{task_run}函数批量执行。
 }
+\seealso{
+Other task functions: 
+\code{\link{get_importing_folder}()},
+\code{\link{get_path}()},
+\code{\link{get_topics}()},
+\code{\link{get_topic}()},
+\code{\link{import_folders}()},
+\code{\link{import_redo}()},
+\code{\link{import_todo}()},
+\code{\link{set_topic}()},
+\code{\link{task_files}()},
+\code{\link{task_run}()}
+}
+\concept{task functions}

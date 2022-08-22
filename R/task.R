@@ -34,6 +34,32 @@ set_topic <- function(topic, path) {
   assign(topic, path, envir = TASK.ENV)
 }
 
+#' @title 所有导入文件夹
+#' @description 将主题域下的所有一级子目录作为导入素材
+#' @param importTopic 导入主题域，即导入素材的根目录
+#' @details 
+#' 未导入成功过的文件夹可作为增量导入素材，被自动发现。
+#' @family task functions
+#' @export
+import_folders <- function(importTopic = "IMPORT", taskTopic = "TASK/IMPORT") {
+  root <- get_path(importTopic)
+  all <- fs::dir_ls(root, type = "directory", recurse = FALSE) |>
+    fs::file_info() |>
+    select(path, size, modification_time, user, group, device_id, blocks, block_size) |>
+    mutate(importFolder = stringr::str_remove(path, paste0(root, "/"))) |>
+    mutate(importTopic = importTopic) |>
+    select(importTopic, importFolder, everything())
+  ## 取出所有导入文件夹的状态，用做增量对比
+  s <- state_read("__IMPORTED_FOLDER__") |> collect()
+  if(!rlang::is_empty(s)) {
+    oldTasks <- s |> group_by(importTopic, importFolder) |>
+      summarise(lastImportedAt = max(lastModified), .groups = "drop")
+    all |> left_join(oldTasks, by = c("importTopic", "importFolder"))
+  } else {
+    all |> mutate(lastImportedAt = NA)
+  }
+}
+
 #' @title 未曾处理过的任务文件夹
 #' @description 从状态库中比对，哪些任务尚未处理过，然后自动执行
 #' @details 
@@ -56,13 +82,15 @@ set_topic <- function(topic, path) {
 #' @export
 import_todo <- function(importTopic = "IMPORT", taskTopic = "TASK/IMPORT", taskFolder = "") {
   batchNum <- gen_batchNum()
-  tasks <- find_import_todo(importTopic)
-  s <- state_read("__IMPORTED_FOLDER__")
-  if(!rlang::is_empty(s)) {
-    d <- s |> select(importFolder) |> collect()
-    tasks[tasks %nin% d$importFolder] |> batch_tasks(taskTopic, taskFolder, batchNum)
+  all <- import_folders(importTopic = importTopic, taskTopic = taskTopic)
+  if(rlang::is_empty(all)) {
+    warnnig("No Data Folders To IMPORT!")
   } else {
-    tasks |> batch_tasks(taskTopic, taskFolder, batchNum)
+    (all |> filter(is.na(lastImportedAt)))$importFolder |>
+      batch_tasks(importTopic = importTopic,
+                  taskTopic = taskTopic,
+                  taskFolder = taskFolder,
+                  batchNum = batchNum)
   }
 }
 
@@ -71,29 +99,27 @@ import_todo <- function(importTopic = "IMPORT", taskTopic = "TASK/IMPORT", taskF
 #' @export
 import_redo <- function(todo = c(), importTopic = "IMPORT", taskTopic = "TASK/IMPORT", taskFolder = "") {
   batchNum <- gen_batchNum()
-  import_folders_todo <- find_import_todo(importTopic)
-  import_folders_todo[import_folders_todo %in% todo] |>  batch_tasks(taskTopic, taskFolder, batchNum)
-}
-
-# 罗列导入主题下所有导入任务文件夹
-# 如果希望划分子文件夹管理导入内容（例如按年、月），可以将子文件夹作为导入主题
-find_import_todo <- function(importTopic) {
-  path = get_path(importTopic)
-  fs::dir_ls(path, type = "directory", recurse = FALSE) |>
-    sort() |>
-    fs::path_file()
+  todo |> batch_tasks(importTopic = importTopic,
+                      taskTopic = taskTopic,
+                      taskFolder = taskFolder,
+                      batchNum = batchNum)
 }
 
 # 枚举任务文件夹
-batch_tasks <- function(importFolders, taskTopic, taskFolder, batchNum) {
+batch_tasks <- function(importFolders, importTopic, taskTopic, taskFolder, batchNum) {
   message(length(importFolders), " task folders todo.")
   importFolders |> purrr::walk(function(item) {
     set_topic("__IMPORTING_FOLDER__", item)
     message("SCAN IMPORT FOLDER：", item)
-    task_run(taskTopic, taskFolder, batchNum)
+    task_run(
+      taskTopic = taskTopic,
+      taskFolder = taskFolder,
+      importTopic = importTopic,
+      batchNum = batchNum)
     set_topic("__IMPORTING_FOLDER__", "-")
     state_write("__IMPORTED_FOLDER__", tibble(
       "batchNum" = batchNum,
+      "importTopic" = importTopic,
       "importFolder" = item,
       "status" = "DONE",
       "taskTopic" = taskTopic,
@@ -106,15 +132,17 @@ batch_tasks <- function(importFolders, taskTopic, taskFolder, batchNum) {
 #' @description 应当按照脚本顺序执行
 #' @param taskTopic 脚本文件夹主题
 #' @param taskFolder 执行脚本文件的目录
+#' @param importTopic 导入主题域
 #' @param glob 默认加载所有R文件
 #' @details 
 #' glob参数可用于运行运行特定的R文件，
-#' 例如 \cdoe{task_run(taskFolder = "abc", glob = "**/1.R")}。
+#' 例如 \code{task_run(taskFolder = "abc", glob = "**/1.R")}。
 #' @family task functions
 #' @export
 task_run <- function(
     taskTopic = "TASK/BUILD",
     taskFolder = "",
+    importTopic = "IMPORT",
     batchNum = gen_batchNum(),
     glob = "*.R") {
   task_files(taskTopic, taskFolder, glob = glob) |> purrr::pwalk(function(topic, folder, name, path) {
@@ -138,6 +166,7 @@ task_run <- function(
         "taskFolder" = taskFolder,
         "taskName" = name,
         "taskScript" = path,
+        "importTopic" = importTopic,
         "importFolder" = tf,
         "usedTime" = used,
         "info" = msg
@@ -188,6 +217,7 @@ task_files <- function(taskTopic = "TASK/BUILD", taskFolder = "", glob = "*.R") 
 #' @param taskTopic 脚本文件夹主题
 #' @param taskFolder 执行脚本文件的目录
 #' @param glob 要执行的源文件默认以.R结尾
+#' @family task functions
 #' @export
 task_dir <- function(taskTopic = "TASK/BUILD", taskFolder = "", glob = "*.R") {
   if(fs::dir_exists(get_path(taskTopic, taskFolder))) {
@@ -207,6 +237,7 @@ task_dir <- function(taskTopic = "TASK/BUILD", taskFolder = "", glob = "*.R") {
 }
 
 #' @title 查看当前导入文件夹
+#' @family task functions
 #' @export
 get_importing_folder <- function() {
   get_topic("__IMPORTING_FOLDER__")
