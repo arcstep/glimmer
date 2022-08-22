@@ -7,16 +7,23 @@
 task_run(
   taskTopic = "TASK/BUILD",
   taskFolder = "",
-  batchNum = as.integer(lubridate::now())
+  batchNum = gen_batchNum(),
+  glob = "*.R"
 )
 }
 \arguments{
 \item{taskTopic}{脚本文件夹主题}
 
 \item{taskFolder}{执行脚本文件的目录}
+
+\item{glob}{默认加载所有R文件}
 }
 \description{
 应当按照脚本顺序执行
+}
+\details{
+glob参数可用于运行运行特定的R文件，
+例如 \cdoe{task_run(taskFolder = "abc", glob = "**/1.R")}。
 }
 \seealso{
 Other task functions: 

@@ -6,7 +6,7 @@
 \usage{
 risk_model_run(
   modelName,
-  batchNumber = as.integer(lubridate::now(tz = "Asia/Shanghai")),
+  batchNumber = gen_batchNum(),
   dsName = "疑点数据",
   targetTopic = "CACHE",
   topic = "RISKMODEL",

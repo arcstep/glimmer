@@ -106,13 +106,18 @@ batch_tasks <- function(importFolders, taskTopic, taskFolder, batchNum) {
 #' @description 应当按照脚本顺序执行
 #' @param taskTopic 脚本文件夹主题
 #' @param taskFolder 执行脚本文件的目录
+#' @param glob 默认加载所有R文件
+#' @details 
+#' glob参数可用于运行运行特定的R文件，
+#' 例如 \cdoe{task_run(taskFolder = "abc", glob = "**/1.R")}。
 #' @family task functions
 #' @export
 task_run <- function(
     taskTopic = "TASK/BUILD",
     taskFolder = "",
-    batchNum = gen_batchNum()) {
-  task_files(taskTopic, taskFolder) |> purrr::pwalk(function(topic, folder, name, path) {
+    batchNum = gen_batchNum(),
+    glob = "*.R") {
+  task_files(taskTopic, taskFolder, glob = glob) |> purrr::pwalk(function(topic, folder, name, path) {
     message("RUN TASK SCRIPT：", name)
     beginTime <- lubridate::now(tz = "Asia/Shanghai")
     # 执行脚本

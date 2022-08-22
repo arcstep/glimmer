@@ -123,7 +123,7 @@ test_that("执行目标文件夹下的脚本", {
   write("f1 <- 1", get_path("TASK/BUILD", "1.R"))
   write("f3 <- f2 + f1", get_path("TASK/BUILD", "3.R"))
   task_run(taskTopic = "TASK/BUILD")
-  expect_equal(f3, 3)
+  testthat::expect_equal(f3, 3)
   clear_dir()
 })
 
@@ -134,9 +134,24 @@ test_that("执行目标文件夹下的脚本，哪怕是多层子目录", {
   write("f1 <- 1", get_path("TASK/BUILD", "1-FF/1.R"))
   write("f3 <- f2 + f1", get_path("TASK/BUILD", "2-EE/1.R"))
   task_run(taskTopic = "TASK/BUILD")
-  expect_equal(f3, 3)
+  testthat::expect_equal(f3, 3)
   clear_dir()
 })
+
+test_that("执行特定脚本文件", {
+  fs::dir_create(get_path("TASK/BUILD", "1-FF"))
+  fs::dir_create(get_path("TASK/BUILD", "2-EE"))
+  write("f2 <- f1 + 1", get_path("TASK/BUILD", "1-FF/2.R"))
+  write("f1 <- 1", get_path("TASK/BUILD", "1-FF/1.R"))
+  write("f3 <- f2 + f1", get_path("TASK/BUILD", "2-EE/1.R"))
+  task_run(taskTopic = "TASK/BUILD", taskFolder = "1-FF", glob = "**/1.R")
+  task_run(taskTopic = "TASK/BUILD", taskFolder = "1-FF", glob = "**/2.R")
+  task_run(taskTopic = "TASK/BUILD", taskFolder = "2-EE", glob = "**/1.R")
+  testthat::expect_equal(f3, 3)
+  clear_dir()
+})
+
+
 
 test_that("根据导入文件夹，执行导入计划", {
   prepare_csv( 1:10, taskFolder = "task001", dsName = "车型")
