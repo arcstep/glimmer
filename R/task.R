@@ -34,6 +34,29 @@ set_topic <- function(topic, path) {
   assign(topic, path, envir = TASK.ENV)
 }
 
+#' @title 加载配置文件
+#' @description 批量执行\code{set_topic}任务
+#' @param yml_file YAML配置文件
+#' @family task functions
+#' @export
+load_config <- function(yml_file) {
+  topics <- yaml::read_yaml(yml_file)
+  if("ROOT_PATH" %in% names(topics)) {
+    root_path <- topics[["ROOT_PATH"]]
+  } else {
+    root_path <- NULL
+  }
+  names(topics) |> purrr::walk(function(item) {
+    if(item != "ROOT_PATH") {
+      if(stringr::str_detect(topics[[item]], "^(\\.\\/)")) {
+        set_topic(item, fs::path_join(c(root_path, topics[[item]])) |> fs::path_abs())
+      } else {
+        set_topic(item, topics[[item]])
+      }
+    }
+  })
+}
+
 #' @title 所有导入文件夹
 #' @description 将主题域下的所有一级子目录作为导入素材
 #' @param importTopic 导入主题域，即导入素材的根目录

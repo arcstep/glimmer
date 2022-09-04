@@ -17,6 +17,7 @@ Other task functions:
 \code{\link{import_folders}()},
 \code{\link{import_redo}()},
 \code{\link{import_todo}()},
+\code{\link{load_config}()},
 \code{\link{set_topic}()},
 \code{\link{task_dir}()},
 \code{\link{task_files}()},

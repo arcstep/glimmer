@@ -33,6 +33,7 @@ Other task functions:
 \code{\link{get_topic}()},
 \code{\link{import_folders}()},
 \code{\link{import_redo}()},
+\code{\link{load_config}()},
 \code{\link{set_topic}()},
 \code{\link{task_dir}()},
 \code{\link{task_files}()},
