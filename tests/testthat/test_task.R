@@ -211,3 +211,15 @@ test_that("手工指定导入文件夹，执行导入脚本", {
   
   clear_dir()
 })
+
+test_that("定义导入脚本", {
+  prepare_csv(1:2, taskFolder = "task001", dsName = "车型")
+  create_dir(get_path("TASK/IMPORT"))
+  'import_define("比亚迪", function(path) {})' |> write(get_path("TASK/IMPORT", "1.R"))
+  'import_define("长安福特", function(path) {})' |> write(get_path("TASK/IMPORT", "2.R"))
+  
+  import_redo(todo = c("task001"), taskTopic = "TASK/IMPORT")
+  import_datasets("IMPORT") |> names() |> testthat::expect_equal(c("比亚迪", "长安福特"))
+
+  clear_dir()
+})

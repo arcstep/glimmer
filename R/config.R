@@ -36,6 +36,11 @@ set_topic <- function(topic, path) {
 
 #' @title 加载配置文件
 #' @description 批量执行\code{set_topic}任务
+#' @details 
+#' 使用\code{ROOT_PATH}时有一个关键约定：
+#' 配置项必须以\code{./}开头，才能使用\code{ROOT_PATH}扩展其路径；
+#' 否则，将被视为独立配置名。
+#' 
 #' @param yml_file YAML配置文件
 #' @family config functions
 #' @export
@@ -55,4 +60,11 @@ load_config <- function(yml_file) {
       }
     }
   })
+}
+
+#' @title 读取所有配置项
+#' @family config functions
+#' @export
+get_config <- function() {
+  as.list(TASK.ENV)
 }

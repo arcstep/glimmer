@@ -27,14 +27,9 @@ task_dir(taskTopic = "TASK/BUILD", taskFolder = "", glob = "*.R")
 \seealso{
 Other task functions: 
 \code{\link{get_importing_folder}()},
-\code{\link{get_path}()},
-\code{\link{get_topics}()},
-\code{\link{get_topic}()},
 \code{\link{import_folders}()},
 \code{\link{import_redo}()},
 \code{\link{import_todo}()},
-\code{\link{load_config}()},
-\code{\link{set_topic}()},
 \code{\link{task_files}()},
 \code{\link{task_run}()}
 }
