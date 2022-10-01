@@ -7,7 +7,7 @@
 #' @param suggestedColumns 查看数据时推荐的显示列向量，支持多列，
 #' @param titleColumn 标题列，不支持多列
 #' @param desc 对数据集的额外描述
-#' @param append 默认使用update方式（用新数据覆盖旧数据），若使用append模式则不会覆盖旧数据
+#' @param mode 当主键重复时，update模式（默认）使用新数据，append模式保留旧数据
 #' @description 更新受影响的分区
 #' @family dataset function
 #' @details

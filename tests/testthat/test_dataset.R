@@ -1,5 +1,5 @@
-library(dplyr)
-library(tibble)
+library(dplyr, warn.conflicts = F)
+library(tibble, warn.conflicts = F)
 
 set_topic("STATE", "/tmp/glimmer/STATE")
 set_topic("CACHE", "/tmp/glimmer/CACHE")
