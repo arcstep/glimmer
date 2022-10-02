@@ -102,25 +102,23 @@ ds_write <- function(d, dsName, topic = "CACHE",
     ## 更新元数据集元件
     d <- arrow::open_dataset(path, format = "parquet")
     updateTimestamp <- lubridate::now(tz = "Asia/Shanghai")
-    datasetMeta <- list(
-      "datasetId" = digest::digest(fs::path_join(c(topic, dsName)), algo = "xxhash32"),
-      "topic" = topic,
-      "name" = dsName,
+    list(
       "desc" = desc,
       "nrow" = nrow(d),
       "columns" = names(d),
       "partColumns" = partColumns,
       "keyColumns" = keyColumns,
-      "suggestedColumns" = suggestedColumns,
-      "titleColumn" = titleColumn,
-      "updateAt" = lubridate::as_datetime(updateTimestamp, tz = "Asia/Shanghai") |> as.character(),
-      "updateTime" = updateTimestamp |> as.integer(),
-      "lastUpdate" = updated,
-      "lastAffected" = affectedParts$path
-    )
-    yaml::write_yaml(datasetMeta, get_path(topic, dsName, ".metadata.yml"))
+      "reading" = list(
+        "suggestedColumns" = suggestedColumns,
+        "titleColumn" = titleColumn),
+      "updated" = list(
+        "lastUpdatedAt" = lubridate::as_datetime(updateTimestamp, tz = "Asia/Shanghai") |> as.character(),
+        "lastAffectedSummary" = updated,
+        "lastAffectedFiles" = affectedParts$path)
+    ) |> ds_write_yaml(dsName, topic)
   }
 }
+
 
 #' @title 读取重写过分区的数据集文件
 #' @param affectedParts 受影响的分区文件，多个时用逗号间隔表示
@@ -198,20 +196,6 @@ ds_all <- function(topic = "CACHE") {
   }
 }
 
-#' @title 查看数据集元数据
-#' @param dsName 数据集名称
-#' @param topic 主题域
-#' @family dataset function
-#' @export
-ds_yaml <- function(dsName, topic = "CACHE") {
-  path <- get_path(topic, dsName, ".metadata.yml")
-  if(fs::file_exists(path)) {
-    yaml::read_yaml(path)
-  } else {
-    list()
-  }
-}
-
 #' @title 移除数据文件夹
 #' @description 可以整个移除，也可以组装目录后按分区移除
 #' @param dsName 数据集名称
@@ -219,7 +203,7 @@ ds_yaml <- function(dsName, topic = "CACHE") {
 #' @family dataset function
 #' @export
 ds_remove_path <- function(dsName, topic = "CACHE") {
-  path <- get_path(topic, dsName)
+  path <- get_path(topic, dsName) |> fs::path_expand()
   if(fs::dir_exists(path)) {
     fs::dir_delete(path)
     message("[REMOVED DIR] >>> ", path)

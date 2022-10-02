@@ -25,7 +25,6 @@ Other dataset function:
 \code{\link{ds_read_affected}()},
 \code{\link{ds_read}()},
 \code{\link{ds_schema}()},
-\code{\link{ds_write}()},
-\code{\link{ds_yaml}()}
+\code{\link{ds_write}()}
 }
 \concept{dataset function}

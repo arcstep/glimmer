@@ -33,7 +33,7 @@ ds_write(
 
 \item{desc}{对数据集的额外描述}
 
-\item{append}{默认使用update方式（用新数据覆盖旧数据），若使用append模式则不会覆盖旧数据}
+\item{mode}{当主键重复时，update模式（默认）使用新数据，append模式保留旧数据}
 }
 \description{
 更新受影响的分区
@@ -54,7 +54,6 @@ Other dataset function:
 \code{\link{ds_read_affected}()},
 \code{\link{ds_read}()},
 \code{\link{ds_remove_path}()},
-\code{\link{ds_schema}()},
-\code{\link{ds_yaml}()}
+\code{\link{ds_schema}()}
 }
 \concept{dataset function}
