@@ -56,7 +56,7 @@ create_dir <- function(path) {
 #' @family utils function
 #' @export
 gen_batchNum <- function() {
-  n <- sprintf("%04d", sample(1, 1:1000))
+  n <- sprintf("%03d", sample(0:999, 1))
   m <- lubridate::now() |> as.character.Date(format = "SN-%Y-%m%d-%H%M%S")
   paste(m, n, sep = "-")
 }
