@@ -1,56 +1,62 @@
-## %error% 取不到值时使用默认值
+#' @title 遇到异常填充默认值
+#' @family utils function
+#' @export
 `%error%` <- function(exp, defaultValue) {
   tryCatch({
     exp
   }, error = function(e) defaultValue)
 }
 
-## %regex%正则表达式
+#' @title 条件过滤：使用正则表达式
+#' @family utils function
+#' @export
 `%regex%` <- function(a, b) {
   stringr::str_detect(a, b)
 }
 
+#' @title 条件过滤：使用正则表达式取反
+#' @family utils function
+#' @export
 `%not-regex%` <- function(a, b) {
   stringr::str_detect(a, b, negate = TRUE)
 }
 
-## %in%取反
+#' @title 条件过滤：取反
+#' @family utils function
+#' @export
 `%nin%` <- Negate(`%in%`)
 
-## 当值为NULL、空向量、空列表、空字符串时设置默认值
+#' @title 遇到空值填充默认值
+#' @description 当值为NULL、空向量、空列表、空字符串时设置默认值
+#' @family utils function
+#' @export
 `%empty%` <- function(a, b) {
   if (rlang::is_empty(a)) b else a
 }
 
-## %empty%取反
-`%not-empty%` <- function(a, b) {
-  if (!rlang::is_empty(a)) b else a
-}
-
-## 条件执行
-`%true%` <- function(a, b) {
-  if(a) b
-}
-
-`%false%` <- function(a, b) {
-  if(!a) b
-}
-
-## 如果文件夹存在就删除
+#' @title 删除文件夹
+#' @family utils function
+#' @export
 remove_dir <- function(path) {
   if(fs::dir_exists(path)) {
     fs::dir_delete(path)
   }
 }
 
-## 如果文件夹不存在就创建
+#' @title 创建文件夹
+#' @family utils function
+#' @export
 create_dir <- function(path) {
   if(!fs::dir_exists(path)) {
     fs::dir_create(path)
   }
 }
 
-##
+#' @title 获取批次号
+#' @family utils function
+#' @export
 gen_batchNum <- function() {
-  lubridate::now() |> as.character.Date(format = "SN-%Y-%m%d-%H%M%S")
+  n <- sprintf("%04d", sample(1, 1:1000))
+  m <- lubridate::now() |> as.character.Date(format = "SN-%Y-%m%d-%H%M%S")
+  paste(m, n, sep = "-")
 }
