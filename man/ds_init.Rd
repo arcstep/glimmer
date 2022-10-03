@@ -7,6 +7,8 @@
 ds_init(
   dsName,
   topic = "CACHE",
+  data = tibble(),
+  schema = list(),
   partColumns = c(),
   keyColumns = c(),
   suggestedColumns = c(),
@@ -19,6 +21,8 @@ ds_init(
 
 \item{topic}{数据集保存的主题目录，默认为CACHE}
 
+\item{data}{样本数据，用来分析数据结构}
+
 \item{partColumns}{支持分区存储，支持多列}
 
 \item{keyColumns}{要求在所有行中具有唯一值的列向量，支持多列}
@@ -30,16 +34,24 @@ ds_init(
 \item{desc}{对数据集的额外描述}
 }
 \description{
-所有数据集使用@action作为第一层分区：
+1、通过dsName和topic识别数据集和配置文件位置。
+
+2、数据集必须首先使用\code{ds_init}函数创建配置文件（或手工建立），
+然后才能对数据集做增删改查操作。
+
+3、所有数据集的存储结构都使用@action作为第一层分区：
 \strong{APPEND}, \strong{DELETE}, \strong{ARCHIVE}
 }
 \seealso{
 Other dataset function: 
 \code{\link{ds_all}()},
+\code{\link{ds_append}()},
 \code{\link{ds_as_unique}()},
 \code{\link{ds_compare_schema}()},
+\code{\link{ds_delete}()},
 \code{\link{ds_diff_dataset}()},
 \code{\link{ds_diff_schema}()},
+\code{\link{ds_files}()},
 \code{\link{ds_last_affected}()},
 \code{\link{ds_read_affected}()},
 \code{\link{ds_read}()},

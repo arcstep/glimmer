@@ -1,3 +1,252 @@
+## 创建数据集 -------------
+
+#' @title 初始化数据集配置
+#' @description 
+#' 
+#' 1、通过dsName和topic识别数据集和配置文件位置。
+#' 
+#' 2、数据集必须首先使用\code{ds_init}函数创建配置文件（或手工建立），
+#' 然后才能对数据集做增删改查操作。
+#' 
+#' 3、所有数据集的存储结构都使用@action作为第一层分区：
+#' __APPEND__, __DELETE__, __ARCHIVE__
+#' 
+#' @param dsName 数据集名称
+#' @param data 样本数据，用来分析数据结构
+#' @param topic 数据集保存的主题目录，默认为CACHE
+#' @param partColumns 支持分区存储，支持多列
+#' @param keyColumns 要求在所有行中具有唯一值的列向量，支持多列
+#' @param suggestedColumns 查看数据时推荐的显示列向量，支持多列，
+#' @param titleColumn 标题列，不支持多列
+#' @param desc 对数据集的额外描述
+#' @family dataset function
+#' @export
+ds_init <- function(dsName,
+                    topic = "CACHE",
+                    data = tibble(),
+                    schema = list(),
+                    partColumns = c(), keyColumns = c(),
+                    suggestedColumns = c(), titleColumn = c(),
+                    desc = "-") {
+  ## 要补充的元数据
+  meta <- list(
+    ## 所有数据集使用@action作为第一层分区：
+    ## __NEW__, __UPDATE__, __DELETE__, __ARCHIVE__
+    "schema" = schema,
+    "partColumns" = c("@action", partColumns) |> unlist(),
+    "keyColumns" = keyColumns,
+    "writing" = list(
+      ## 当键值重复时，使用新数据替换旧数据
+      "updateMode" = "overwrite"
+    ),
+    "reading" = list(
+      "suggestedColumns" = suggestedColumns,
+      "titleColumn" = titleColumn))
+  
+  ## 写入配置文件
+  ds_yaml_write(meta = meta, dsName = dsName, data = data, topic = topic)
+}
+
+#' @title 批量追加更新的数据
+#' @description 
+#' 为了避免修改原数据文件，追加数据时不查询旧数据，提交归档时再统一处理。
+#' 
+#' 当追加的数据量与归档数据相比规模较小时，这种模式将具有优势。
+#' @param d 要写入的数据
+#' @param dsName 数据集名称
+#' @param topic 数据集保存的主题目录，默认为CACHE
+#' @param action 默认为__APPEND__， 修改为__DELETE__后就是删除操作
+#' @family dataset function
+#' @export
+ds_append <- function(d, dsName, topic = "CACHE", action = "__APPEND__") {
+  if(rlang::is_empty(d)) {
+    warning("Empty Dataset to write >>> ", dsName, "/", topic)
+  } else {
+    if(nrow(d) == 0) {
+      warning("No Content in New Dataset to write >>> ", dsName, "/", topic)
+    } else {
+      ## 默认从CACHE任务目录读写数据集
+      path <- get_path(topic, dsName)
+      
+      ## 读取数据集配置
+      meta <- ds_yaml(dsName, topic)
+      if(rlang::is_empty(meta)) {
+        stop("Empty Dataset Metadata!!!")
+      }
+      
+      if(action %in% c("__APPEND__", "__DELETE__")) {
+        ## 追加数据时，确定数据结构一致
+        schema_old <- ds_yaml_schema(dsName, topic)
+        diff_info <- ds_diff_schema(schema_old, ds_schema(d)) |> filter(!equal)
+        if(nrow(diff_info) > 0) {
+          print(diff_info |> rename(`F.Old` = `fieldType.x`, `F.New` = `fieldType.y`))
+          stop("Different Schema >> ", path)
+        }    
+      } else {
+        stop("Unkonw @action when appending data: ", action)
+      }
+
+      ## 写入数据
+      batch <- gen_batchNum()
+      d |>
+        mutate(cyl = as.integer(cyl)) |>
+        mutate(`@action` = action) |>
+        mutate(`@batch` = batch) |>
+        mutate(`@lastmodifiedAt` = lubridate::now(tzone = "Asia/Shanghai")) |>
+        ungroup() |>
+        arrow::write_dataset(
+          path = path,
+          format = "parquet",
+          basename_template = paste0("append-", batch, "-{i}.parquet"),
+          partitioning = meta$partColumns,
+          version = "2.0",
+          existing_data_behavior = "overwrite")
+    }
+  }
+}
+
+#' @title 批量追加删除的数据
+#' @description 以追加标记文件的形式删除数据（不做物理删除）
+#' @param d 要删除的数据
+#' @param dsName 数据集名称
+#' @param topic 数据集保存的主题目录，默认为CACHE
+#' @family dataset function
+#' @export
+ds_delete <- function(d, dsName, topic = "CACHE") {
+  meta <- ds_yaml(dsName, topic)
+  if(rlang::is_empty(meta$keyColumns)) {
+    stop("Can't Delete without keyColumns Setting!!!")
+  }
+  ds_append(d, dsName = dsName, topic = topic, action = "__DELETE__")
+}
+
+#' @title 数据集归档
+#' @description 消除零散的追加文件，但保留删除记录
+#' @param dsName 数据集名称
+#' @param topic 主题域
+#' @details 
+#' 归档操作可能耗时，应当集中处理。
+#' 如果不归档，则可能因为零散文件较多，而影响数据读取速度
+#' @export
+ds_submit <- function(dsName, topic = "CACHE") {
+  meta <- ds_yaml(dsName, topic)
+  path <- get_path(topic, dsName)
+  
+  ## 找出更新数据的分区
+  part <- meta$partColumns[meta$partColumns != "@action"]
+  if(rlang::is_empty(part)) {
+    d <- ds_read(dsName, topic) |> collect()
+  } else {
+    to_append <-
+      arrow::open_dataset(path, format = "parquet") |>
+      filter(`@action` ==  "__APPEND__") |>
+      collect()
+    d <- ds_read(dsName, topic) |>
+      semi_join(to_append, by = part) |>
+      collect()
+  }
+
+  if(rlang::is_empty(d)) {
+    warning("Empty Dataset to submit >>> ", dsName, "/", topic)
+  } else {
+    if(nrow(d) == 0) {
+      warning("No Content in New Dataset to submit >>> ", dsName, "/", topic)
+    } else {
+      ## 写入数据
+      batch <- gen_batchNum()
+      d |>
+        mutate(cyl = as.integer(cyl)) |>
+        mutate(`@action` = "__ARCHIVE__") |>
+        ungroup() |>
+        arrow::write_dataset(
+          path = path,
+          format = "parquet",
+          basename_template = paste0("archive-", batch, "-{i}.parquet"),
+          partitioning = meta$partColumns,
+          version = "2.0",
+          existing_data_behavior = "delete_matching")
+      ## 删除__APPEND__分区
+      path_remove <- get_path(topic, dsName, "@action=__APPEND__")
+      if(fs::dir_exists(path_remove)) {
+        fs::dir_delete(path_remove)
+      }
+    }
+  }
+}
+
+
+
+#' @title 读取数据集的文件信息
+#' @param dsName 数据集名称
+#' @param topic 主题域
+#' @family dataset function
+#' @export
+ds_files <- function(dsName, topic = "CACHE") {
+  path <- get_path(topic, dsName)
+  arrow::open_dataset(path)$files |>
+    fs::file_info()
+}
+
+#' @title 读取数据集
+#' @param dsName 数据集名称
+#' @param topic 主题域
+#' @family dataset function
+#' @export
+ds_read <- function(dsName, topic = "CACHE") {
+  meta <- ds_yaml(dsName, topic)
+  path <- get_path(topic, dsName)
+  
+  d <- arrow::open_dataset(path, format = "parquet")
+  ## 如果存储结构不包含@action、@lastmodifiedAt等元字段就抛异常
+  if(FALSE %in% (c("@action", "@lastmodifiedAt") %in% names(d))) {
+    stop("dataset storage without: @action or @lastmodifiedAt")
+  }
+  
+  ## 如果配置文件中存在主键
+  ## 提取追加和删除的数据
+  if(length(meta$keyColumns) > 0) {
+    keys0 <- d |>
+      filter(`@action` %in% c("__APPEND__", "__DELETE__")) |>
+      select(meta$keyColumns, "@action", "@lastmodifiedAt") |>
+      anti_join(d |> filter(`@action` == c("__ARCHIVE__")), by = c(meta$keyColumns, "@lastmodifiedAt"))
+    keys <- keys0 |>
+      select(meta$keyColumns, "@action", "@lastmodifiedAt") |>
+      semi_join(keys0 |>
+                  group_by(!!!syms(meta$keyColumns)) |>
+                  summarise(`@lastmodifiedAt` = max(`@lastmodifiedAt`), .groups = "drop") |>
+                  collect(), by = c(meta$keyColumns, "@lastmodifiedAt"))
+  } else {
+    keys <- tibble()
+  }
+
+  if(!rlang::is_empty(keys)) {
+    ## 旧数据要更新的记录
+    to_update <- d |>
+      filter(`@action` == c("__ARCHIVE__")) |>
+      semi_join(keys |> filter(`@action` == "__APPEND__"), by = meta$keyColumns)
+    ## 追加数据中过期的记录
+    old_append <- d |>
+      filter(`@action` %in% c("__DELETE__", "__APPEND__")) |>
+      anti_join(keys, by = c(meta$keyColumns, "@lastmodifiedAt"))
+    ## 剔除：准备删除的，过期旧数据和过期新数据
+    resp <- d |>
+      anti_join(keys |> filter(`@action` == "__DELETE__"), by = meta$keyColumns) |>
+      anti_join(to_update, by = c(meta$keyColumns, "@lastmodifiedAt")) |>
+      anti_join(old_append, by = c(meta$keyColumns, "@lastmodifiedAt"))
+  } else {
+    ## 数据没有追加操作
+    resp <- d
+  }
+
+  ## 按元数据中的读取建议整理结果
+  if(!rlang::is_empty(meta$suggestedColumns)) {
+    resp |> select(!!!syms(meta$suggestedColumns), everything())
+  } else {
+    resp
+  }
+}
+## 列举
+
 #' @title 写入ApachheParquet文件集
 #' @param d 要写入的数据
 #' @param dsName 数据集名称
@@ -106,11 +355,6 @@ ds_write <- function(d, dsName, topic = "CACHE",
       "desc" = desc,
       "nrow" = nrow(d),
       "columns" = names(d),
-      "partColumns" = partColumns,
-      "keyColumns" = keyColumns,
-      "reading" = list(
-        "suggestedColumns" = suggestedColumns,
-        "titleColumn" = titleColumn),
       "updated" = list(
         "lastUpdatedAt" = lubridate::as_datetime(updateTimestamp, tz = "Asia/Shanghai") |> as.character(),
         "lastAffectedSummary" = updated,
@@ -148,21 +392,6 @@ ds_last_affected <- function(dsName = c(), stateTopic = "STATE") {
   state$affected[[1]] |> ds_read_affected()
 }
 
-#' @title 读取数据集
-#' @param dsName 数据集名称
-#' @param topic 主题域
-#' @family dataset function
-#' @export
-ds_read <- function(dsName, topic = "CACHE") {
-  path <- get_path(topic, dsName)
-  d <- arrow::open_dataset(path, format = "parquet")
-  meta <- ds_yaml(dsName, topic)
-  if(!rlang::is_empty(meta$suggestedColumns)) {
-    d |> select(!!!syms(meta$suggestedColumns), everything())
-  } else {
-    d
-  }
-}
 
 #' @title 列举所有数据集
 #' @param topic 主题域

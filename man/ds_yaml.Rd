@@ -16,6 +16,7 @@ ds_yaml(dsName, topic = "CACHE")
 }
 \seealso{
 Other metadata function: 
-\code{\link{ds_write_yaml}()}
+\code{\link{ds_yaml_schema}()},
+\code{\link{ds_yaml_write}()}
 }
 \concept{metadata function}
