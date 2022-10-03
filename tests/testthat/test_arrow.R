@@ -1,12 +1,10 @@
 library(dplyr, warn.conflicts = F)
 library(tibble, warn.conflicts = F)
 
-set_topic("STATE", "/tmp/glimmer/STATE")
-set_topic("CACHE", "/tmp/glimmer/CACHE")
+config_init(tempdir())
 
 clear_dir <- function() {
   get_path("CACHE") |> remove_dir()
-  get_path("STATE") |> remove_dir()
 }
 
 test_that("空更新：写入空数据时, 数据目录不受影响", {
@@ -109,9 +107,13 @@ test_that("更新文件：重写数据中包含的所有分区内文件", {
 })
 
 ## 局部写入数据时，如果列格式不同会发生什么？
-test_that("更新结构：当新分区数据比旧数据少一列时，数据集结构将被更新", {
+## 列结构不同时，允许新数据文件写入
+## 但读取时，会根据第一个（按字母排序）数据文件内的列结构读取所有数据
+test_that("更新结构：当新分区数据与旧数据不一致", {
   ds_remove_path("车数据")
   mtcars |> as_tibble() |>
+    slice(1:10) |>
+    select(cyl, 1:3) |>
     mutate(cyl = as.integer(cyl)) |>
     arrow::write_dataset(
       path = get_path("CACHE", "车数据"),
@@ -120,51 +122,35 @@ test_that("更新结构：当新分区数据比旧数据少一列时，数据集
       version = "2.0",
       existing_data_behavior = "delete_matching")
   ds_read("车数据") |> head() |> length() |>
-    testthat::expect_equal(11)
+    testthat::expect_equal(3)
 
   mtcars |> as_tibble() |>
-    select(-3) |>
+    slice(11:20) |>
+    select(cyl, 3:6) |>
     mutate(cyl = as.integer(cyl)) |>
-    filter(cyl != 8) |>
     arrow::write_dataset(
       path = get_path("CACHE", "车数据"),
       format = "parquet",
+      basename_template = "z-patch-{i}.parquet",
       partitioning = "cyl",
       version = "2.0",
-      basename_template = "abcd-{i}.p",
-      existing_data_behavior = "delete_matching")
+      existing_data_behavior = "overwrite")
   ds_read("车数据") |> head() |> length() |>
-    testthat::expect_equal(10)
+    testthat::expect_equal(3)
 
-  clear_dir()
-})
-
-test_that("更新结构：当新分区数据比旧数据多一列时，数据集结构也将被更新", {
-  ds_remove_path("车数据")
   mtcars |> as_tibble() |>
-    select(-3) |>
+    slice(11:20) |>
+    select(cyl, 3:6) |>
     mutate(cyl = as.integer(cyl)) |>
     arrow::write_dataset(
       path = get_path("CACHE", "车数据"),
       format = "parquet",
+      basename_template = "a-patch-{i}.parquet",
       partitioning = "cyl",
       version = "2.0",
-      existing_data_behavior = "delete_matching")
+      existing_data_behavior = "overwrite")
   ds_read("车数据") |> head() |> length() |>
-    testthat::expect_equal(10)
-  
-  mtcars |> as_tibble() |>
-    mutate(cyl = as.integer(cyl)) |>
-    filter(cyl != 8) |>
-    arrow::write_dataset(
-      path = get_path("CACHE", "车数据"),
-      format = "parquet",
-      partitioning = "cyl",
-      version = "2.0",
-      basename_template = "abcd-{i}.p",
-      existing_data_behavior = "delete_matching")
-  ds_read("车数据") |> head() |> length() |>
-    testthat::expect_equal(11)
+    testthat::expect_equal(5)
   
   clear_dir()
 })
@@ -355,15 +341,15 @@ test_that("最佳实践：按CUD操作做顶层分区，及时整理", {
   x <-mtcars |> as_tibble()
   d <- x
   # A tibble: 256 × 11
-  # 1:3 |> purrr::walk(function(i) {
-  #   d <<- rbind(d, d)
-  # })
+  1:3 |> purrr::walk(function(i) {
+    d <<- rbind(d, d)
+  })
 
   ## 下面这个示例用于测试较大规模的数据
   # A tibble: 1,048,576 × 11
-  1:17 |> purrr::walk(function(i) {
-    d <<- rbind(d, d)
-  })
+  # 1:17 |> purrr::walk(function(i) {
+  #   d <<- rbind(d, d)
+  # })
   d <- d |> rownames_to_column()
   
   ## 写入10条

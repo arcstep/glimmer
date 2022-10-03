@@ -3,7 +3,6 @@ library(tibble)
 
 test_that("加载YAML配置文件", {
   p <- tempdir()
-  fs::dir_create(p)
   config_init(p)
   config_yaml(p)$IMPORT |> testthat::expect_equal("./IMPORT")
 
