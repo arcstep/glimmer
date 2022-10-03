@@ -355,15 +355,15 @@ test_that("最佳实践：按CUD操作做顶层分区，及时整理", {
   x <-mtcars |> as_tibble()
   d <- x
   # A tibble: 256 × 11
-  1:3 |> purrr::walk(function(i) {
-    d <<- rbind(d, d)
-  })
-  
-  ## 下面这个示例用于测试较大规模的数据
-  # A tibble: 1,048,576 × 11
-  # 1:15 |> purrr::walk(function(i) {
+  # 1:3 |> purrr::walk(function(i) {
   #   d <<- rbind(d, d)
   # })
+
+  ## 下面这个示例用于测试较大规模的数据
+  # A tibble: 1,048,576 × 11
+  1:17 |> purrr::walk(function(i) {
+    d <<- rbind(d, d)
+  })
   d <- d |> rownames_to_column()
   
   ## 写入10条
@@ -374,6 +374,7 @@ test_that("最佳实践：按CUD操作做顶层分区，及时整理", {
     arrow::write_dataset(
       path = get_path("CACHE", "车数据"),
       format = "parquet",
+      chunk_size = 1e4,
       basename_template = paste0("create-", gen_batchNum(), "-{i}.parquet"),
       partitioning = c("@action", "cyl"),
       version = "2.0",
