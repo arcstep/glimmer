@@ -14,10 +14,11 @@ get_path(topic, ...)
 }
 \seealso{
 Other config functions: 
-\code{\link{get_config}()},
+\code{\link{config_init}()},
+\code{\link{config_load}()},
+\code{\link{config_write}()},
+\code{\link{config_yaml}()},
 \code{\link{get_topics}()},
-\code{\link{get_topic}()},
-\code{\link{load_config}()},
-\code{\link{set_topic}()}
+\code{\link{get_topic}()}
 }
 \concept{config functions}

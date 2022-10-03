@@ -8,9 +8,6 @@ library(dbplyr, warn.conflicts = F)
 library(RSQLite, warn.conflicts = F)
 library(DBI)
 
-set_topic("STATE", "/tmp/glimmer/STATE")
-set_topic("CACHE", "/tmp/glimmer/CACHE")
-
 prepare_db <- function() {
   d0 <- mtcars |> as_tibble() |> head(20)
   d <- d0
@@ -45,6 +42,7 @@ bench_sqlite3 <- function() {
   })
   
   ## arrow
+  glimmer::config_init(path = "/tmp/glimmer")
   system.time({
     d |> ds_write("mtcars")
   })
