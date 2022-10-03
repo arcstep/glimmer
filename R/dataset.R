@@ -174,8 +174,6 @@ ds_submit <- function(dsName, topic = "CACHE") {
   }
 }
 
-
-
 #' @title 读取数据集的文件信息
 #' @param dsName 数据集名称
 #' @param topic 主题域
@@ -183,8 +181,7 @@ ds_submit <- function(dsName, topic = "CACHE") {
 #' @export
 ds_files <- function(dsName, topic = "CACHE") {
   path <- get_path(topic, dsName)
-  arrow::open_dataset(path)$files |>
-    fs::file_info()
+  arrow::open_dataset(path)$files
 }
 
 #' @title 读取数据集
@@ -363,36 +360,6 @@ ds_write <- function(d, dsName, topic = "CACHE",
   }
 }
 
-
-#' @title 读取重写过分区的数据集文件
-#' @param affectedParts 受影响的分区文件，多个时用逗号间隔表示
-#' @family dataset function
-#' @export
-ds_read_affected <- function(affectedParts) {
-  affectedParts |>
-    stringr::str_split(",") |>
-    unlist() |>
-    arrow::open_dataset(format = "parquet")
-}
-
-#' @title 读取最近一次更新时重写过分区的数据集文件
-#' @param dsName 数据集名称
-#' @param stateTopic 状态数据主题域
-#' @family dataset function
-#' @export
-ds_last_affected <- function(dsName = c(), stateTopic = "STATE") {
-  if(rlang::is_empty(dsName)) {
-    state <- state_read("__WRITE_DATASET__", stateTopic) |>
-      arrange(desc(lastModified)) |> collect()
-  } else {
-    state <- state_read("__WRITE_DATASET__") |>
-      filter(.data$dataset == dsName) |>
-      arrange(desc(lastModified)) |> collect()
-  }
-  state$affected[[1]] |> ds_read_affected()
-}
-
-
 #' @title 列举所有数据集
 #' @param topic 主题域
 #' @family dataset function
@@ -407,17 +374,7 @@ ds_all <- function(topic = "CACHE") {
           "datasetId" = x$datasetId,
           "topic" = x$topic,
           "name" = x$name,
-          "desc" = x$desc,
-          "nrow" = x$nrow,
-          "columns" = x$columns |> paste(collapse = ","),
-          "partColumns" = x$partColumns |> paste(collapse = ","),
-          "keyColumns" =  x$keyColumns |> paste(collapse = ","),
-          "suggestedColumns" = x$suggestedColumns |> paste(collapse = ","),
-          "titleColumn" = x$titleColumn |> paste(collapse = ","),
-          "updateAt" = x$updateAt,
-          "updateTime" = x$updateTime,
-          "lastUpdate" = x$lastUpdate,
-          "lastAffected" = x$lastAffected |> paste(collapse = ",")
+          "desc" = x$desc
         )
       })
   } else {
