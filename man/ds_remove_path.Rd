@@ -21,6 +21,7 @@ Other dataset function:
 \code{\link{ds_compare_schema}()},
 \code{\link{ds_diff_dataset}()},
 \code{\link{ds_diff_schema}()},
+\code{\link{ds_init}()},
 \code{\link{ds_last_affected}()},
 \code{\link{ds_read_affected}()},
 \code{\link{ds_read}()},

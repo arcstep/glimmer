@@ -13,22 +13,12 @@ ds_yaml <- function(dsName, topic = "CACHE") {
 }
 
 #' @title 写入数据集的Yaml配置
-#' @description 允许对配置文件做局部更新
+#' @description 支持补写元数据的配置项
 #' @param meta 元数据内容，支持局部更新
 #' @param dsName 数据集名称
 #' @param topic 数据集保存的主题目录，默认为CACHE
 #' @family metadata function
 #' @export
-# "desc" = desc,
-# "nrow" = nrow(d),
-# "columns" = names(d),
-# "partColumns" = partColumns,
-# "keyColumns" = keyColumns,
-# "suggestedColumns" = suggestedColumns,
-# "titleColumn" = titleColumn,
-# "lastUpdate" = updated,
-# "lastAffected" = affectedParts$path
-
 ds_write_yaml <- function(meta, dsName, topic = "CACHE") {
   ## confirm dataset folder exist
   get_path(topic, dsName) |> fs::dir_create()
@@ -39,7 +29,13 @@ ds_write_yaml <- function(meta, dsName, topic = "CACHE") {
     purrr::walk(function(i) {
       datasetMeta[[i]] <<- meta[[i]]
     })
-  ## auto generate items
+  ## 自动生成的元数据项
+  # list(
+  #   datasetId,
+  #   topic,
+  #   name,
+  #   updateTime,
+  #   updateTimeDesc)
   updateTimestamp <- lubridate::now(tz = "Asia/Shanghai")
   datasetMeta$datasetId <- digest::digest(fs::path_join(c(topic, dsName)), algo = "xxhash32")
   datasetMeta$topic <- topic

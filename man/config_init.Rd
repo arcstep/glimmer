@@ -14,7 +14,7 @@ config_init(path, yml = "config.yml", option = list())
 \item{option}{配置项}
 }
 \description{
-初始化配置项
+一次性完成：初始化文件夹、配置项设定和加载
 }
 \seealso{
 Other config functions: 
