@@ -4,12 +4,21 @@
 \alias{ds_yaml_write}
 \title{写入数据集的Yaml配置}
 \usage{
-ds_yaml_write(meta, dsName, data = tibble(), topic = "CACHE")
+ds_yaml_write(
+  dsName,
+  meta = c(),
+  ex = c(),
+  data = tibble(),
+  topic = "CACHE",
+  type = "common"
+)
 }
 \arguments{
-\item{meta}{元数据内容，支持局部更新}
-
 \item{dsName}{数据集名称}
+
+\item{meta}{主元数据内容}
+
+\item{ex}{扩展的元数据内容}
 
 \item{data}{样本数据，用来分析数据结构}
 

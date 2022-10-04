@@ -4,7 +4,7 @@
 \name{glimmer-package}
 \alias{glimmer}
 \alias{glimmer-package}
-\title{glimmer: A framework to Manage Tasks for Data}
+\title{glimmer: A database for R Scripts based on Apache Arrow}
 \description{
 Help R uses to write less code and do more.
 }
