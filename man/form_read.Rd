@@ -4,10 +4,12 @@
 \alias{form_read}
 \title{读取表单数据}
 \usage{
-form_read(formId, formTopic = "FORM")
+form_read(formId, taskType = "common", formTopic = "FORM")
 }
 \arguments{
 \item{formId}{每个批次号保存为一个文件}
+
+\item{taskType}{任务类型}
 
 \item{formTopic}{保存表单的存储主题文件夹}
 

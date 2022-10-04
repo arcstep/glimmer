@@ -4,12 +4,14 @@
 \alias{form_write}
 \title{写入表单数据}
 \usage{
-form_write(data, formId, formTopic = "FORM")
+form_write(data, formId, taskType = "common", formTopic = "FORM")
 }
 \arguments{
 \item{data}{表单数据，一般以列表结构保存}
 
 \item{formId}{保障唯一，每个\code{formId}会保存为一个独立文件}
+
+\item{taskType}{任务类型}
 
 \item{formTopic}{保存表单的存储主题文件夹}
 
