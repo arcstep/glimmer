@@ -10,7 +10,7 @@ ds_yaml_write(
   ex = c(),
   data = tibble(),
   topic = "CACHE",
-  type = "common"
+  type = "__UNKNOWN__"
 )
 }
 \arguments{
@@ -23,6 +23,8 @@ ds_yaml_write(
 \item{data}{样本数据，用来分析数据结构}
 
 \item{topic}{数据集保存的主题目录，默认为CACHE}
+
+\item{type}{数据集类型}
 }
 \description{
 支持补写元数据的配置项

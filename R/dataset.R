@@ -27,7 +27,8 @@ ds_init <- function(dsName,
                     schema = list(),
                     partColumns = c(), keyColumns = c(),
                     suggestedColumns = c(), titleColumn = c(),
-                    desc = "-") {
+                    desc = "-",
+                    type = "__UNKNOWN__") {
   ## 要补充的元数据
   meta <- list(
     ## 所有数据集使用@action作为第一层分区：
@@ -43,7 +44,7 @@ ds_init <- function(dsName,
       "titleColumn" = titleColumn))
   
   ## 写入配置文件
-  ds_yaml_write(dsName = dsName, meta = meta, data = data, topic = topic, type = "common")
+  ds_yaml_write(dsName = dsName, meta = meta, data = data, topic = topic, type = type)
 }
 
 #' @title 批量追加更新的数据
@@ -193,9 +194,14 @@ ds_read <- function(dsName, topic = "CACHE") {
   path <- get_path(topic, dsName)
   
   d <- arrow::open_dataset(path, format = "parquet")
+  
+  if(length(d$files) == 0) {
+    return(tibble())
+  }
+
   ## 如果存储结构不包含@action、@lastmodifiedAt等元字段就抛异常
   if(FALSE %in% (c("@action", "@lastmodifiedAt") %in% names(d))) {
-    stop("dataset storage without: @action or @lastmodifiedAt")
+    stop("Dataset storage without: @action or @lastmodifiedAt.")
   }
   
   ## 如果配置文件中存在主键

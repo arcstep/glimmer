@@ -19,9 +19,10 @@ ds_yaml <- function(dsName, topic = "CACHE") {
 #' @param ex 扩展的元数据内容
 #' @param data 样本数据，用来分析数据结构
 #' @param topic 数据集保存的主题目录，默认为CACHE
+#' @param type 数据集类型
 #' @family metadata function
 #' @export
-ds_yaml_write <- function(dsName, meta = c(), ex = c(),  data = tibble(), topic = "CACHE", type = "common") {
+ds_yaml_write <- function(dsName, meta = c(), ex = c(),  data = tibble(), topic = "CACHE", type = "__UNKNOWN__") {
   ## 自动创建数据集文件夹
   get_path(topic, dsName) |> fs::dir_create()
   

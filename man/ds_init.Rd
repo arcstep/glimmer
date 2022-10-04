@@ -13,7 +13,8 @@ ds_init(
   keyColumns = c(),
   suggestedColumns = c(),
   titleColumn = c(),
-  desc = "-"
+  desc = "-",
+  type = "__UNKNOWN__"
 )
 }
 \arguments{
