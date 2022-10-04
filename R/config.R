@@ -83,7 +83,7 @@ config_write <- function(path, yml = "config.yml", option = list()) {
       "IMPORT" = "./IMPORT",
       "CACHE" = "./CACHE",
       "TASK" = "./TASK",
-      "LOG" = "./LOG")
+      "FORM" = "./FORM")
     names(option) |> purrr::walk(function(i) {
       xoption[[i]] <<- option[[i]]
     })

@@ -33,18 +33,17 @@ ds_init <- function(dsName,
     ## 所有数据集使用@action作为第一层分区：
     ## __NEW__, __UPDATE__, __DELETE__, __ARCHIVE__
     "schema" = schema,
-    "partColumns" = c("@action", partColumns) |> unlist(),
-    "keyColumns" = keyColumns,
+    "partColumns" = c("@action", partColumns) |> unique() |> unlist(),
+    "keyColumns" = keyColumns |> unique(),
     "writing" = list(
       ## 当键值重复时，使用新数据替换旧数据
-      "updateMode" = "overwrite"
-    ),
+      "updateMode" = "overwrite"),
     "reading" = list(
       "suggestedColumns" = suggestedColumns,
       "titleColumn" = titleColumn))
   
   ## 写入配置文件
-  ds_yaml_write(meta = meta, dsName = dsName, data = data, topic = topic)
+  ds_yaml_write(dsName = dsName, meta = meta, data = data, topic = topic, type = "common")
 }
 
 #' @title 批量追加更新的数据
@@ -373,6 +372,7 @@ ds_all <- function(topic = "CACHE") {
         list(
           "datasetId" = x$datasetId,
           "topic" = x$topic,
+          "type" = x$type,
           "name" = x$name,
           "desc" = x$desc
         )
