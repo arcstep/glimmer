@@ -76,31 +76,38 @@ task_read <- function(taskId, taskTopic = "TASK_DEFINE") {
 #' @param taskTopic 保存任务定义的存储主题文件夹
 #' @param family task-define function
 #' @export
-task_run <- function(taskId, taskTopic = "TASK_DEFINE", ...) {
+task_run <- function(taskId, taskTopic = "TASK_DEFINE", runMode = "in-process", ...) {
   toRun <- function(..., task) {
     ## 子函数内定义一个设置返回值的函数，供内部使用
-    assign("result", list(), envir = .GlobalEnv)
-    assign("set_result", function(x) assign("result", x, envir = .GlobalEnv),  envir = .GlobalEnv)
+    TaskRun.ENV <- new.env(hash = TRUE)
+    
+    assign("result", list(), envir = TaskRun.ENV)
     ## 逐项执行子任务
     task$items |> purrr::pwalk(function(taskScripts, params, scriptType) {
       names(params) |> purrr::walk(function(i) {
-        assign(i, params[[i]], envir = .GlobalEnv)
+        assign(i, params[[i]], envir = TaskRun.ENV)
       })
       if(scriptType == "string") {
-        parse(text = taskScripts) |> eval(envir = .GlobalEnv)
+        parse(text = taskScripts) |> eval(envir = TaskRun.ENV)
       } else if(scriptType == "file") {
-        parse(file = taskScripts) |> eval(envir = .GlobalEnv)
+        parse(file = taskScripts) |> eval(envir = TaskRun.ENV)
       } else if(scriptType == "folder") {
         fs::dir_ls(taskScripts, type = "file", recurse = T, glob = "*.R") |>
           sort() |>
-          purrr::walk(function(p) parse(file = p) |> eval(envir = .GlobalEnv))
+          purrr::walk(function(p) parse(file = p) |> eval(envir = TaskRun.ENV))
       } else {
         warning("UNKNOWN ScriptType: ", scriptType)
       }
     })
-    result
+    get("result", envir = TaskRun.ENV)
   }
-  # do.call("toRun", args = list(..., "task" = task_read(taskId, taskTopic)))
   taskread <- task_read(taskId, taskTopic)
-  callr::r(toRun, args = list(..., "task" = taskread))
+  
+  if(runMode == "r") {
+    callr::r(toRun, args = list(..., "task" = taskread))
+  } else if(runMode == "r_bg"){
+    callr::r_bg(toRun, args = list(..., "task" = taskread))
+  } else {
+    do.call("toRun", args = list(..., "task" = task_read(taskId, taskTopic)))
+  }
 }
