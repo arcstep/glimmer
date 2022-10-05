@@ -74,6 +74,7 @@ task_read <- function(taskId, taskTopic = "TASK_DEFINE") {
 #' @param taskId 任务标识
 #' @param params 参数赋值
 #' @param taskTopic 保存任务定义的存储主题文件夹
+#' @param runMode 运行模式（默认为进程内执行，改为r或r_bg为子进程执行）
 #' @param family task-define function
 #' @export
 task_run <- function(taskId, taskTopic = "TASK_DEFINE", runMode = "in-process", ...) {
@@ -96,16 +97,24 @@ task_run <- function(taskId, taskTopic = "TASK_DEFINE", runMode = "in-process", 
                parse(text = taskScripts) |> eval(envir = TaskRun.ENV),
                envir = TaskRun.ENV)
       } else if(scriptType == "file") {
+        if(!fs::file_exists(taskScripts)) {
+          stop("No such script file: ", taskScripts)
+        }
         assign("__RESULT__",
                parse(file = taskScripts) |> eval(envir = TaskRun.ENV),
                envir = TaskRun.ENV)
-      } else if(scriptType == "folder") {
-        fs::dir_ls(taskScripts, type = "file", recurse = T, glob = "*.R") |>
-          sort() |>
-          purrr::walk(function(p) {
-            assign("__RESULT__",
-                   parse(file = p) |> eval(envir = TaskRun.ENV),
-                   envir = TaskRun.ENV)
+      } else if(scriptType == "dir") {
+        if(!fs::dir_exists(taskScripts)) {
+          stop("No such script dir: ", taskScripts)
+        }
+        allFiles <- fs::dir_ls(taskScripts, type = "file", recurse = T, glob = "*.R")
+        if(length(allFiles) == 0) {
+          stop("None R file existing in scripts dir: ", taskScripts)
+        }
+        allFiles |> sort() |> purrr::walk(function(p) {
+          assign("__RESULT__",
+                 parse(file = p) |> eval(envir = TaskRun.ENV),
+                 envir = TaskRun.ENV)
           })
       } else {
         warning("UNKNOWN ScriptType: ", scriptType)

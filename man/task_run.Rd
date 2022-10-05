@@ -4,12 +4,14 @@
 \alias{task_run}
 \title{运行任务}
 \usage{
-task_run(taskId, taskTopic = "TASK_DEFINE", ...)
+task_run(taskId, taskTopic = "TASK_DEFINE", runMode = "in-process", ...)
 }
 \arguments{
 \item{taskId}{任务标识}
 
 \item{taskTopic}{保存任务定义的存储主题文件夹}
+
+\item{runMode}{运行模式（默认为进程内执行，改为r或r_bg为子进程执行）}
 
 \item{params}{参数赋值}
 
