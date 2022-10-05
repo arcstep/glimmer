@@ -22,4 +22,5 @@ Imports:
     lubridate,
     yaml,
     digest,
-    stringr
+    stringr,
+    callr

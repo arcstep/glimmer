@@ -107,7 +107,7 @@ batch_tasks <- function(importFolders, importTopic, taskTopic, taskFolder, batch
 #' 例如 \code{task_run(taskFolder = "abc", glob = "**/1.R")}。
 #' @family task functions
 #' @export
-task_run <- function(
+task_run0 <- function(
     taskTopic = "TASK/BUILD",
     taskFolder = "",
     importTopic = "IMPORT",

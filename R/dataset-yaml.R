@@ -30,7 +30,7 @@ ds_yaml_write <- function(dsName, meta = c(), ex = c(),  data = tibble(), topic 
   datasetMeta <- ds_yaml(dsName, topic)
 
   ## 自动生成额外的元数据项
-  updateTimestamp <- lubridate::now(tz = "Asia/Shanghai")
+  updateTimestamp <- lubridate::now()
   datasetMeta$datasetId <- digest::digest(fs::path_join(c(topic, dsName)), algo = "xxhash32")
   datasetMeta$topic <- topic
   datasetMeta$name <- dsName

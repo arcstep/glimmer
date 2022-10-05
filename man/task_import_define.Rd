@@ -4,7 +4,7 @@
 \alias{task_import_define}
 \title{创建导入任务的目录结构和脚本文件}
 \usage{
-task_import_define(taskFolder, taskTopic = "TASK")
+task_import_define(taskFolder, taskTopic = "TASK_SCRIPTS")
 }
 \description{
 约定taskFolder与导入素材的目录结构对应。

@@ -82,8 +82,8 @@ config_write <- function(path, yml = "config.yml", option = list()) {
       "ROOT_PATH" = fs::path_abs(path),
       "IMPORT" = "./IMPORT",
       "CACHE" = "./CACHE",
-      "TASK" = "./TASK",
-      "FORM" = "./FORM")
+      "TASK_SCRIPTS" = "./TASK_SCRIPTS",
+      "TASK_DEFINE" = "./TASK_DEFINE")
     names(option) |> purrr::walk(function(i) {
       xoption[[i]] <<- option[[i]]
     })

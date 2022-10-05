@@ -8,7 +8,7 @@ task_import_scan(
   dsName = "__IMPORT_TASK__",
   cacheTopic = "CACHE",
   importTopic = "IMPORT",
-  taskTopic = "TASK"
+  taskTopic = "TASK_SCRIPTS"
 )
 }
 \description{

@@ -30,7 +30,7 @@ task_import_init <- function(dsName = "__IMPORT_TASK__", cacheTopic = "CACHE") {
 #' 这将会执行taskFolder内所有R脚本文件（包括子文件夹）。
 #' @family task-import function
 #' @export
-task_import_define <- function(taskFolder, taskTopic = "TASK") {
+task_import_define <- function(taskFolder, taskTopic = "TASK_SCRIPTS") {
   pathTask <- get_path(taskTopic, "__IMPORT_TASK__", taskFolder, paste0(taskFolder, ".R"))
   fs::path_dir(pathTask) |> fs::dir_create()
   fs::file_touch(pathTask)
@@ -40,7 +40,7 @@ task_import_define <- function(taskFolder, taskTopic = "TASK") {
 #' @title 扫描需要导入的新任务
 #' @family task-import function
 #' @export
-task_import_scan <- function(dsName = "__IMPORT_TASK__", cacheTopic = "CACHE", importTopic = "IMPORT", taskTopic = "TASK") {
+task_import_scan <- function(dsName = "__IMPORT_TASK__", cacheTopic = "CACHE", importTopic = "IMPORT", taskTopic = "TASK_SCRIPTS") {
   ## 加载任务队列
   taskQueue <- ds_read(dsName) |> collect()
   ## 扫描素材文件夹

@@ -16,6 +16,6 @@ Other task functions:
 \code{\link{import_todo}()},
 \code{\link{task_dir}()},
 \code{\link{task_files}()},
-\code{\link{task_run}()}
+\code{\link{task_run0}()}
 }
 \concept{task functions}
