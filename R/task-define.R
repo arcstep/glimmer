@@ -80,26 +80,38 @@ task_run <- function(taskId, taskTopic = "TASK_DEFINE", runMode = "in-process", 
   toRun <- function(..., task) {
     ## 子函数内定义一个设置返回值的函数，供内部使用
     TaskRun.ENV <- new.env(hash = TRUE)
+    taskParams <- list(...)
+    names(taskParams) |> purrr::walk(function(i) {
+      assign(i, taskParams[[i]], envir = TaskRun.ENV)
+    })
     
-    assign("result", list(), envir = TaskRun.ENV)
+    assign("__RESULT__", list(), envir = TaskRun.ENV)
     ## 逐项执行子任务
     task$items |> purrr::pwalk(function(taskScripts, params, scriptType) {
       names(params) |> purrr::walk(function(i) {
         assign(i, params[[i]], envir = TaskRun.ENV)
       })
       if(scriptType == "string") {
-        parse(text = taskScripts) |> eval(envir = TaskRun.ENV)
+        assign("__RESULT__",
+               parse(text = taskScripts) |> eval(envir = TaskRun.ENV),
+               envir = TaskRun.ENV)
       } else if(scriptType == "file") {
-        parse(file = taskScripts) |> eval(envir = TaskRun.ENV)
+        assign("__RESULT__",
+               parse(file = taskScripts) |> eval(envir = TaskRun.ENV),
+               envir = TaskRun.ENV)
       } else if(scriptType == "folder") {
         fs::dir_ls(taskScripts, type = "file", recurse = T, glob = "*.R") |>
           sort() |>
-          purrr::walk(function(p) parse(file = p) |> eval(envir = TaskRun.ENV))
+          purrr::walk(function(p) {
+            assign("__RESULT__",
+                   parse(file = p) |> eval(envir = TaskRun.ENV),
+                   envir = TaskRun.ENV)
+          })
       } else {
         warning("UNKNOWN ScriptType: ", scriptType)
       }
     })
-    get("result", envir = TaskRun.ENV)
+    get("__RESULT__", envir = TaskRun.ENV)
   }
   taskread <- task_read(taskId, taskTopic)
   
