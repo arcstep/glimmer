@@ -96,7 +96,7 @@ ds_append <- function(d, dsName, topic = "CACHE", toDelete = FALSE) {
         mutate(`@batchId` = batch) |>
         mutate(`@lastmodifiedAt` = lubridate::now(tzone = "Asia/Shanghai")) |>
         ungroup() |>
-        arrow::write_dataset(
+        write_dataset(
           path = path,
           format = "parquet",
           write_statistics = TRUE,
@@ -153,7 +153,7 @@ ds_submit <- function(dsName, topic = "CACHE") {
     d <- ds_read(dsName, topic, noDeleted = FALSE) |> collect()
   } else {
     myschema <- do.call("schema", ds_schema_obj(ds_yaml_schema(dsName, topic)))
-    to_append <- arrow::open_dataset(path, format = "parquet", schema = myschema) |>
+    to_append <- open_dataset(path, format = "parquet", schema = myschema) |>
       filter(`@action` ==  "__APPEND__") |>
       collect()
     ## 仅归档__APPEND__数据中包含的分区
@@ -173,7 +173,7 @@ ds_submit <- function(dsName, topic = "CACHE") {
       d |>
         mutate(`@action` = "__ARCHIVE__") |>
         ungroup() |>
-        arrow::write_dataset(
+        write_dataset(
           path = path,
           format = "parquet",
           write_statistics = TRUE,
@@ -197,7 +197,7 @@ ds_submit <- function(dsName, topic = "CACHE") {
 #' @export
 ds_files <- function(dsName, topic = "CACHE") {
   path <- get_path(topic, dsName)
-  arrow::open_dataset(path)$files
+  open_dataset(path)$files
 }
 
 #' @title 读取数据集
@@ -213,7 +213,7 @@ ds_read <- function(dsName, topic = "CACHE", toFix = TRUE, noDeleted = TRUE) {
 
   ## 按照yaml配置中的schema读取数据集
   myschema <- do.call("schema", ds_schema_obj(ds_yaml_schema(dsName, topic)))
-  d <- arrow::open_dataset(path, format = "parquet", schema = myschema)
+  d <- open_dataset(path, format = "parquet", schema = myschema)
   
   if(length(d$files) == 0) {
     return(tibble())
@@ -338,8 +338,8 @@ ds_schema <- function(ds) {
     path <- tempfile()
     ds |>
       head() |>
-      arrow::write_dataset(path = path, format = "parquet", write_statistics = FALSE, version = "2.0")
-    s <- (arrow::open_dataset(path, format = "parquet"))$schema
+      write_dataset(path = path, format = "parquet", write_statistics = FALSE, version = "2.0")
+    s <- (open_dataset(path, format = "parquet"))$schema
     myschema <- s$fields |>
       purrr::map_df(function(item) {
         str <- item$ToString() |> stringr::str_split(": ")
@@ -355,42 +355,42 @@ ds_schema <- function(ds) {
 #' @export
 ds_field <- function(x) {
   allFields <- list(
-    "int8" = arrow::int8(),
-    "int16" = arrow::int16(),
-    "int32" = arrow::int32(),
-    "int64" = arrow::int64(),
-    "uint8" = arrow::uint8(),
-    "uint16" = arrow::uint16(),
-    "uint32" = arrow::uint32(),
-    "uint64" = arrow::uint64(),
-    "float16" = arrow::float16(),
-    "halffloat" = arrow::halffloat(),
-    "float32" = arrow::float32(),
-    "float" = arrow::float(),
-    "float64" = arrow::float64(),
-    "double" = arrow::float64(),
-    "logical" = arrow::boolean(),
-    "boolean" = arrow::boolean(),
-    "bool" = arrow::bool(),
-    "utf8" = arrow::utf8(),
-    "large_utf8" = arrow::large_utf8(),
-    "binary" = arrow::binary(),
-    "large_binary" = arrow::large_binary(),
-    "character" = arrow::string(),
-    "string" = arrow::string(),
-    "dictionary<values=string, indices=int32>" = arrow::dictionary(index_type = arrow::int32(), value_type = arrow::utf8(), ordered = FALSE),
-    "day" = arrow::date32(),
-    "date32" = arrow::date32(),
-    "date32[day]" = arrow::date32(),
-    "date64" = arrow::date64(),
-    "time32" = arrow::time32(unit = c("ms", "s")),
-    "time64" = arrow::time64(unit = c("ns", "us")),
-    "null" = arrow::null(),
-    "timestamp" = arrow::timestamp(unit = c("s", "ms", "us", "ns")),
-    "timestamp[s]" = arrow::timestamp(unit = c("s", "ms", "us", "ns")),
-    "timestamp[us]" = arrow::timestamp(unit = c("us")),
-    "timestamp[us, tz=UTC]" = arrow::timestamp(unit = c("us")),
-    "timestamp[us, tz=Asia/Shanghai]" = arrow::timestamp(unit = c("us"), timezone = "Asia/Shanghai")
+    "int8" = int8(),
+    "int16" = int16(),
+    "int32" = int32(),
+    "int64" = int64(),
+    "uint8" = uint8(),
+    "uint16" = uint16(),
+    "uint32" = uint32(),
+    "uint64" = uint64(),
+    "float16" = float16(),
+    "halffloat" = halffloat(),
+    "float32" = float32(),
+    "float" = float(),
+    "float64" = float64(),
+    "double" = float64(),
+    "logical" = boolean(),
+    "boolean" = boolean(),
+    "bool" = bool(),
+    "utf8" = utf8(),
+    "large_utf8" = large_utf8(),
+    "binary" = binary(),
+    "large_binary" = large_binary(),
+    "character" = string(),
+    "string" = string(),
+    "dictionary<values=string, indices=int32>" = dictionary(index_type = int32(), value_type = utf8(), ordered = FALSE),
+    "day" = date32(),
+    "date32" = date32(),
+    "date32[day]" = date32(),
+    "date64" = date64(),
+    "time32" = time32(unit = c("ms", "s")),
+    "time64" = time64(unit = c("ns", "us")),
+    "null" = null(),
+    "timestamp" = timestamp(unit = c("s", "ms", "us", "ns")),
+    "timestamp[s]" = timestamp(unit = c("s", "ms", "us", "ns")),
+    "timestamp[us]" = timestamp(unit = c("us")),
+    "timestamp[us, tz=UTC]" = timestamp(unit = c("us")),
+    "timestamp[us, tz=Asia/Shanghai]" = timestamp(unit = c("us"), timezone = "Asia/Shanghai")
   )
   allFields[[x]]
 }
