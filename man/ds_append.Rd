@@ -24,7 +24,6 @@ ds_append(d, dsName, topic = "CACHE", toDelete = FALSE)
 Other dataset function: 
 \code{\link{ds_all}()},
 \code{\link{ds_as_unique}()},
-\code{\link{ds_compare_schema}()},
 \code{\link{ds_delete}()},
 \code{\link{ds_diff_dataset}()},
 \code{\link{ds_diff_schema}()},

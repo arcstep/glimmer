@@ -329,32 +329,6 @@ ds_schema <- function(ds) {
   }
 }
 
-#' @title 确认数据集同构
-#' @description
-#' 比较两个数据集的列数、列名、列字段类型是否一致。
-#' @details
-#' 如果列结构完全相等，则返回列表中的equal为TRUE，否则为FALSE；
-#' 如果第一个数据集中的列在第二个数据集中全部存在，且字段类型一致，则返回列表中的
-#' contained为TRUE，否则为FALSE。
-#'
-#' 在需要时，可以将ds_schema获得的数据集结构持久化保存（例如，使用saveRDS），
-#' 然后用于比较新导入、新生成的数据集是否合规。
-#' 也可以直接使用 dataset_comfirm 来完成这个工作。
-#' @param schema1 用于比较的数据集结构，可使用ds_schema获得
-#' @param schema2 用于参考的数据集结构，可使用ds_schema获得
-#' @family dataset function
-#' @export
-ds_compare_schema <- function(schema1, schema2) {
-  if(rlang::is_empty(schema2)) {
-    list("equal" = FALSE, "contained" = FALSE)
-  } else {
-    result <- ds_diff_schema(schema1, schema2)
-    equal <- !purrr::some(result$equal, function(item) !item)
-    contained <- !purrr::some(result$contained, function(item) !item)
-    list(equal=equal, contained=contained)
-  }
-}
-
 #' @title 详细比较两个数据集结构
 #' @param schema1 用于比较的数据集结构，可使用\code{\link{ds_schema}}获得
 #' @param schema2 用于参考的数据集结构，可使用\code{\link{ds_schema}}获得
@@ -385,7 +359,7 @@ ds_diff_dataset <- function(ds1, ds2) {
 
 #' @title 去除重复行
 #' @description
-#' 按键值列去除重复行。
+#' 按键值列去除重复行，保留最先发现的行
 #' @param ds 要确认的数据集
 #' @param columns 要确认的列名或其向量、列表
 #' @family dataset function

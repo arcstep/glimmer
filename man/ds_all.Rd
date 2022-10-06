@@ -16,7 +16,6 @@ ds_all(topic = "CACHE")
 Other dataset function: 
 \code{\link{ds_append}()},
 \code{\link{ds_as_unique}()},
-\code{\link{ds_compare_schema}()},
 \code{\link{ds_delete}()},
 \code{\link{ds_diff_dataset}()},
 \code{\link{ds_diff_schema}()},

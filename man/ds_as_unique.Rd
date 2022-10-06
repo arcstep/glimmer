@@ -12,13 +12,12 @@ ds_as_unique(ds, keyColumns)
 \item{columns}{要确认的列名或其向量、列表}
 }
 \description{
-按键值列去除重复行。
+按键值列去除重复行，保留最先发现的行
 }
 \seealso{
 Other dataset function: 
 \code{\link{ds_all}()},
 \code{\link{ds_append}()},
-\code{\link{ds_compare_schema}()},
 \code{\link{ds_delete}()},
 \code{\link{ds_diff_dataset}()},
 \code{\link{ds_diff_schema}()},
