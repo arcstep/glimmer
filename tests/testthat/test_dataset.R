@@ -11,17 +11,50 @@ test_that("当数据集配置文件不存在时", {
   ds_remove_path("车数据")
   ds_append(mtcars, "车数据") |>
     testthat::expect_error("Empty Dataset Metadata")
+  
+  clear_dir()
 })
 
-test_that("当新数据集结构与配置文件不一致", {
+test_that("当新数据集结构不一致", {
   ds_remove_path("车数据")
   ds_init("车数据", data = mtcars |> head())
   
-  mtcars |> select(-2) |> ds_append("车数据") |>
-    testthat::expect_error("Different Schema")
+  ## 接受缺少字段
+  mtcars |> select(-2) |> ds_append("车数据")
+  (names(mtcars)[[2]] %in% names(ds_read("车数据") |> collect())) |>
+    testthat::expect_true()
   
-  mtcars |> mutate("xx" = "XX") |> ds_append("车数据") |>
-    testthat::expect_error("Different Schema")
+  ## 接受多出字段
+  mtcars |> mutate("xx" = "XX") |> ds_append("车数据")
+  ("xx" %in% names(ds_read("车数据") |> collect())) |>
+    testthat::expect_false()
+  
+  clear_dir()
+})
+
+test_that("当新数据集结构不一致，且缺少关键字段", {
+  ds_remove_path("车数据")
+  m <- mtcars |> as_tibble() |> rownames_to_column("id")
+  ds_init("车数据", data = m |> head(), keyColumns = "id", partColumns = "cyl")
+  
+  ## 缺少主键
+  mtcars |> as_tibble() |>
+    ds_append("车数据") |>
+    testthat::expect_error("No keyColumns")
+  
+  ## 缺少分区字段
+  m |>
+    select(-cyl) |>
+    ds_append("车数据") |>
+    testthat::expect_error("No partColumns")
+  
+  ## 删除时仅提供主键字段
+  tibble("id" = 1, "cyl" = 4) |>
+    ds_delete("车数据")
+  ds_read("车数据", noDeleted = F) |> collect()
+  arrow::open_dataset(get_path("CACHE", "车数据")) |> collect()
+
+  clear_dir()
 })
 
 test_that("追加数据：缺少架构描述", {

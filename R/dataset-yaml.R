@@ -59,10 +59,17 @@ ds_yaml_write <- function(dsName, meta = c(), ex = c(),  data = tibble(), topic 
   
   ## 如果元数据没有提供架构描述，则从样本数据中推断
   if(rlang::is_empty(meta$schema)) {
-    datasetMeta$schema <- ds_schema(data) |>
-      purrr::pmap(function(fieldType, fieldName) {
-        list("name" = fieldName, "type" = fieldType)
-      })
+    if(!rlang::is_empty(data)) {
+      mydata <- data |>
+        mutate(`@deleted` = FALSE) |>
+        mutate(`@action` = "__APPEND__") |>
+        mutate(`@batchId` = gen_batchNum()) |>
+        mutate(`@lastmodifiedAt` = lubridate::now())
+      datasetMeta$schema <- ds_schema(mydata) |>
+        purrr::pmap(function(fieldType, fieldName) {
+          list("name" = fieldName, "type" = fieldType)
+        })
+    }
   }
 
   ## 保存YAML文件

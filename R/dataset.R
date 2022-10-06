@@ -73,27 +73,33 @@ ds_append <- function(d, dsName, topic = "CACHE", toDelete = FALSE) {
       if(rlang::is_empty(meta$schema)) {
         stop("No Schema Defined!!!")
       }
-      
-      ## 追加数据时，确定数据结构一致
-      schema_old <- ds_yaml_schema(dsName, topic)
-      diff_info <- ds_diff_schema(schema_old, ds_schema(d)) |> filter(!equal)
-      if(nrow(diff_info) > 0) {
-        print(diff_info |> rename(`F.Old` = `fieldType.x`, `F.New` = `fieldType.y`))
-        stop("Different Schema >> ", path)
-      }    
 
+      ## 缺少主键字段
+      if(!rlang::is_empty(meta$keyColumns)) {
+        if(FALSE %in% (meta$keyColumns %in% names(d))) {
+          stop("No keyColumns in data: ", meta$keyColumns |> paste(collapse = ", "))
+        }
+      }
+      
+      ## 缺少分区字段
+      if(!rlang::is_empty(meta$partColumns)) {
+        if(FALSE %in% (meta$partColumns %in% c("@action", names(d)))) {
+          stop("No partColumns in data: ", meta$partColumns |> paste(collapse = ", "))
+        }
+      }
+      
       ## 写入数据
       batch <- gen_batchNum()
       d |>
-        mutate(cyl = as.integer(cyl)) |>
         mutate(`@deleted` = toDelete) |>
         mutate(`@action` = "__APPEND__") |>
-        mutate(`@batch` = batch) |>
+        mutate(`@batchId` = batch) |>
         mutate(`@lastmodifiedAt` = lubridate::now(tzone = "Asia/Shanghai")) |>
         ungroup() |>
         arrow::write_dataset(
           path = path,
           format = "parquet",
+          write_statistics = TRUE,
           basename_template = paste0("append-", batch, "-{i}.parquet"),
           partitioning = meta$partColumns,
           version = "2.0",
@@ -146,8 +152,8 @@ ds_submit <- function(dsName, topic = "CACHE") {
   if(rlang::is_empty(part)) {
     d <- ds_read(dsName, topic, noDeleted = FALSE) |> collect()
   } else {
-    to_append <-
-      arrow::open_dataset(path, format = "parquet") |>
+    myschema <- do.call("schema", ds_schema_obj(ds_yaml_schema(dsName, topic)))
+    to_append <- arrow::open_dataset(path, format = "parquet", schema = myschema) |>
       filter(`@action` ==  "__APPEND__") |>
       collect()
     ## 仅归档__APPEND__数据中包含的分区
@@ -165,12 +171,12 @@ ds_submit <- function(dsName, topic = "CACHE") {
       ## 写入数据
       batch <- gen_batchNum()
       d |>
-        mutate(cyl = as.integer(cyl)) |>
         mutate(`@action` = "__ARCHIVE__") |>
         ungroup() |>
         arrow::write_dataset(
           path = path,
           format = "parquet",
+          write_statistics = TRUE,
           basename_template = paste0("archive-", batch, "-{i}.parquet"),
           partitioning = meta$partColumns,
           version = "2.0",
@@ -204,17 +210,19 @@ ds_files <- function(dsName, topic = "CACHE") {
 ds_read <- function(dsName, topic = "CACHE", toFix = TRUE, noDeleted = TRUE) {
   meta <- ds_yaml(dsName, topic)
   path <- get_path(topic, dsName)
-  
-  d <- arrow::open_dataset(path, format = "parquet")
+
+  ## 按照yaml配置中的schema读取数据集
+  myschema <- do.call("schema", ds_schema_obj(ds_yaml_schema(dsName, topic)))
+  d <- arrow::open_dataset(path, format = "parquet", schema = myschema)
   
   if(length(d$files) == 0) {
     return(tibble())
   }
 
   ## 如果存储结构不包含@action、@lastmodifiedAt等元字段就抛异常
-  metaColumns <- c("@action", "@lastmodifiedAt", "@batch", "@deleted")
+  metaColumns <- c("@action", "@lastmodifiedAt", "@batchId", "@deleted")
   if(FALSE %in% (metaColumns %in% names(d))) {
-    stop("Dataset storage lost some meata column: ", metaColumns)
+    stop("Dataset storage lost some meata column: ", metaColumns |> paste(collapse = ", "))
   }
   
   ## 如果配置文件中存在主键
@@ -284,7 +292,6 @@ ds_all <- function(topic = "CACHE") {
       purrr::map_df(function(path) {
         x <- yaml::read_yaml(path)
         list(
-          "topic" = x$topic,
           "datasetId" = x$datasetId,
           "type" = x$type,
           "name" = x$name,
@@ -314,7 +321,8 @@ ds_remove_path <- function(dsName, topic = "CACHE") {
 
 #' @title 查看数据集架构
 #' @description
-#' 查看数据集架构时，必须包含数据
+#' 查看数据集架构时，必须包含数据。
+#' 
 #' @param ds 数据框
 #' @family dataset function
 #' @export
@@ -322,12 +330,85 @@ ds_schema <- function(ds) {
   if(rlang::is_empty(ds)) {
     tibble()
   } else {
-    tibble(
-      fieldName = names(ds),
-      fieldType = lapply(names(ds), function(field) {typeof(ds[[field]])}) |> unlist()
-    ) |> arrange(.data[["fieldName"]])
+    # tibble(
+    #   fieldName = names(ds),
+    #   fieldType = lapply(names(ds), function(field) {typeof(ds[[field]])}) |> unlist()
+    # ) |> arrange(.data[["fieldName"]])
+    ## 写入到临时文件，再提取类型信息
+    path <- tempfile()
+    ds |>
+      head() |>
+      arrow::write_dataset(path = path, format = "parquet", write_statistics = FALSE, version = "2.0")
+    s <- (arrow::open_dataset(path, format = "parquet"))$schema
+    myschema <- s$fields |>
+      purrr::map_df(function(item) {
+        str <- item$ToString() |> stringr::str_split(": ")
+        list("fieldName" = str[[1]][[1]], "fieldType" = str[[1]][[2]])
+      })
+    path |> fs::file_delete()
+    myschema
   }
 }
+
+#' @title 返回schema所有支持的字段
+#' @family schema function
+#' @export
+ds_field <- function(x) {
+  allFields <- list(
+    "int8" = arrow::int8(),
+    "int16" = arrow::int16(),
+    "int32" = arrow::int32(),
+    "int64" = arrow::int64(),
+    "uint8" = arrow::uint8(),
+    "uint16" = arrow::uint16(),
+    "uint32" = arrow::uint32(),
+    "uint64" = arrow::uint64(),
+    "float16" = arrow::float16(),
+    "halffloat" = arrow::halffloat(),
+    "float32" = arrow::float32(),
+    "float" = arrow::float(),
+    "float64" = arrow::float64(),
+    "double" = arrow::float64(),
+    "logical" = arrow::boolean(),
+    "boolean" = arrow::boolean(),
+    "bool" = arrow::bool(),
+    "utf8" = arrow::utf8(),
+    "large_utf8" = arrow::large_utf8(),
+    "binary" = arrow::binary(),
+    "large_binary" = arrow::large_binary(),
+    "character" = arrow::string(),
+    "string" = arrow::string(),
+    "dictionary<values=string, indices=int32>" = arrow::dictionary(index_type = arrow::int32(), value_type = arrow::utf8(), ordered = FALSE),
+    "day" = arrow::date32(),
+    "date32" = arrow::date32(),
+    "date32[day]" = arrow::date32(),
+    "date64" = arrow::date64(),
+    "time32" = arrow::time32(unit = c("ms", "s")),
+    "time64" = arrow::time64(unit = c("ns", "us")),
+    "null" = arrow::null(),
+    "timestamp" = arrow::timestamp(unit = c("s", "ms", "us", "ns")),
+    "timestamp[s]" = arrow::timestamp(unit = c("s", "ms", "us", "ns")),
+    "timestamp[us]" = arrow::timestamp(unit = c("us")),
+    "timestamp[us, tz=UTC]" = arrow::timestamp(unit = c("us")),
+    "timestamp[us, tz=Asia/Shanghai]" = arrow::timestamp(unit = c("us"), timezone = "Asia/Shanghai")
+  )
+  allFields[[x]]
+}
+
+#' @title 构造Arrow的schema
+#' @description 
+#' 从数据框格式的schema转换为Arrow的Schema对象
+#' 
+#' @param dsSchema 数据框格式保存的schema
+#' @family dataset function
+#' @export
+ds_schema_obj <- function(dsSchema) {
+  s <- list()
+  dsSchema |>
+    purrr::pmap(function(fieldName, fieldType) s[[fieldName]] <<- ds_field(fieldType))
+  s
+}
+
 
 #' @title 详细比较两个数据集结构
 #' @param schema1 用于比较的数据集结构，可使用\code{\link{ds_schema}}获得

@@ -54,6 +54,7 @@ Other dataset function:
 \code{\link{ds_files}()},
 \code{\link{ds_read}()},
 \code{\link{ds_remove_path}()},
+\code{\link{ds_schema_obj}()},
 \code{\link{ds_schema}()},
 \code{\link{ds_write}()}
 }

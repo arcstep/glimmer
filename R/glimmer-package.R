@@ -2,6 +2,7 @@
 "_PACKAGE"
 
 ## usethis namespace: start
+#' @importFrom arrow schema 
 #' @importFrom tibble tibble
 #' @importFrom tibble tibble as_tibble tribble
 #' @importFrom tidyr expand_grid nest unite

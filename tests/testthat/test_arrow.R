@@ -328,7 +328,41 @@ test_that("追加更新：补充更新记录，读时过滤", {
   clear_dir()
 })
 
+## schema
+test_that("使用schema：控制返回结果的列结构", {
+  ds_remove_path("车数据")
+  d <- mtcars |> as_tibble() |>
+    slice(1:10) |>
+    select(cyl, 1:10) |>
+    mutate(cyl = as.integer(cyl))
+  d |>
+    select(cyl, 3:6) |>
+    arrow::write_dataset(
+      path = get_path("CACHE", "车数据"),
+      format = "parquet",
+      partitioning = "cyl",
+      version = "2.0",
+      existing_data_behavior = "delete_matching")
+  s1 <- arrow::arrow_table(d)$schema
+  arrow::open_dataset(get_path("CACHE", "车数据"), schema = s1)$schema$ToString() |>
+    testthat::expect_equal(s1$ToString())
+  
+  mtcars |> as_tibble() |>
+    slice(11:20) |>
+    select(cyl, 1:10) |>
+    mutate(cyl = as.integer(cyl)) |>
+    arrow::write_dataset(
+      path = get_path("CACHE", "车数据"),
+      format = "parquet",
+      basename_template = "a-patch-{i}.parquet",
+      partitioning = "cyl",
+      version = "2.0",
+      existing_data_behavior = "overwrite")
+  arrow::open_dataset(get_path("CACHE", "车数据"), schema = s1)$schema$ToString() |>
+    testthat::expect_equal(s1$ToString())
 
+  clear_dir()  
+})
 
 ## 1、在顶层按__CREATE__、__UPDATE__、__DELETE__等操作分区
 ## 2、增加元数据字段@lastmodifiedAt

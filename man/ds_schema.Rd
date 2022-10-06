@@ -10,7 +10,7 @@ ds_schema(ds)
 \item{ds}{数据框}
 }
 \description{
-查看数据集架构时，必须包含数据
+查看数据集架构时，必须包含数据。
 }
 \seealso{
 Other dataset function: 
@@ -24,6 +24,7 @@ Other dataset function:
 \code{\link{ds_init}()},
 \code{\link{ds_read}()},
 \code{\link{ds_remove_path}()},
+\code{\link{ds_schema_obj}()},
 \code{\link{ds_write}()}
 }
 \concept{dataset function}
