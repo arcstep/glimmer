@@ -278,14 +278,14 @@ ds_read <- function(dsName, topic = "CACHE", toFix = TRUE, noDeleted = TRUE) {
 #' @family dataset function
 #' @export
 ds_all <- function(topic = "CACHE") {
-  path <- get_path(topic)
-  if(fs::dir_exists(path)) {
-    fs::dir_ls(path, type = "file", all = T, glob = "*.yml", recurse = T) |>
+  root_path <- get_path(topic)
+  if(fs::dir_exists(root_path)) {
+    fs::dir_ls(root_path, type = "file", all = T, glob = "*.yml", recurse = T) |>
       purrr::map_df(function(path) {
         x <- yaml::read_yaml(path)
         list(
-          "datasetId" = x$datasetId,
           "topic" = x$topic,
+          "datasetId" = x$datasetId,
           "type" = x$type,
           "name" = x$name,
           "desc" = x$desc

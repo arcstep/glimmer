@@ -70,6 +70,28 @@ task_read <- function(taskId, taskTopic = "TASK_DEFINE") {
   }
 }
 
+#' @title 列举所有任务定义
+#' @param topic 主题域
+#' @param family task-define function
+#' @export
+task_all <- function(taskTopic = "TASK_DEFINE") {
+  root_path <- get_path(taskTopic)
+  if(fs::dir_exists(root_path)) {
+    fs::dir_ls(root_path, type = "file", all = T, glob = "*.yml", recurse = T) |>
+      purrr::map_df(function(path) {
+        x <- yaml::read_yaml(path)
+        list(
+          "taskTopic" = x$taskTopic,
+          "taskId" = x$taskId,
+          "items" = x$items,
+          "taskType" = x$taskType,
+          "desc" = x$desc,
+          "createdAt" = x$createdAt
+        )
+      })
+  }
+}
+
 #' @title 运行任务
 #' @param taskId 任务标识
 #' @param params 参数赋值
