@@ -69,6 +69,11 @@ ds_append <- function(d, dsName, topic = "CACHE", toDelete = FALSE) {
         stop("Empty Dataset Metadata!!!")
       }
       
+      ## 缺少schema定义
+      if(rlang::is_empty(meta$schema)) {
+        stop("No Schema Defined!!!")
+      }
+      
       ## 追加数据时，确定数据结构一致
       schema_old <- ds_yaml_schema(dsName, topic)
       diff_info <- ds_diff_schema(schema_old, ds_schema(d)) |> filter(!equal)
@@ -95,6 +100,18 @@ ds_append <- function(d, dsName, topic = "CACHE", toDelete = FALSE) {
           existing_data_behavior = "overwrite")
     }
   }
+}
+
+#' @title 写入数据
+#' @description 先执行追加操作，然后直接归档整理。
+#' @param d 要追加的数据
+#' @param dsName 数据集名称
+#' @param topic 数据集保存的主题目录，默认为CACHE
+#' @family dataset function
+#' @export
+ds_write <- function(d, dsName, topic = "CACHE") {
+  ds_append(d, dsName, topic)
+  ds_submit(dsName, topic)
 }
 
 #' @title 批量追加删除的数据

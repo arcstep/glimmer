@@ -28,7 +28,7 @@ task_create <- function(taskId, items = tibble(), taskType = "__UNKNOWN__", desc
 #' @param taskTopic 保存任务定义的存储主题文件夹
 #' @param family task-define function
 #' @export
-task_add <- function(
+task_item_add <- function(
     taskId,
     taskScript,
     params = list(NULL),

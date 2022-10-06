@@ -35,15 +35,15 @@ test_that("定义任务：string类型", {
   task_read("A")$taskType |>
     testthat::expect_equal("__UNKNOWN__")
 
-  task_add(taskId = "A", taskScript = "ls()", scriptType = "string")
+  task_item_add(taskId = "A", taskScript = "ls()", scriptType = "string")
   task_read("A")$items |> nrow() |>
     testthat::expect_equal(1)
   
-  task_add(taskId = "A", taskScript = "ls()", params = list(batchFoler = NULL), scriptType = "string")
+  task_item_add(taskId = "A", taskScript = "ls()", params = list(batchFoler = NULL), scriptType = "string")
   task_read("A")$items |> nrow() |>
     testthat::expect_equal(2)
   
-  task_add(taskId = "A", taskScript = "ls()", params = list(batchFoler = "schedual_1001", data = 1:3), scriptType = "string")
+  task_item_add(taskId = "A", taskScript = "ls()", params = list(batchFoler = "schedual_1001", data = 1:3), scriptType = "string")
   task_read("A")$items |> nrow() |>
     testthat::expect_equal(3)
   
@@ -52,11 +52,11 @@ test_that("定义任务：string类型", {
 
 test_that("定义任务：file类型", {
   task_create(taskId = "B", list())
-  task_add(
+  task_item_add(
     taskId = "B",
     taskScript = path_a,
     scriptType = "file")
-  task_add(
+  task_item_add(
     taskId = "B",
     taskScript = "result <- (x |> filter(age > 6))",
     scriptType = "string")
@@ -68,7 +68,7 @@ test_that("定义任务：file类型", {
 
 test_that("定义任务：dir类型", {
   task_create(taskId = "C", list())
-  task_add(
+  task_item_add(
     taskId = "C",
     taskScript = path_A,
     scriptType = "dir")
@@ -80,11 +80,11 @@ test_that("定义任务：dir类型", {
 
 test_that("运行任务：string", {
   task_create(taskId = "B", list())
-  task_add(
+  task_item_add(
     taskId = "B",
     taskScript = path_a,
     scriptType = "file")
-  task_add(
+  task_item_add(
     taskId = "B",
     taskScript = "result <- (x |> filter(age > 6))",
     scriptType = "string")
@@ -97,7 +97,7 @@ test_that("运行任务：string", {
 
 test_that("运行任务：dir类型", {
   task_create(taskId = "C", list())
-  task_add(
+  task_item_add(
     taskId = "C",
     taskScript = path_A,
     scriptType = "dir")
@@ -110,11 +110,11 @@ test_that("运行任务：dir类型", {
 
 test_that("运行任务：定义时带参数", {
   task_create(taskId = "B", list())
-  task_add(
+  task_item_add(
     taskId = "B",
     taskScript = path_a,
     scriptType = "file")
-  task_add(
+  task_item_add(
     taskId = "B",
     taskScript = "result <- (x |> filter(age > myage))",
     params = list(myage = 3),
@@ -126,11 +126,11 @@ test_that("运行任务：定义时带参数", {
 
 test_that("运行任务：运行时带参数", {
   task_create(taskId = "B", list())
-  task_add(
+  task_item_add(
     taskId = "B",
     taskScript = path_a,
     scriptType = "file")
-  task_add(
+  task_item_add(
     taskId = "B",
     taskScript = "result <- (x |> filter(age > myage))",
     scriptType = "string")
@@ -141,7 +141,7 @@ test_that("运行任务：运行时带参数", {
 
 test_that("运行任务：抛出异常", {
   task_create(taskId = "B", list())
-  task_add(
+  task_item_add(
     taskId = "B",
     taskScript = "stop('I m an error!')",
     scriptType = "string")
@@ -154,7 +154,7 @@ test_that("运行任务：抛出异常", {
 
 test_that("运行任务：文件不存在", {
   task_create(taskId = "B", list())
-  task_add(
+  task_item_add(
     taskId = "B",
     taskScript = path_c,
     scriptType = "file")
@@ -167,7 +167,7 @@ test_that("运行任务：文件不存在", {
 
 test_that("运行任务：目录不存在", {
   task_create(taskId = "B", list())
-  task_add(
+  task_item_add(
     taskId = "B",
     taskScript = path_C,
     scriptType = "dir")
@@ -180,7 +180,7 @@ test_that("运行任务：目录不存在", {
 
 test_that("运行任务：（子进程）目录不存在", {
   task_create(taskId = "B", list())
-  task_add(
+  task_item_add(
     taskId = "B",
     taskScript = path_C,
     scriptType = "dir")
