@@ -4,12 +4,16 @@
 \alias{ds_read}
 \title{读取数据集}
 \usage{
-ds_read(dsName, topic = "CACHE")
+ds_read(dsName, topic = "CACHE", toFix = TRUE, noDeleted = TRUE)
 }
 \arguments{
 \item{dsName}{数据集名称}
 
 \item{topic}{主题域}
+
+\item{toFix}{修复因归档后未及时清理__APPEND__数据遗漏的部分}
+
+\item{noDeleted}{不返回标记为删除的数据}
 }
 \description{
 读取数据集

@@ -12,7 +12,7 @@ ds_submit(dsName, topic = "CACHE")
 \item{topic}{主题域}
 }
 \description{
-消除零散的追加文件，但保留删除记录
+消除零散的追加文件
 }
 \details{
 归档操作可能耗时，应当集中处理。

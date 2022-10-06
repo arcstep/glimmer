@@ -187,7 +187,7 @@ test_that("运行任务：（子进程）目录不存在", {
   
   task_run("B", runMode = "r") |>
     testthat::expect_error("No such script dir")
-  
+
   clear_dir()
 })
 

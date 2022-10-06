@@ -55,10 +55,10 @@ ds_init <- function(dsName,
 #' @param d 要写入的数据
 #' @param dsName 数据集名称
 #' @param topic 数据集保存的主题目录，默认为CACHE
-#' @param action 默认为__APPEND__， 修改为__DELETE__后就是删除操作
+#' @param toDelete 将数据标记为删除
 #' @family dataset function
 #' @export
-ds_append <- function(d, dsName, topic = "CACHE", action = "__APPEND__") {
+ds_append <- function(d, dsName, topic = "CACHE", toDelete = FALSE) {
   if(rlang::is_empty(d)) {
     warning("Empty Dataset to write >>> ", dsName, "/", topic)
   } else {
@@ -74,23 +74,20 @@ ds_append <- function(d, dsName, topic = "CACHE", action = "__APPEND__") {
         stop("Empty Dataset Metadata!!!")
       }
       
-      if(action %in% c("__APPEND__", "__DELETE__")) {
-        ## 追加数据时，确定数据结构一致
-        schema_old <- ds_yaml_schema(dsName, topic)
-        diff_info <- ds_diff_schema(schema_old, ds_schema(d)) |> filter(!equal)
-        if(nrow(diff_info) > 0) {
-          print(diff_info |> rename(`F.Old` = `fieldType.x`, `F.New` = `fieldType.y`))
-          stop("Different Schema >> ", path)
-        }    
-      } else {
-        stop("Unkonw @action when appending data: ", action)
-      }
+      ## 追加数据时，确定数据结构一致
+      schema_old <- ds_yaml_schema(dsName, topic)
+      diff_info <- ds_diff_schema(schema_old, ds_schema(d)) |> filter(!equal)
+      if(nrow(diff_info) > 0) {
+        print(diff_info |> rename(`F.Old` = `fieldType.x`, `F.New` = `fieldType.y`))
+        stop("Different Schema >> ", path)
+      }    
 
       ## 写入数据
       batch <- gen_batchNum()
       d |>
         mutate(cyl = as.integer(cyl)) |>
-        mutate(`@action` = action) |>
+        mutate(`@deleted` = toDelete) |>
+        mutate(`@action` = "__APPEND__") |>
         mutate(`@batch` = batch) |>
         mutate(`@lastmodifiedAt` = lubridate::now(tzone = "Asia/Shanghai")) |>
         ungroup() |>
@@ -117,11 +114,11 @@ ds_delete <- function(d, dsName, topic = "CACHE") {
   if(rlang::is_empty(meta$keyColumns)) {
     stop("Can't Delete without keyColumns Setting!!!")
   }
-  ds_append(d, dsName = dsName, topic = topic, action = "__DELETE__")
+  ds_append(d, dsName = dsName, topic = topic, toDelete = TRUE)
 }
 
 #' @title 数据集归档
-#' @description 消除零散的追加文件，但保留删除记录
+#' @description 消除零散的追加文件
 #' @param dsName 数据集名称
 #' @param topic 主题域
 #' @details 
@@ -135,13 +132,14 @@ ds_submit <- function(dsName, topic = "CACHE") {
   ## 找出更新数据的分区
   part <- meta$partColumns[meta$partColumns != "@action"]
   if(rlang::is_empty(part)) {
-    d <- ds_read(dsName, topic) |> collect()
+    d <- ds_read(dsName, topic, noDeleted = FALSE) |> collect()
   } else {
     to_append <-
       arrow::open_dataset(path, format = "parquet") |>
       filter(`@action` ==  "__APPEND__") |>
       collect()
-    d <- ds_read(dsName, topic) |>
+    ## 仅归档__APPEND__数据中包含的分区
+    d <- ds_read(dsName, topic, noDeleted = FALSE) |>
       semi_join(to_append, by = part) |>
       collect()
   }
@@ -187,9 +185,11 @@ ds_files <- function(dsName, topic = "CACHE") {
 #' @title 读取数据集
 #' @param dsName 数据集名称
 #' @param topic 主题域
+#' @param toFix 修复因归档后未及时清理__APPEND__数据遗漏的部分
+#' @param noDeleted 不返回标记为删除的数据
 #' @family dataset function
 #' @export
-ds_read <- function(dsName, topic = "CACHE") {
+ds_read <- function(dsName, topic = "CACHE", toFix = TRUE, noDeleted = TRUE) {
   meta <- ds_yaml(dsName, topic)
   path <- get_path(topic, dsName)
   
@@ -200,19 +200,28 @@ ds_read <- function(dsName, topic = "CACHE") {
   }
 
   ## 如果存储结构不包含@action、@lastmodifiedAt等元字段就抛异常
-  if(FALSE %in% (c("@action", "@lastmodifiedAt") %in% names(d))) {
-    stop("Dataset storage without: @action or @lastmodifiedAt.")
+  metaColumns <- c("@action", "@lastmodifiedAt", "@batch", "@deleted")
+  if(FALSE %in% (metaColumns %in% names(d))) {
+    stop("Dataset storage lost some meata column: ", metaColumns)
   }
   
   ## 如果配置文件中存在主键
-  ## 提取追加和删除的数据
   if(length(meta$keyColumns) > 0) {
+    ## 提取__APPEND__数据，且不与__ARCHIVE__数据重复（归档后但未删除）
     keys0 <- d |>
-      filter(`@action` %in% c("__APPEND__", "__DELETE__")) |>
-      select(meta$keyColumns, "@action", "@lastmodifiedAt") |>
-      anti_join(d |> filter(`@action` == c("__ARCHIVE__")), by = c(meta$keyColumns, "@lastmodifiedAt"))
+      filter(`@action` == "__APPEND__") |>
+      select(meta$keyColumns, "@action", "@lastmodifiedAt", "@deleted")
+    ## 如果__ARCHIVE__数据保存后，未及时删除__APPEND__，读取时将丢失这部分数据
+    ## 这需要增加以下的判断步骤，但需要额外付出计算性能
+    if(toFix) {
+      keys0 <- keys0 |>
+        anti_join(d |>
+                  select(meta$keyColumns, "@action", "@lastmodifiedAt") |>
+                  filter(`@action` == c("__ARCHIVE__")),
+                by = c(meta$keyColumns, "@lastmodifiedAt"))}
+    ## 提取应保留的最近一次__APPEND__数据
     keys <- keys0 |>
-      select(meta$keyColumns, "@action", "@lastmodifiedAt") |>
+      select(meta$keyColumns, "@action", "@lastmodifiedAt", "@deleted") |>
       semi_join(keys0 |>
                   group_by(!!!syms(meta$keyColumns)) |>
                   summarise(`@lastmodifiedAt` = max(`@lastmodifiedAt`), .groups = "drop") |>
@@ -223,21 +232,25 @@ ds_read <- function(dsName, topic = "CACHE") {
 
   if(!rlang::is_empty(keys)) {
     ## 旧数据要更新的记录
-    to_update <- d |>
-      filter(`@action` == c("__ARCHIVE__")) |>
+    arrchive_expired <- d |>
+      filter(`@action` == "__ARCHIVE__") |>
       semi_join(keys |> filter(`@action` == "__APPEND__"), by = meta$keyColumns)
     ## 追加数据中过期的记录
-    old_append <- d |>
-      filter(`@action` %in% c("__DELETE__", "__APPEND__")) |>
+    append_expired <- d |>
+      filter(`@action` == "__APPEND__") |>
       anti_join(keys, by = c(meta$keyColumns, "@lastmodifiedAt"))
-    ## 剔除：准备删除的，过期旧数据和过期新数据
+    ## 剔除：过期旧数据和过期新数据, 以及标记为删除的
     resp <- d |>
-      anti_join(keys |> filter(`@action` == "__DELETE__"), by = meta$keyColumns) |>
-      anti_join(to_update, by = c(meta$keyColumns, "@lastmodifiedAt")) |>
-      anti_join(old_append, by = c(meta$keyColumns, "@lastmodifiedAt"))
+      anti_join(arrchive_expired, by = c(meta$keyColumns, "@lastmodifiedAt")) |>
+      anti_join(append_expired, by = c(meta$keyColumns, "@lastmodifiedAt"))
   } else {
     ## 数据没有追加操作
     resp <- d
+  }
+  
+  ## 处理标记为删除的数据
+  if(noDeleted) {
+    resp <- resp |> filter(!`@deleted`)
   }
 
   ## 按元数据中的读取建议整理结果

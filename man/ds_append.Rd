@@ -4,7 +4,7 @@
 \alias{ds_append}
 \title{批量追加更新的数据}
 \usage{
-ds_append(d, dsName, topic = "CACHE", action = "__APPEND__")
+ds_append(d, dsName, topic = "CACHE", toDelete = FALSE)
 }
 \arguments{
 \item{d}{要写入的数据}
@@ -13,7 +13,7 @@ ds_append(d, dsName, topic = "CACHE", action = "__APPEND__")
 
 \item{topic}{数据集保存的主题目录，默认为CACHE}
 
-\item{action}{默认为__APPEND__， 修改为__DELETE__后就是删除操作}
+\item{toDelete}{将数据标记为删除}
 }
 \description{
 为了避免修改原数据文件，追加数据时不查询旧数据，提交归档时再统一处理。

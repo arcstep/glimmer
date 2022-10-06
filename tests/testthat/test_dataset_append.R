@@ -54,7 +54,7 @@ test_that("删除数据：没有设置主键时不允许删除", {
   ds_init("车数据", keyColumns = "rowname", data = m |> head())
   m |> slice(1:10) |> as_tibble() |> ds_append("车数据")
   m |> slice(1:3) |> as_tibble() |> ds_delete("车数据")
-    ds_read("车数据") |> collect() |> nrow() |>
+  ds_read("车数据") |> collect() |> nrow() |>
     testthat::expect_equal(7)
 })
 
@@ -87,5 +87,5 @@ test_that("归档数据操作：有分区", {
   m |> filter(cyl == 4) |> as_tibble() |> ds_append("车数据")
   ds_submit("车数据")
   ds_read("车数据") |> collect() |> nrow() |>
-    testthat::expect_equal(20)
+    testthat::expect_equal(21)
 })
