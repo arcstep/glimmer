@@ -24,7 +24,6 @@ Other dataset function:
 \code{\link{ds_files}()},
 \code{\link{ds_init}()},
 \code{\link{ds_read}()},
-\code{\link{ds_remove_path}()},
-\code{\link{ds_write}()}
+\code{\link{ds_remove_path}()}
 }
 \concept{dataset function}

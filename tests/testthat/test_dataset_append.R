@@ -89,3 +89,40 @@ test_that("归档数据操作：有分区", {
   ds_read("车数据") |> collect() |> nrow() |>
     testthat::expect_equal(21)
 })
+
+test_that("内存中对数据去重", {
+  all <- mtcars |> as_tibble() |>
+    mutate(cyl = as.integer(cyl), am = as.integer(am)) |>
+    mutate(id = row_number())
+  
+  rbind(all |> slice(1:3), all |> slice(4:6)) |>
+    ds_as_unique("id") |>
+    nrow() |>
+    testthat::expect_equal(6)
+  
+  rbind(all |> slice(1:3), all |> slice(3:5)) |>
+    ds_as_unique("id") |>
+    nrow() |>
+    testthat::expect_equal(5)
+})
+
+test_that("读写数据时使用推荐的显示列", {
+  ds_remove_path("车数据")
+  all <- mtcars |> as_tibble() |>
+    mutate(cyl = as.integer(cyl), am = as.integer(am)) |>
+    mutate(id = row_number())
+  
+  glimmer::ds_init("车数据", data = all, keyColumns = "id", suggestedColumns = c("id"))
+  all |> glimmer::ds_append("车数据")
+  (glimmer::ds_read("车数据") |> names())[[1]] |>
+    testthat::expect_equal("id")
+  glimmer::ds_read("车数据") |> names() |> length() |>
+    testthat::expect_equal(length(all |> names()) + 4)
+  
+  glimmer::ds_init("车数据2", data = all, keyColumns = "id", suggestedColumns = c("id", "cyl"))
+  all |> glimmer::ds_append("车数据2")
+  (glimmer::ds_read("车数据2") |> names())[[2]] |>
+    testthat::expect_equal("cyl")
+  
+  clear_dir()
+})

@@ -31,17 +31,12 @@ ds_init <- function(dsName,
                     type = "__UNKNOWN__") {
   ## 要补充的元数据
   meta <- list(
-    ## 所有数据集使用@action作为第一层分区：
-    ## __NEW__, __UPDATE__, __DELETE__, __ARCHIVE__
+    "desc" = desc,
     "schema" = schema,
     "partColumns" = c("@action", partColumns) |> unique() |> unlist(),
     "keyColumns" = keyColumns |> unique(),
-    "writing" = list(
-      ## 当键值重复时，使用新数据替换旧数据
-      "updateMode" = "overwrite"),
-    "reading" = list(
-      "suggestedColumns" = suggestedColumns,
-      "titleColumn" = titleColumn))
+    "suggestedColumns" = suggestedColumns,
+    "titleColumn" = titleColumn)
   
   ## 写入配置文件
   ds_yaml_write(dsName = dsName, meta = meta, data = data, topic = topic, type = type)
@@ -258,123 +253,6 @@ ds_read <- function(dsName, topic = "CACHE", toFix = TRUE, noDeleted = TRUE) {
     resp |> select(!!!syms(meta$suggestedColumns), everything())
   } else {
     resp
-  }
-}
-## 列举
-
-#' @title 写入ApachheParquet文件集
-#' @param d 要写入的数据
-#' @param dsName 数据集名称
-#' @param topic 数据集保存的主题目录，默认为CACHE
-#' @param partColumns 照此进行分区存储，支持多列
-#' @param keyColumns 要求在所有行中具有唯一值的列向量，支持多列
-#' @param suggestedColumns 查看数据时推荐的显示列向量，支持多列，
-#' @param titleColumn 标题列，不支持多列
-#' @param desc 对数据集的额外描述
-#' @param mode 当主键重复时，update模式（默认）使用新数据，append模式保留旧数据
-#' @description 更新受影响的分区
-#' @family dataset function
-#' @details
-#' 默认为更新模式；如果仅直接覆写数据，应先删除数据集
-#' 
-#' 如果不设置关键列，则为追加模式；否则按关键列替换
-#' 
-#' @export
-ds_write <- function(d, dsName, topic = "CACHE",
-                     partColumns = c(), keyColumns = c(),
-                     suggestedColumns = c(), titleColumn = c(),
-                     desc = "-", mode = "update") {
-  ## 默认从CACHE任务目录读写数据集
-  path <- get_path(topic, dsName)
-  
-  ## 确定数据集不为空
-  if(!is.data.frame(d)) stop("Not Tibble Object to write >>> ", path)
-  if(rlang::is_empty(d)) {
-    warning("Empty Dataset to write >>> ", path)
-  } else {
-    if(nrow(d)==0) {
-      warning("No Content in New Dataset to write >>> ", path)
-    }
-  }
-  
-  ## 如果旧数据集已经存在
-  affected_data <- tibble()
-  
-  if(fs::dir_exists(path)) {
-    ## 确定与已存在数据集结构一致
-    d_old <- arrow::open_dataset(path, format = "parquet") |> head() |> collect()
-    diff_info <- d |> ds_diff_dataset(d_old) |> filter(!equal)
-    if(nrow(diff_info) > 0) {
-      print(diff_info)
-      stop("Different Schema to write >> ", path)
-    }
-    
-    ## 找出受影响的分区文件（如果没有分区就提取整个数据集）
-    ## 注意：要找出的是分区文件，而不是数据
-    if(rlang::is_empty(partColumns)) {
-      affected_data <- arrow::open_dataset(path, format = "parquet") |> collect()
-    } else {
-      affected_data <- arrow::open_dataset(path, format = "parquet") |>
-        semi_join(d, by = partColumns) |> collect()
-    }
-  }
-  
-  ## 当写入数据到磁盘时
-  if(nrow(d) > 0) {
-    ## 没有设置关键列，直接追加到旧数据分区文件中
-    if(rlang::is_empty(keyColumns)) {
-      to_write <- affected_data |> rbind(d)
-    } else {
-      if(rlang::is_empty(affected_data)) {
-        to_write <- d
-      } else {
-        if(mode == "append") {
-          ## 追加模式，按关键列剔除新数据
-          to_write <- affected_data |> rbind(d |> anti_join(affected_data, by = keyColumns))
-        } else {
-          ## 更新模式，按关键列剔除旧数据
-          to_write <- (affected_data |> anti_join(d, by = keyColumns)) |> rbind(d)
-        }
-      }
-    }
-
-    beginTimestamp <- lubridate::now(tz = "Asia/Shanghai")
-    # Sys.sleep(1)
-    ## 写入分区
-    arrow::write_dataset(
-      to_write,
-      path,
-      format = "parquet",
-      partitioning = partColumns,
-      version = "2.0",
-      existing_data_behavior = "delete_matching")
-    
-    ## 登记已写入分区状态，方便按分区增量变化做其他处理
-    allPartsInfo <- fs::dir_ls(path, type = "file", recurse = T, glob = "*.parquet") |> fs::file_info()
-    affectedParts <- allPartsInfo |> filter(modification_time > beginTimestamp)
-    affected <- affectedParts$path |> paste(collapse = ",")
-    updated <- paste("affected ", nrow(to_write), "rows", ",", nrow(affectedParts), "parts")
-    message("write_dataset << ", dsName, " >> ", updated)
-    state_write(
-      stateName = "__WRITE_DATASET__",
-      tibble(
-        "dataset" = dsName,
-        "updated" = updated,
-        "affected" = affected
-      ))
-    
-    ## 更新元数据集元件
-    d <- arrow::open_dataset(path, format = "parquet")
-    updateTimestamp <- lubridate::now(tz = "Asia/Shanghai")
-    list(
-      "desc" = desc,
-      "nrow" = nrow(d),
-      "columns" = names(d),
-      "updated" = list(
-        "lastUpdatedAt" = lubridate::as_datetime(updateTimestamp, tz = "Asia/Shanghai") |> as.character(),
-        "lastAffectedSummary" = updated,
-        "lastAffectedFiles" = affectedParts$path)
-    ) |> ds_write_yaml(dsName, topic)
   }
 }
 
