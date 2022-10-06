@@ -27,7 +27,7 @@ test_that("空更新：写入空数据时, 数据目录不受影响", {
       partitioning = "cyl",
       version = "2.0",
       existing_data_behavior = "delete_matching")
-  ds_read("车数据")$files |> length() |>
+ arrow::open_dataset(get_path("CACHE", "车数据"))$files |> length() |>
     testthat::expect_equal(3)
   
   tibble() |>
@@ -37,7 +37,7 @@ test_that("空更新：写入空数据时, 数据目录不受影响", {
       # partitioning = "cyl",
       version = "2.0",
       existing_data_behavior = "delete_matching")
-  ds_read("车数据")$files |> length() |>
+  arrow::open_dataset(get_path("CACHE", "车数据"))$files |> length() |>
     testthat::expect_equal(3)
 
   clear_dir()
@@ -56,7 +56,7 @@ test_that("更新分区：重写数据中包含的分区目录", {
       partitioning = "cyl",
       version = "2.0",
       existing_data_behavior = "delete_matching")
-  ds_read("车数据")$files |> length() |>
+ arrow::open_dataset(get_path("CACHE", "车数据"))$files |> length() |>
     testthat::expect_equal(3)
 
   mtcars |> as_tibble() |>
@@ -69,7 +69,7 @@ test_that("更新分区：重写数据中包含的分区目录", {
       version = "2.0",
       basename_template = "abc-{i}.p",
       existing_data_behavior = "delete_matching")
-  ds_read("车数据")$files |> length() |>
+ arrow::open_dataset(get_path("CACHE", "车数据"))$files |> length() |>
     testthat::expect_equal(3)
   
   clear_dir()
@@ -87,7 +87,7 @@ test_that("更新文件：重写数据中包含的所有分区内文件", {
       partitioning = "cyl",
       version = "2.0",
       existing_data_behavior = "delete_matching")
-  ds_read("车数据")$files |> length() |>
+ arrow::open_dataset(get_path("CACHE", "车数据"))$files |> length() |>
     testthat::expect_equal(3)
   
   mtcars |> as_tibble() |>
@@ -100,7 +100,7 @@ test_that("更新文件：重写数据中包含的所有分区内文件", {
       version = "2.0",
       basename_template = "abcd-{i}.p",
       existing_data_behavior = "overwrite")
-  ds_read("车数据")$files |> length() |>
+ arrow::open_dataset(get_path("CACHE", "车数据"))$files |> length() |>
     testthat::expect_equal(5)
   
   clear_dir()
@@ -121,7 +121,7 @@ test_that("更新结构：当新分区数据与旧数据不一致", {
       partitioning = "cyl",
       version = "2.0",
       existing_data_behavior = "delete_matching")
-  ds_read("车数据") |> head() |> length() |>
+ arrow::open_dataset(get_path("CACHE", "车数据")) |> head() |> length() |>
     testthat::expect_equal(3)
 
   mtcars |> as_tibble() |>
@@ -135,7 +135,7 @@ test_that("更新结构：当新分区数据与旧数据不一致", {
       partitioning = "cyl",
       version = "2.0",
       existing_data_behavior = "overwrite")
-  ds_read("车数据") |> head() |> length() |>
+ arrow::open_dataset(get_path("CACHE", "车数据")) |> head() |> length() |>
     testthat::expect_equal(3)
 
   mtcars |> as_tibble() |>
@@ -149,7 +149,7 @@ test_that("更新结构：当新分区数据与旧数据不一致", {
       partitioning = "cyl",
       version = "2.0",
       existing_data_behavior = "overwrite")
-  ds_read("车数据") |> head() |> length() |>
+ arrow::open_dataset(get_path("CACHE", "车数据")) |> head() |> length() |>
     testthat::expect_equal(5)
   
   clear_dir()
@@ -179,8 +179,8 @@ test_that("合并读取：将列分为两组存储，合并读取时仍然支持
       existing_data_behavior = "delete_matching")
   ## 惰性操作读取
   left_join(
-    ds_read("车数据"),
-    ds_read("车数据补充") |> head(5),
+   arrow::open_dataset(get_path("CACHE", "车数据")),
+    arrow::open_dataset(get_path("CACHE", "车数据补充")) |> head(5),
     by = "rowname") |>
     filter(cyl != 4) |>
     collect() |>
@@ -227,22 +227,22 @@ test_that("追加新增：补充新增记录，读时合并", {
       version = "2.0",
       existing_data_behavior = "overwrite")
   
-  ds_read("车数据")$files |> length() |>
+ arrow::open_dataset(get_path("CACHE", "车数据"))$files |> length() |>
     testthat::expect_equal(6)
-  ds_read("车数据") |> nrow() |>
+ arrow::open_dataset(get_path("CACHE", "车数据")) |> nrow() |>
     testthat::expect_equal(10)
   
   ## 重新保存后，合并文件
-  ds_read("车数据") |> collect() |>
+ arrow::open_dataset(get_path("CACHE", "车数据")) |> collect() |>
     arrow::write_dataset(
       path = get_path("CACHE", "车数据"),
       format = "parquet",
       partitioning = "cyl",
       version = "2.0",
       existing_data_behavior = "delete_matching")    
-  ds_read("车数据")$files |> length() |>
+ arrow::open_dataset(get_path("CACHE", "车数据"))$files |> length() |>
     testthat::expect_equal(3)
-  ds_read("车数据") |> nrow() |>
+ arrow::open_dataset(get_path("CACHE", "车数据")) |> nrow() |>
     testthat::expect_equal(10)
   
   clear_dir()
@@ -267,7 +267,7 @@ test_that("追加删除：补充删除记录，读时过滤", {
       partitioning = "cyl",
       version = "2.0",
       existing_data_behavior = "delete_matching")
-  ds_read("车数据") |> filter(`@action` == "C") |> nrow() |>
+ arrow::open_dataset(get_path("CACHE", "车数据")) |> filter(`@action` == "C") |> nrow() |>
     testthat::expect_equal(10)
   
   
@@ -281,8 +281,8 @@ test_that("追加删除：补充删除记录，读时过滤", {
       partitioning = "cyl",
       version = "2.0",
       existing_data_behavior = "overwrite")
-  ds_read("车数据") |> filter(`@action` == "C") |>
-    anti_join(ds_read("车数据") |> filter(`@action` == "D"), by = "rowname") |>
+ arrow::open_dataset(get_path("CACHE", "车数据")) |> filter(`@action` == "C") |>
+    anti_join(arrow::open_dataset(get_path("CACHE", "车数据")) |> filter(`@action` == "D"), by = "rowname") |>
     collect() |>
     nrow() |>
     testthat::expect_equal(7)
@@ -305,7 +305,7 @@ test_that("追加更新：补充更新记录，读时过滤", {
       partitioning = "cyl",
       version = "2.0",
       existing_data_behavior = "delete_matching")
-  ds_read("车数据") |> filter(`@action`=="C") |> nrow() |>
+ arrow::open_dataset(get_path("CACHE", "车数据")) |> filter(`@action`=="C") |> nrow() |>
     testthat::expect_equal(10)
   
   
@@ -319,8 +319,8 @@ test_that("追加更新：补充更新记录，读时过滤", {
       partitioning = "cyl",
       version = "2.0",
       existing_data_behavior = "overwrite")
-  ds_read("车数据") |> filter(`@action` %in% c("C", "U")) |>
-    anti_join(ds_read("车数据") |> filter(`@action`=="U"), by = c("rowname", "@action")) |>
+ arrow::open_dataset(get_path("CACHE", "车数据")) |> filter(`@action` %in% c("C", "U")) |>
+    anti_join(arrow::open_dataset(get_path("CACHE", "车数据")) |> filter(`@action`=="U"), by = c("rowname", "@action")) |>
     collect() |>
     nrow() |>
     testthat::expect_equal(10)
@@ -365,7 +365,7 @@ test_that("最佳实践：按CUD操作做顶层分区，及时整理", {
       partitioning = c("@action", "cyl"),
       version = "2.0",
       existing_data_behavior = "overwrite")
-  ds_read("车数据") |> filter(`@action`=="__CREATE__") |> nrow() |>
+ arrow::open_dataset(get_path("CACHE", "车数据")) |> filter(`@action`=="__CREATE__") |> nrow() |>
     testthat::expect_equal(256)
   
   ## 修改3条
@@ -381,7 +381,7 @@ test_that("最佳实践：按CUD操作做顶层分区，及时整理", {
       partitioning = c("@action", "cyl"),
       version = "2.0",
       existing_data_behavior = "overwrite")
-  ds_read("车数据") |> nrow() |>
+ arrow::open_dataset(get_path("CACHE", "车数据")) |> nrow() |>
     testthat::expect_equal(256+3)
   
   ## 删除3条  
@@ -396,7 +396,7 @@ test_that("最佳实践：按CUD操作做顶层分区，及时整理", {
       partitioning = c("@action", "cyl"),
       version = "2.0",
       existing_data_behavior = "overwrite")
-  ds_read("车数据") |> nrow() |>
+ arrow::open_dataset(get_path("CACHE", "车数据")) |> nrow() |>
     testthat::expect_equal(256+3+3)
   
   ## 再修改2条
@@ -412,11 +412,11 @@ test_that("最佳实践：按CUD操作做顶层分区，及时整理", {
       partitioning = c("@action", "cyl"),
       version = "2.0",
       existing_data_behavior = "overwrite")
-  ds_read("车数据") |> nrow() |>
+ arrow::open_dataset(get_path("CACHE", "车数据")) |> nrow() |>
     testthat::expect_equal(256+3+3+2)
 
   ## 第1种读取方法
-  ds_read("车数据") |>
+ arrow::open_dataset(get_path("CACHE", "车数据")) |>
     collect() |>
     group_by(rowname) |>
     arrange(desc(`@lastmodifiedAt`)) |>
@@ -426,11 +426,11 @@ test_that("最佳实践：按CUD操作做顶层分区，及时整理", {
     testthat::expect_equal(256-1)
 
   ## 第2种读取方法
-  keys <- ds_read("车数据") |>
+  keys <-arrow::open_dataset(get_path("CACHE", "车数据")) |>
     collect() |>
     group_by(rowname) |>
     summarise(`@lastmodifiedAt` = max(`@lastmodifiedAt`))
-  ds_read("车数据") |>
+ arrow::open_dataset(get_path("CACHE", "车数据")) |>
     semi_join(keys, by = c("rowname", "@lastmodifiedAt")) |>
     collect() |>
     filter(`@action` != "__DELETE__") |>
@@ -448,12 +448,12 @@ test_that("最佳实践：按CUD操作做顶层分区，及时整理", {
     group_by(rowname) |>
     summarise(`@lastmodifiedAt` = max(`@lastmodifiedAt`))
   rbind(
-    ds_read("车数据") |>
+   arrow::open_dataset(get_path("CACHE", "车数据")) |>
       filter(`@action` == "__CREATE__") |>
       anti_join(keys, by = c("rowname")) |>
       select(`@action`, everything()) |>
       collect(),
-    ds_read("车数据") |>
+   arrow::open_dataset(get_path("CACHE", "车数据")) |>
       filter(`@action` != "__CREATE__") |>
       semi_join(keys, by = c("rowname", "@lastmodifiedAt")) |>
       select(`@action`, everything()) |>
