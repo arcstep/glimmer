@@ -147,6 +147,10 @@ ds_submit <- function(dsName, topic = "CACHE") {
   meta <- ds_yaml(dsName, topic)
   path <- get_path(topic, dsName)
   
+  ## 提前列出准备删除后的分区文件
+  allFiles <- ds_files(dsName, topic)
+  toRemoveFiles <- allFiles[stringr::str_detect(allFiles, "@action=__APPEND__")]
+  force(toRemoveFiles)
   ## 找出更新数据的分区
   part <- meta$partColumns[meta$partColumns != "@action"]
   if(rlang::is_empty(part)) {
@@ -181,11 +185,19 @@ ds_submit <- function(dsName, topic = "CACHE") {
           partitioning = meta$partColumns,
           version = "2.0",
           existing_data_behavior = "delete_matching")
-      ## 删除__APPEND__分区
-      path_remove <- get_path(topic, dsName, "@action=__APPEND__")
-      if(fs::dir_exists(path_remove)) {
-        fs::dir_delete(path_remove)
-      }
+      ## 删除已经处理过的文件和文件夹
+      ## 如果在写入过程中新增文件，则保留
+      allFiles2 <- ds_files(dsName, topic)
+      allFiles3 <- allFiles2[stringr::str_detect(allFiles2, "@action=__APPEND__")]
+      newFiles <- allFiles3[allFiles3 %nin% toRemoveFiles]
+      toRemoveFolders <- fs::path_dir(toRemoveFiles) |> unique()
+      toReservedForlders <- fs::path_dir(newFiles) |> unique()
+      ## 先删除文件夹
+      toRemoveFolders[toRemoveFolders %nin% toReservedForlders] |> fs::dir_delete()
+      ## 再删除文件
+      toRemoveFiles |> purrr::walk(function(p) {
+        if(fs::file_exists(p)) fs::file_delete(p)
+      })
     }
   }
 }
@@ -203,11 +215,10 @@ ds_files <- function(dsName, topic = "CACHE") {
 #' @title 读取数据集
 #' @param dsName 数据集名称
 #' @param topic 主题域
-#' @param toFix 修复因归档后未及时清理__APPEND__数据遗漏的部分
 #' @param noDeleted 不返回标记为删除的数据
 #' @family dataset function
 #' @export
-ds_read <- function(dsName, topic = "CACHE", toFix = TRUE, noDeleted = TRUE) {
+ds_read <- function(dsName, topic = "CACHE", noDeleted = TRUE) {
   meta <- ds_yaml(dsName, topic)
   path <- get_path(topic, dsName)
 
@@ -232,13 +243,15 @@ ds_read <- function(dsName, topic = "CACHE", toFix = TRUE, noDeleted = TRUE) {
       filter(`@action` == "__APPEND__") |>
       select(meta$keyColumns, "@action", "@lastmodifiedAt", "@deleted")
     ## 如果__ARCHIVE__数据保存后，未及时删除__APPEND__，读取时将丢失这部分数据
+    ## 这可能是因为ds_submit执行过程中可能因为ds_read或ds_write执行时间过长
+    ##
+    ## 这可以在ds_read中剔除，这需要增加以下的判断步骤，但需要额外付出计算性能
     ## 这需要增加以下的判断步骤，但需要额外付出计算性能
-    if(toFix) {
-      keys0 <- keys0 |>
-        anti_join(d |>
-                  select(meta$keyColumns, "@action", "@lastmodifiedAt") |>
-                  filter(`@action` == c("__ARCHIVE__")),
-                by = c(meta$keyColumns, "@lastmodifiedAt"))}
+    keys0 <- keys0 |>
+      anti_join(d |>
+                select(meta$keyColumns, "@action", "@lastmodifiedAt") |>
+                filter(`@action` == c("__ARCHIVE__")),
+              by = c(meta$keyColumns, "@lastmodifiedAt"))
     ## 提取应保留的最近一次__APPEND__数据
     keys <- keys0 |>
       select(meta$keyColumns, "@action", "@lastmodifiedAt", "@deleted") |>
