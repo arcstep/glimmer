@@ -18,29 +18,24 @@ get_path <- function(topic, ...) {
 #' @param topic 任务主题
 #' @family config functions
 #' @export
-get_topic <- function(topic) {
-  get(topic, envir = TASK.ENV)
-}
+get_topic <- function(topic) get(topic, envir = TASK.ENV)
 
 #' @title 获得所有主题
 #' @family config functions
 #' @export
-get_topics <- function() {
-  ls(envir = TASK.ENV)
-}
+get_topics <- function() ls(envir = TASK.ENV)
 
-## 配置文件-------
+## 操作内存配置项-------
+get_config <- function() as.list(TASK.ENV)
+set_topic <- function(topic, path) assign(topic, path, envir = TASK.ENV)
 
-get_config <- function() {
-  as.list(TASK.ENV)
-}
+## 读写配置文件-----
 
-set_topic <- function(topic, path) {
-  assign(topic, path, envir = TASK.ENV)
-}
-
-#' @title 加载配置文件
-#' @description 批量执行\code{set_topic}任务
+#' @title 加载配置文件到内存
+#' @description
+#' 自动创建\code{ROOT_PATH}目录。
+#' 
+#' 根据配置文件配置目录到运行环境。
 #' @details 
 #' 使用\code{ROOT_PATH}时有一个关键约定：
 #' 配置项必须以\code{./}开头，才能使用\code{ROOT_PATH}扩展其路径；
@@ -51,8 +46,11 @@ set_topic <- function(topic, path) {
 #' @family config functions
 #' @export
 config_load <- function(path = "./", yml = "config.yml") {
-  topics <- yaml::read_yaml(fs::path_join(c(path, "config.yml")))
+  topics <- config_yaml(path, yml)
   if("ROOT_PATH" %in% names(topics)) {
+    if(!fs::dir_exists(topics$ROOT_PATH)) {
+      fs::dir_create(topics$ROOT_PATH)
+    }
     root_path <- topics[["ROOT_PATH"]]
   } else {
     root_path <- NULL
@@ -68,7 +66,7 @@ config_load <- function(path = "./", yml = "config.yml") {
   })
 }
 
-#' @title 创建或补写配置项
+#' @title 创建或补写配置项到磁盘
 #' @description 多次运行时会增量补充
 #' @param path YAML配置文件目录
 #' @param yml 默认为config.yml
@@ -107,18 +105,13 @@ config_init <- function(path = "./", yml = "config.yml", option = list()) {
   }
   ## 写入配置
   config_write(path, yml, option)
-  ## 创建数据根目录
-  yml <- config_yaml(path, yml)
-  if(!fs::dir_exists(yml$ROOT_PATH)) {
-    fs::dir_create(yml$ROOT_PATH)
-  }
   ## 加载配置
   config_load(path, yml)
   ## 返回内存中的所有配置
   get_config()
 }
 
-#' @title 读取配置项文件
+#' @title 读取yaml配置文件为列表
 #' @param path YAML配置文件目录
 #' @param yml 默认为config.yml
 #' @family config functions

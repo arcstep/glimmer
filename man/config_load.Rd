@@ -2,7 +2,7 @@
 % Please edit documentation in R/config.R
 \name{config_load}
 \alias{config_load}
-\title{加载配置文件}
+\title{加载配置文件到内存}
 \usage{
 config_load(path = "./", yml = "config.yml")
 }
@@ -12,7 +12,9 @@ config_load(path = "./", yml = "config.yml")
 \item{yml}{默认为config.yml}
 }
 \description{
-批量执行\code{set_topic}任务
+自动创建\code{ROOT_PATH}目录。
+
+根据配置文件配置目录到运行环境。
 }
 \details{
 使用\code{ROOT_PATH}时有一个关键约定：

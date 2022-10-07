@@ -2,7 +2,7 @@
 % Please edit documentation in R/config.R
 \name{config_yaml}
 \alias{config_yaml}
-\title{读取配置项文件}
+\title{读取yaml配置文件为列表}
 \usage{
 config_yaml(path = "./", yml = "config.yml")
 }
@@ -12,7 +12,7 @@ config_yaml(path = "./", yml = "config.yml")
 \item{yml}{默认为config.yml}
 }
 \description{
-读取配置项文件
+读取yaml配置文件为列表
 }
 \seealso{
 Other config functions: 
