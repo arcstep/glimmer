@@ -60,17 +60,11 @@ ds_yaml_write <- function(dsName, meta = c(), ex = c(),  data = tibble(), topic 
   ## 如果元数据没有提供架构描述，则从样本数据中推断
   if(rlang::is_empty(meta$schema)) {
     if(!rlang::is_empty(data)) {
-      mydata <- data |>
-        mutate(`@deleted` = FALSE) |>
-        mutate(`@action` = "__APPEND__") |>
-        mutate(`@batchId` = gen_batchNum()) |>
-        mutate(`@lastmodifiedAt` = lubridate::now())
-      datasetMeta$schema <- ds_schema(mydata) |>
+      datasetMeta$schema <- ds_schema(data) |>
         purrr::pmap(function(fieldType, fieldName) {
-          list("name" = fieldName, "type" = fieldType)
+          list("fieldName" = fieldName, "fieldType" = fieldType)
         })
-    }
-  }
+    }}
 
   ## 保存YAML文件
   yaml::write_yaml(datasetMeta, get_path(topic, dsName, ".metadata.yml"))
@@ -83,6 +77,6 @@ ds_yaml_schema <- function(dsName, topic = "CACHE") {
   yml <- ds_yaml(dsName, topic)
   yml$schema |>
     purrr::map_df(function(i) {
-      list(fieldName = i$name, fieldType = i$type)
+      list("fieldName" = i$fieldName, "fieldType" = i$fieldType)
     })
 }

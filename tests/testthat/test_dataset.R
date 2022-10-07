@@ -57,6 +57,21 @@ test_that("当新数据集结构不一致，且缺少关键字段", {
   clear_dir()
 })
 
+test_that("当新数据集架构不一致，按要求转换", {
+  ds_remove_path("AAA")
+  ds_init("AAA", schema = list(
+    list("fieldName" = "a", "fieldType" = "int32"),
+    list("fieldName" = "b", "fieldType" = "timestamp[us, tz=Asia/Shanghai]")))
+  
+  tibble(a = 10.0, b = lubridate::as_datetime("2022-10-01 10:00:00")) |>
+    ds_append("AAA")
+  (ds_read("AAA") |> collect())$a |> class() |>
+    testthat::expect_equal("integer")
+  
+  ds_remove_path("AAA")
+
+})
+
 test_that("追加数据：缺少架构描述", {
   m <- mtcars |> as_tibble() |> rownames_to_column()
   ds_remove_path("车数据")

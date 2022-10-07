@@ -419,6 +419,10 @@ ds_schema_obj <- function(dsSchema) {
   s <- list()
   dsSchema |>
     purrr::pmap(function(fieldName, fieldType) s[[fieldName]] <<- ds_field(fieldType))
+  s$`@deleted` <- ds_field("bool")
+  s$`@action` <- ds_field("string")
+  s$`@batchId` <- ds_field("string")
+  s$`@lastmodifiedAt` <- ds_field("timestamp[us, tz=Asia/Shanghai]")
   s
 }
 
