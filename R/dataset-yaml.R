@@ -68,6 +68,9 @@ ds_yaml_write <- function(dsName, meta = c(), ex = c(),  data = tibble(), topic 
 
   ## 保存YAML文件
   yaml::write_yaml(datasetMeta, get_path(topic, dsName, ".metadata.yml"))
+  
+  ##
+  message("dataset metafile wrote: ", paste0(topic, "/", dsName, "/.metadata.yml"))
 }
 
 #' @title 将yaml配置中的架构转化为数据框

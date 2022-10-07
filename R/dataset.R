@@ -90,11 +90,12 @@ ds_append <- function(d, dsName, topic = "CACHE", toDelete = FALSE) {
       
       ## 写入数据
       batch <- gen_batchNum()
-      d |>
+      x <- d |>
         mutate(`@deleted` = toDelete) |>
         mutate(`@action` = "__APPEND__") |>
         mutate(`@batchId` = batch) |>
-        mutate(`@lastmodifiedAt` = lubridate::now(tzone = "Asia/Shanghai")) |>
+        mutate(`@lastmodifiedAt` = lubridate::now(tzone = "Asia/Shanghai"))
+      x |>
         ungroup() |>
         write_dataset(
           path = path,
@@ -104,6 +105,11 @@ ds_append <- function(d, dsName, topic = "CACHE", toDelete = FALSE) {
           partitioning = meta$partColumns,
           version = "2.0",
           existing_data_behavior = "overwrite")
+      if(toDelete) {
+        message("data delete <", dsName, ">", " ", nrow(x), " rows deleted!")
+      } else {
+        message("data append <", dsName, ">", " ", nrow(x), " rows wroted!")
+      }
     }
   }
 }
