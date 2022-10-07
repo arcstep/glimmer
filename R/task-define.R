@@ -1,17 +1,22 @@
 #' @title 创建任务执行框架
 #' @param taskId 任务唯一标识，每个\code{taskId}会保存为一个独立文件
 #' @param items 子任务清单，包含子任务的执行脚本、参数设定等
+#' @param runLevel 同一批次任务中，运行时的优先级
+#' @param online 任务是否启用
 #' @param taskType 任务类型
 #' @param desc 任务描述
 #' @param taskTopic 保存任务定义的存储主题文件夹
 #' @param family task-define function
 #' @export
-task_create <- function(taskId, items = tibble(), taskType = "__UNKNOWN__", desc = "-", taskTopic = "TASK_DEFINE") {
+task_create <- function(taskId, items = tibble(), runLevel = 500, online = TRUE,
+                        taskType = "__UNKNOWN__", desc = "-", taskTopic = "TASK_DEFINE") {
   path <- get_path(taskTopic, paste0(taskId, ".yml"))
   fs::path_dir(path) |> fs::dir_create()
   list(
     "taskId" = taskId,
     "items" = items,
+    "runLevel" = runLevel,
+    "online" = online,
     "taskType" = taskType,
     "desc" = desc,
     "taskTopic" = taskTopic,
@@ -83,12 +88,16 @@ task_all <- function(taskTopic = "TASK_DEFINE") {
         list(
           "taskTopic" = x$taskTopic,
           "taskId" = x$taskId,
-          "items" = x$items,
+          "items" = x$items |> as_tibble(),
+          "runLevel" = x$runLevel,
+          "online" = x$online %empty% TRUE,
           "taskType" = x$taskType,
           "desc" = x$desc,
           "createdAt" = x$createdAt
         )
       })
+  } else {
+    tibble()
   }
 }
 

@@ -7,6 +7,8 @@
 task_create(
   taskId,
   items = tibble(),
+  runLevel = 500,
+  online = TRUE,
   taskType = "__UNKNOWN__",
   desc = "-",
   taskTopic = "TASK_DEFINE"
@@ -16,6 +18,10 @@ task_create(
 \item{taskId}{任务唯一标识，每个\code{taskId}会保存为一个独立文件}
 
 \item{items}{子任务清单，包含子任务的执行脚本、参数设定等}
+
+\item{runLevel}{同一批次任务中，运行时的优先级}
+
+\item{online}{任务是否启用}
 
 \item{taskType}{任务类型}
 
