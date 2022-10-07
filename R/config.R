@@ -100,7 +100,7 @@ config_write <- function(path, yml = "config.yml", option = list()) {
 #' @param option 配置项
 #' @family config functions
 #' @export
-config_init <- function(path, yml = "config.yml", option = list()) {
+config_init <- function(path = "./", yml = "config.yml", option = list()) {
   ## 创建配置文件目录
   if(!fs::dir_exists(path)) {
     fs::dir_create(path)
