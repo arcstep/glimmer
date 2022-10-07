@@ -13,5 +13,6 @@
 #'  summarise semi_join anti_join left_join inner_join full_join collect
 #'  slice n row_number case_when
 #' @importFrom yaml write_yaml read_yaml
+#' @importFrom lubridate as_date as_datetime now
 ## usethis namespace: end
 NULL
