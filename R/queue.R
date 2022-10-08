@@ -5,17 +5,17 @@
 queue_dataset_init <- function(dsName = "__TASK_QUEUE__", cacheTopic = "CACHE") {
   ## 任务数据样本
   sampleData <- tibble(
-    "id" = gen_batchNum(),
-    "taskTopic" = "TASK_DEFINE",
-    "taskType" = "__TYPE_IMPORT__",
-    "taskId" = "MY_UNIQUE_TASK_NAME", # from task_define
-    "runLevel" = 500L,
-    "ymlParams" = list("name" = "adi") |> queue_param_to_yaml(),
-    "createdAt" = as_datetime("2022-10-01 08:28:15", tz = "Asia/Shanghai"),
-    "runAt" = as_datetime("2022-10-01 08:28:15", tz = "Asia/Shanghai"),
-    "doneAt" = as_datetime("2022-10-01 08:30:45", tz = "Asia/Shanghai"),
-    "year" = 2022L, # createdAt year
-    "month" = 10L)  # createdAt month
+    "id" = dt_string(),
+    "taskTopic" = dt_string(),
+    "taskType" = dt_string(),
+    "taskId" = dt_string(),
+    "runLevel" = dt_int(),
+    "ymlParams" = dt_string(),
+    "createdAt" = dt_datetime(),
+    "runAt" = dt_datetime(),
+    "doneAt" = dt_datetime(),
+    "year" = dt_int(), # createdAt year
+    "month" = dt_int())  # createdAt month
   ds_init(
     dsName = dsName,
     topic = cacheTopic,
@@ -29,16 +29,33 @@ queue_dataset_init <- function(dsName = "__TASK_QUEUE__", cacheTopic = "CACHE") 
 queue_param_from_yaml <- function(ymlParams) ymlParams |> yaml::yaml.load()
 queue_param_to_yaml <- function(params) params |> yaml::as.yaml()
 
+#' @title 构造队列中的一条数据
+#' @family task function
+#' @export
+queue_task_item <- function(taskId, params, taskType = "__TYPE_UNKNOWN__", taskTopic = "CACHE") {
+  createdAt <- now(tzone = "Asia/Shanghai")
+  list(
+    "id" = gen_batchNum(),
+    "taskTopic" = taskTopic,
+    "taskType" = taskType,
+    "taskId" = taskId,
+    "ymlParams" = params,
+    "createdAt" = createdAt,
+    "year" = as.integer(lubridate::year(createdAt)),
+    "month" = as.integer(lubridate::month(createdAt)))
+}
+
 #' @title 待执行的队列任务
 #' @family task function
 #' @export
-queue_batch_todo <- function(dsName = "__TASK_QUEUE__", cacheTopic = "CACHE") {
+queue_batch_todo <- function(taskType = NULL, dsName = "__TASK_QUEUE__", cacheTopic = "CACHE") {
   all_tasks <- ds_read(dsName = dsName, topic = cacheTopic)
   if(!rlang::is_empty(all_tasks)) {
     (all_tasks |>
-      filter(!is.na(runAt)) |>
-      collect() |>
-      distinct(`@batchId`))$`@batchId` |> sort()
+       filter(!is.na(runAt)) |>
+       filter(taskType %in% taskType) |>
+       collect() |>
+       distinct(`@batchId`))$`@batchId` |> sort()
   } else {
     c()
   }
@@ -64,9 +81,9 @@ queue_batch_run <- function(batchId, runMode = "in-process", dsName = "__TASK_QU
       arg$taskTopic <- taskTopic
       arg$runMode <- runMode
       ## 执行任务
-      runAt <- now()
+      runAt <- now(tzone = "Asia/Shanghai")
       do.call("task_run", args = arg)
-      doneAt <- now()
+      doneAt <- now(tzone = "Asia/Shanghai")
       ## 更新队列状态
       list(
         "id" = id,

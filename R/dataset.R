@@ -424,6 +424,13 @@ ds_field <- function(x) {
   allFields[[x]]
 }
 
+dt_bool <- function() TRUE
+dt_int <- function() 1000L
+dt_double <- function() 3.14
+dt_string <- function() "I_AM_STRING"
+dt_date <- function() as_date("2022-10-01", tz = "Asia/Shanghai")
+dt_datetime <- function() as_datetime("2022-10-01 08:28:15", tz = "Asia/Shanghai")
+
 #' @title 构造Arrow的schema
 #' @description 
 #' 从数据框格式的schema转换为Arrow的Schema对象

@@ -21,6 +21,7 @@ queue_batch_run(
 \seealso{
 Other task function: 
 \code{\link{queue_batch_todo}()},
-\code{\link{queue_dataset_init}()}
+\code{\link{queue_dataset_init}()},
+\code{\link{queue_task_item}()}
 }
 \concept{task function}

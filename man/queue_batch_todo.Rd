@@ -4,7 +4,11 @@
 \alias{queue_batch_todo}
 \title{待执行的队列任务}
 \usage{
-queue_batch_todo(dsName = "__TASK_QUEUE__", cacheTopic = "CACHE")
+queue_batch_todo(
+  taskType = NULL,
+  dsName = "__TASK_QUEUE__",
+  cacheTopic = "CACHE"
+)
 }
 \description{
 待执行的队列任务
@@ -12,6 +16,7 @@ queue_batch_todo(dsName = "__TASK_QUEUE__", cacheTopic = "CACHE")
 \seealso{
 Other task function: 
 \code{\link{queue_batch_run}()},
-\code{\link{queue_dataset_init}()}
+\code{\link{queue_dataset_init}()},
+\code{\link{queue_task_item}()}
 }
 \concept{task function}

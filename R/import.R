@@ -12,19 +12,19 @@
 import_dataset_init <- function(dsName = "__IMPORT_FILES__", cacheTopic = "CACHE") {
   ## 任务数据样本
   sampleData <- tibble(
-    "importTopic" = "IMPORT",
-    "createdAt" = as_datetime("2022-10-01 08:19:45", tz = "Asia/Shanghai"), # birth_time,
-    "scanedAt" = as_datetime("2022-10-01 08:19:45", tz = "Asia/Shanghai"),
-    "lastmodifiedAt" = as_datetime("2022-10-01 01:19:45", tz = "Asia/Shanghai"), # modification_time
-    "batchFolder" = "schedule_2022-10-01",
+    "importTopic" = dt_string(),
+    "createdAt" = dt_datetime(), # birth_time,
+    "scanedAt" = dt_datetime(),
+    "lastmodifiedAt" = dt_datetime(), # modification_time
+    "batchFolder" = dt_string(),
     "filePath" = "MY/IMPORT/FOLDER/my.csv",
     "fileSize" = 537.0, # fs::bytes
     "taskTopic" = "TASK", # 匹配到的任务主题，"-" default
-    "taskId" = "MY_UNIQUE_TASK_NAME",  # 匹配到的任务，"-" default
-    "taskReadAt" = as_datetime("2022-10-01 08:19:45", tz = "Asia/Shanghai"), # 已被任务读取
-    "taskRunAt" = as_datetime("2022-10-01 08:29:45", tz = "Asia/Shanghai"), # 任务开始运行
-    "taskDoneAt" = as_datetime("2022-10-01 08:30:45", tz = "Asia/Shanghai"), # 任务完成
-    "ignore" = FALSE, # 忽略处理后，不必再判断处理时间
+    "taskId" = dt_string(),  # 匹配到的任务，"-" default
+    "taskReadAt" = dt_datetime(), # 已被任务读取
+    "taskRunAt" = dt_datetime(), # 任务开始运行
+    "taskDoneAt" = dt_datetime(), # 任务完成
+    "ignore" = dt_bool(), # 忽略处理后，不必再判断处理时间
     "year" = 2022L, # createdAt year
     "month" = 10L)  # createdAt month
   ds_init(
@@ -99,7 +99,26 @@ import_folders_scan <- function(importDataset = "__IMPORT_FILES__", importTopic 
 #' @export
 import_folders_ignore <- function() {}
 
-#' @title 生成导入任务
+#' @title 构建导入任务的批处理队列
+#' @description 
+#' 扫描素材时，要求遵循文件夹命名约定：即被扫描文件相对于批次文件夹的相对路径名，
+#' 以扫描任务TaskId开始，例如\code{联系人/重要/1.csv}可以匹配TaskID为\code{联系人}的任务，
+#' 也可以同时匹配到\code{联系人/重要}的任务。
+#' 匹配到的任务都会将素材文件作为参数执行。
+#' 
+#' 扫描后的任务处理流程如下：
+#' 
+#' （1）将未处理的重复素材设置忽略标记；
+#' 
+#' （2）罗列所有扫描任务；
+#' 
+#' （3）根据扫描任务优先级，查找未处理素材，添加导入任务；
+#' 
+#' （4）导入素材添加后，更新这些素材文件的状态信息（读取时间）。
+#' 
+#' （5）每次处理的素材文件个数不超过100个，超过时建立新任务；
+#' 
+#' （6）追加一个任务：导入结束后，更新这些素材文件的状态信息。
 #' @family import function
 #' @export
 import_task_gen <- function(taskDataset = "__TASK_QUEUE__", importDataset = "__IMPORT_FILES__",
@@ -109,7 +128,7 @@ import_task_gen <- function(taskDataset = "__TASK_QUEUE__", importDataset = "__I
     filter(is.na(taskReadAt)) |>
     collect()
   if(!rlang::is_empty(filesToRead)) {
-    ## 从任务清单中找出匹配的导入任务
+    ## 罗列所有扫描任务
     ## 按照约定，使用taskId匹配导入素材的filePath
     allTasks <- task_all(taskTopic)
     if(!rlang::is_empty(allTasks)) {
@@ -124,20 +143,14 @@ import_task_gen <- function(taskDataset = "__TASK_QUEUE__", importDataset = "__I
           } else {
             params <- "NULL"
           }
-          createdAt <- now(tzone = "Asia/Shanghai")
-          list(
-            "id" = gen_batchNum(),
-            "taskTopic" = taskTopic,
-            "taskType" = "__TYPE_IMPORT__",
-            "taskId" = taskId,
-            "ymlParams" = params,
-            "createdAt" = createdAt,
-            "year" = as.integer(lubridate::year(createdAt)),
-            "month" = as.integer(lubridate::month(createdAt)))
+          queue_task_item(taskId = taskId,
+                          params = params,
+                          taskType = "__TYPE_IMPORT__",
+                          taskTopic = cacheTopic)
         }) |> filter(ymlParams != "NULL")
       ## 修改导入素材文件状态
       filesToRead |>
-        mutate(taskReadAt = now()) |>
+        mutate(taskReadAt = now(tzone = "Asia/Shanghai")) |>
         ds_append(dsName = importDataset, topic = cacheTopic)
       ## 增加导入任务到队列
       tasksToGen |>
@@ -149,4 +162,7 @@ import_task_gen <- function(taskDataset = "__TASK_QUEUE__", importDataset = "__I
 #' @title 执行导入任务
 #' @family import function
 #' @export
-import_folders_update <- function() {}
+import_task_run <- function() {
+  queue_batch_todo(taskType == "__TYPE_IMPORT__") |>
+    purrr::walk(function(batchId) queue_batch_run(batchId))
+}
