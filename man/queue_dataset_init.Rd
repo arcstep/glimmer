@@ -11,6 +11,7 @@ queue_dataset_init(dsName = "__TASK_QUEUE__", cacheTopic = "CACHE")
 }
 \seealso{
 Other task function: 
-\code{\link{queue_run}()}
+\code{\link{queue_batch_run}()},
+\code{\link{queue_batch_todo}()}
 }
 \concept{task function}

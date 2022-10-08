@@ -21,7 +21,7 @@ queue_dataset_init <- function(dsName = "__TASK_QUEUE__", cacheTopic = "CACHE") 
     topic = cacheTopic,
     data = sampleData,
     keyColumns = c("id"),
-    partColumns = c("year", "month"),
+    partColumns = c("taskType", "year", "month"),
     type = "__STATE__")
 }
 
@@ -29,29 +29,56 @@ queue_dataset_init <- function(dsName = "__TASK_QUEUE__", cacheTopic = "CACHE") 
 queue_param_from_yaml <- function(ymlParams) ymlParams |> yaml::yaml.load()
 queue_param_to_yaml <- function(params) params |> yaml::as.yaml()
 
-#' @title 批量执行队列任务
+#' @title 待执行的队列任务
 #' @family task function
 #' @export
-queue_run <- function(dsName = "__TASK_QUEUE__", cacheTopic = "CACHE") {
+queue_batch_todo <- function(dsName = "__TASK_QUEUE__", cacheTopic = "CACHE") {
   all_tasks <- ds_read(dsName = dsName, topic = cacheTopic)
   if(!rlang::is_empty(all_tasks)) {
-    all_tasks |>
+    (all_tasks |>
       filter(!is.na(runAt)) |>
       collect() |>
-      arrange(`@batchId`) |>
-      nest(`@batchId`) |>
-      purrr::pwalk(function(`@batchId`, data) {
-        data |> arrange(desc(runLevel)) |>
-          select(taskId, taskTopic, ymlParams) |>
-          purrr::pmap_df(function(taskId, taskTopic, ymlParams) {
-            arg <- ymlParams |> queue_param_from_yaml()
-            arg$taskId <- taskId
-            arg$taskTopic <- taskTopic
-            arg$runMode <- "in-process"
-            ## 执行任务
-            do.call("task_run", args = arg)
-            ## 更新队列状态
-          })
-      })
+      distinct(`@batchId`))$`@batchId` |> sort()
+  } else {
+    c()
   }
+}
+
+#' @title 批量执行队列任务
+#' @description 
+#' 相同批次的任务按优先级大小依次执行；
+#' 执行后的结果统一更新到队列。
+#' 
+#' 如果批任务中部分任务失败，则整体批次任务暂停，
+#' 批次中的所有任务信息都不更新。
+#' @family task function
+#' @export
+queue_batch_run <- function(batchId, runMode = "in-process", dsName = "__TASK_QUEUE__", cacheTopic = "CACHE") {
+  all_tasks <- ds_read(dsName = dsName, topic = cacheTopic) |>
+    filter(`@batchId` == batchId) |>
+    arrange(desc(runLevel)) |>
+    select(id, taskId, taskTopic, taskType, runLevel, ymlParams, createdAt, year, month) |>
+    purrr::pmap_df(function(id, taskId, taskTopic, taskType, runLevel, ymlParams, createdAt, year, month) {
+      arg <- ymlParams |> queue_param_from_yaml()
+      arg$taskId <- taskId
+      arg$taskTopic <- taskTopic
+      arg$runMode <- runMode
+      ## 执行任务
+      runAt <- now()
+      do.call("task_run", args = arg)
+      doneAt <- now()
+      ## 更新队列状态
+      list(
+        "id" = id,
+        "taskTopic" = taskTopic,
+        "taskType" = taskType,
+        "taskId" = taskId,
+        "runLevel" = runLevel,
+        "ymlParams" = ymlParams,
+        "createdAt" = createdAt,
+        "runAt" = runAt,
+        "doneAt" = doneAt,
+        "year" = year,
+        "month" = month)
+    }) |> ds_append(dsName = dsName, topic = cacheTopic)
 }
