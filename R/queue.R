@@ -32,10 +32,10 @@ queue_param_to_yaml <- function(params) params |> yaml::as.yaml()
 #' @title 构造队列中的一条数据
 #' @family task function
 #' @export
-queue_task_item <- function(taskId, params, taskType = "__TYPE_UNKNOWN__", taskTopic = "CACHE") {
+queue_task_item <- function(taskId, params, taskType = "__TYPE_UNKNOWN__", taskTopic = "CACHE", id = gen_batchNum()) {
   createdAt <- now(tzone = "Asia/Shanghai")
   list(
-    "id" = gen_batchNum(),
+    "id" = id,
     "taskTopic" = taskTopic,
     "taskType" = taskType,
     "taskId" = taskId,

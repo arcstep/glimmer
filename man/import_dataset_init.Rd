@@ -17,10 +17,10 @@ import_dataset_init(dsName = "__IMPORT_FILES__", cacheTopic = "CACHE")
 }
 \seealso{
 Other import function: 
-\code{\link{import_folders_all}()},
-\code{\link{import_folders_ignore}()},
-\code{\link{import_folders_scan}()},
-\code{\link{import_task_gen}()},
+\code{\link{ds_import_match}()},
+\code{\link{ds_import_write}()},
+\code{\link{import_files_all}()},
+\code{\link{import_task_create}()},
 \code{\link{import_task_run}()}
 }
 \concept{import function}

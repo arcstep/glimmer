@@ -8,7 +8,8 @@ queue_task_item(
   taskId,
   params,
   taskType = "__TYPE_UNKNOWN__",
-  taskTopic = "CACHE"
+  taskTopic = "CACHE",
+  id = gen_batchNum()
 )
 }
 \description{

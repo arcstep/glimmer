@@ -36,10 +36,10 @@ import_dataset_init <- function(dsName = "__IMPORT_FILES__", cacheTopic = "CACHE
     type = "__STATE__")
 }
 
-#' @title 列举所有文件
+#' @title 列举所有导入素材文件
 #' @family import function
 #' @export
-import_folders_all <- function(importTopic = "IMPORT") {
+import_files_all <- function(importTopic = "IMPORT") {
   ## 扫描素材的批次文件夹
   batchFolders <- get_path(importTopic) |>
     fs::dir_ls(type = "dir", recurse = F) |>
@@ -51,11 +51,11 @@ import_folders_all <- function(importTopic = "IMPORT") {
         ## 提取批次文件夹名称
         batchFolderName <- stringr::str_remove(batchPath, paste0(get_path(importTopic), "/"))
         ## 提取所有素材文件
-        files <- batchPath |>
+        batchPath |>
           fs::dir_info(type = "file", recurse = T) |>
           as_tibble() |>
-          rename(filePath=path, lastmodifiedAt=modification_time, createdAt=birth_time, fileSize=size) |>
-          mutate(filePath = stringr::str_remove(filePath, paste0(batchPath, "/"))) |>
+          rename(lastmodifiedAt=modification_time, createdAt=birth_time, fileSize=size) |>
+          mutate(filePath = stringr::str_remove(path, paste0(batchPath, "/"))) |>
           mutate(batchFolder = batchFolderName) |>
           mutate(importTopic = importTopic) |>
           mutate(scanedAt = now(tzone = "Asia/Shanghai")) |>
@@ -77,8 +77,8 @@ import_folders_all <- function(importTopic = "IMPORT") {
 #' 处理导入任务时也将修改这一状态库，标记taskReadAt、taskDoneAt、taskDoneAt、ignore等字段。
 #' @family import function
 #' @export
-import_folders_scan <- function(importDataset = "__IMPORT_FILES__", importTopic = "IMPORT", cacheTopic = "CACHE") {
-  all_files <- import_folders_all(importTopic)
+ds_import_write <- function(importDataset = "__IMPORT_FILES__", importTopic = "IMPORT", cacheTopic = "CACHE") {
+  all_files <- import_files_all(importTopic)
   if(!rlang::is_empty(all_files)) {
     ## 筛查未曾入库或虽曾入库但已修改的素材文件
     existing <- ds_read(dsName = importDataset, topic = cacheTopic) |> collect()
@@ -90,14 +90,52 @@ import_folders_scan <- function(importDataset = "__IMPORT_FILES__", importTopic 
     }
     ## 入库
     newScan |> ds_append(dsName = importDataset, topic = cacheTopic)
-    # ds_submit(dsName = importDataset, topic = cacheTopic)
+    ds_submit(dsName = importDataset, topic = cacheTopic)
   }
 }
 
-#' @title 将导入素材标记为忽略状态
+#' @title 扫描所有未处理、未忽略的文件
+ds_import_read <- function(dsName = "__IMPORT_FILES__", topic = "CACHE", onlyNewFiles = TRUE) {
+  filesToRead <- ds_read(dsName = importDataset, topic = cacheTopic) |>
+    filter(!ignore) |>
+    collect()
+  if(onlyNewFiles) {
+    filesToRead |> filter(is.na(taskReadAt))
+  } else {
+    filesToRead
+  }
+}
+
+#' @title 为导入素材匹配任务
+#' @description 
+#' 开发过程中，可能要为新建任务重新匹配导入素材。
+#' 
+#' 此时，可以根据实际情况决定仅针对未处理状态还是所有的导入素材做匹配。
 #' @family import function
 #' @export
-import_folders_ignore <- function() {}
+ds_import_match <- function(taskDataset = "__TASK_QUEUE__", importDataset = "__IMPORT_FILES__",
+                                     taskTopic = "TASK_DEFINE", cacheTopic = "CACHE", onlyNewFiles = TRUE) {
+  ## 扫描所有未处理、未忽略的文件
+  filesToRead <- ds_import_files_read(dsName = importDataset, topic = cacheTopic, onlyNewFiles = onlyNewFiles)
+  ## 匹配任务
+  if(!rlang::is_empty(filesToRead)) {
+    ## 按照约定，使用taskId匹配导入素材的filePath
+    allTasks <- task_all(taskTopic)
+    if(!rlang::is_empty(allTasks)) {
+      allTasks |>
+        filter(taskType == "__TYPE_IMPORT__" & online) |>
+        select(taskTopic, taskId) |>
+        purrr::pwalk(function(taskTopic, taskId) {
+          pat <- paste0("^", taskId)
+          filesToRead |>
+            filter(stringr::str_detect(filePath, pat)) |>
+            mutate(taskTopic = taskTopic, taskId = taskId) |>
+            ds_append(dsName = importDataset, topic = cacheTopic)
+        })
+      ds_submit(dsName = importDataset, topic = cacheTopic)
+    }
+  }
+}
 
 #' @title 构建导入任务的批处理队列
 #' @description 
@@ -121,41 +159,30 @@ import_folders_ignore <- function() {}
 #' （6）追加一个任务：导入结束后，更新这些素材文件的状态信息。
 #' @family import function
 #' @export
-import_task_gen <- function(taskDataset = "__TASK_QUEUE__", importDataset = "__IMPORT_FILES__",
+import_task_create <- function(taskDataset = "__TASK_QUEUE__", importDataset = "__IMPORT_FILES__",
                             taskTopic = "TASK_DEFINE", importTopic = "IMPORT", cacheTopic = "CACHE") {
-  ## 扫描所有未处理文件夹
+  ## 扫描所有未处理、未忽略、已完成匹配的导入素材文件
   filesToRead <- ds_read(dsName = importDataset, topic = cacheTopic) |>
     filter(is.na(taskReadAt)) |>
+    filter(!ignore) |>
+    filter(!is.na(taskId) & !is.na(taskTopic)) |>
     collect()
   if(!rlang::is_empty(filesToRead)) {
-    ## 罗列所有扫描任务
-    ## 按照约定，使用taskId匹配导入素材的filePath
-    allTasks <- task_all(taskTopic)
-    if(!rlang::is_empty(allTasks)) {
-      tasksToGen <- allTasks |>
-        filter(taskType == "__TYPE_IMPORT__" & online) |>
-        select(taskId) |>
-        purrr::pmap_df(function(taskId) {
-          pat <- paste0("^", taskId)
-          ds <- filesToRead |> filter(stringr::str_detect(filePath, pat))
-          if(!rlang::is_empty(ds)) {
-            params <- list("filePath" = ds$filePath) |> queue_param_to_yaml()
-          } else {
-            params <- "NULL"
-          }
-          queue_task_item(taskId = taskId,
-                          params = params,
-                          taskType = "__TYPE_IMPORT__",
-                          taskTopic = cacheTopic)
-        }) |> filter(ymlParams != "NULL")
-      ## 修改导入素材文件状态
-      filesToRead |>
-        mutate(taskReadAt = now(tzone = "Asia/Shanghai")) |>
-        ds_append(dsName = importDataset, topic = cacheTopic)
-      ## 增加导入任务到队列
-      tasksToGen |>
-        ds_append(dsName = taskDataset, topic = cacheTopic)      
-    }
+    tasksToCreate <- filesToRead |>
+      nest(taskTopic, taskId) |>
+      purrr::pmap_df(function(taskTopic, taskId, data) {
+        params <- list("filePath" = data$filePath) |> queue_param_to_yaml()
+        queue_task_item(taskId = taskId,
+                        params = params,
+                        taskType = "__TYPE_IMPORT__",
+                        taskTopic = cacheTopic)
+      })
+    ## 修改导入素材文件状态
+    filesToRead |>
+      mutate(taskReadAt = now(tzone = "Asia/Shanghai")) |>
+      ds_append(dsName = importDataset, topic = cacheTopic)
+    ## 增加导入任务到队列
+    tasksToCreate |> ds_append(dsName = taskDataset, topic = cacheTopic)      
   }
 }
 
