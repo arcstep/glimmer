@@ -172,7 +172,7 @@ import_task_create <- function(taskDataset = "__TASK_QUEUE__", importDataset = "
       nest(taskTopic, taskId) |>
       purrr::pmap_df(function(taskTopic, taskId, data) {
         params <- list("filePath" = data$filePath) |> queue_param_to_yaml()
-        queue_task_item(taskId = taskId,
+        ds_task_queue_item(taskId = taskId,
                         params = params,
                         taskType = "__TYPE_IMPORT__",
                         taskTopic = cacheTopic)
@@ -190,6 +190,6 @@ import_task_create <- function(taskDataset = "__TASK_QUEUE__", importDataset = "
 #' @family import function
 #' @export
 import_task_run <- function() {
-  queue_batch_todo(taskType == "__TYPE_IMPORT__") |>
-    purrr::walk(function(batchId) queue_batch_run(batchId))
+  ds_task_queue_todo(taskType == "__TYPE_IMPORT__") |>
+    purrr::walk(function(batchId) ds_task_queue_run(batchId))
 }

@@ -2,7 +2,7 @@
 #' @description  批处理任务的队列
 #' @family task function
 #' @export
-queue_dataset_init <- function(dsName = "__TASK_QUEUE__", cacheTopic = "CACHE") {
+ds_task_queue_init <- function(dsName = "__TASK_QUEUE__", cacheTopic = "CACHE") {
   ## 任务数据样本
   sampleData <- tibble(
     "id" = dt_string(),
@@ -32,7 +32,7 @@ queue_param_to_yaml <- function(params) params |> yaml::as.yaml()
 #' @title 构造队列中的一条数据
 #' @family task function
 #' @export
-queue_task_item <- function(taskId, params, taskType = "__TYPE_UNKNOWN__", taskTopic = "CACHE", id = gen_batchNum()) {
+ds_task_queue_item <- function(taskId, params, taskType = "__TYPE_UNKNOWN__", taskTopic = "CACHE", id = gen_batchNum()) {
   createdAt <- now(tzone = "Asia/Shanghai")
   list(
     "id" = id,
@@ -48,7 +48,7 @@ queue_task_item <- function(taskId, params, taskType = "__TYPE_UNKNOWN__", taskT
 #' @title 待执行的队列任务
 #' @family task function
 #' @export
-queue_batch_todo <- function(taskType = NULL, dsName = "__TASK_QUEUE__", cacheTopic = "CACHE") {
+ds_task_queue_todo <- function(taskType = NULL, dsName = "__TASK_QUEUE__", cacheTopic = "CACHE") {
   all_tasks <- ds_read(dsName = dsName, topic = cacheTopic)
   if(!rlang::is_empty(all_tasks)) {
     (all_tasks |>
@@ -70,7 +70,7 @@ queue_batch_todo <- function(taskType = NULL, dsName = "__TASK_QUEUE__", cacheTo
 #' 批次中的所有任务信息都不更新。
 #' @family task function
 #' @export
-queue_batch_run <- function(batchId, runMode = "in-process", dsName = "__TASK_QUEUE__", cacheTopic = "CACHE") {
+ds_task_queue_run <- function(batchId, runMode = "in-process", dsName = "__TASK_QUEUE__", cacheTopic = "CACHE") {
   all_tasks <- ds_read(dsName = dsName, topic = cacheTopic) |>
     filter(`@batchId` == batchId) |>
     arrange(desc(runLevel)) |>
