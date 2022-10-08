@@ -4,7 +4,12 @@
 \alias{config_init}
 \title{初始化配置项}
 \usage{
-config_init(path = "./", yml = "config.yml", option = list())
+config_init(
+  path = "./",
+  yml = "config.yml",
+  option = list(ROOT_PATH = fs::path_abs(path), IMPORT = "./IMPORT", CACHE = "./CACHE",
+    TASK_SCRIPTS = "./TASK_SCRIPTS", TASK_DEFINE = "./TASK_DEFINE")
+)
 }
 \arguments{
 \item{path}{YAML配置文件目录}
@@ -14,7 +19,7 @@ config_init(path = "./", yml = "config.yml", option = list())
 \item{option}{配置项}
 }
 \description{
-一次性完成：初始化文件夹、配置项设定和加载
+初始化文件夹、配置项设定和加载
 }
 \seealso{
 Other config functions: 

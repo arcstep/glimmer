@@ -67,7 +67,8 @@ config_load <- function(path = "./", yml = "config.yml") {
 }
 
 #' @title 创建或补写配置项到磁盘
-#' @description 多次运行时会增量补充
+#' @description
+#' 多次运行时会增量补充
 #' @param path YAML配置文件目录
 #' @param yml 默认为config.yml
 #' @param option 配置项
@@ -75,40 +76,41 @@ config_load <- function(path = "./", yml = "config.yml") {
 #' @export
 config_write <- function(path, yml = "config.yml", option = list()) {
   if(fs::dir_exists(path)) {
-    p <- fs::path_join(c(path, yml))
-    xoption <- list(
-      "ROOT_PATH" = fs::path_abs(path),
-      "IMPORT" = "./IMPORT",
-      "CACHE" = "./CACHE",
-      "TASK_SCRIPTS" = "./TASK_SCRIPTS",
-      "TASK_DEFINE" = "./TASK_DEFINE")
+    ## 写入配置
+    xoption <- config_yaml(path, yml)
     names(option) |> purrr::walk(function(i) {
       xoption[[i]] <<- option[[i]]
     })
-    xoption |> yaml::write_yaml(p)
-    p
+    xoption |> yaml::write_yaml(fs::path_join(c(path, yml)))
+    ## 加载配置
+    config_load(path, yml)
+    ## 返回内存中的所有配置
+    get_config()
   } else {
     stop("Path Folder Not Exist: ", path)
   }
 }
 #' @title 初始化配置项
-#' @description 一次性完成：初始化文件夹、配置项设定和加载
+#' @description 初始化文件夹、配置项设定和加载
 #' @param path YAML配置文件目录
 #' @param yml 默认为config.yml
 #' @param option 配置项
 #' @family config functions
 #' @export
-config_init <- function(path = "./", yml = "config.yml", option = list()) {
+config_init <- function(path = "./",
+                        yml = "config.yml",
+                        option = list(
+                          "ROOT_PATH" = fs::path_abs(path),
+                          "IMPORT" = "./IMPORT",
+                          "CACHE" = "./CACHE",
+                          "TASK_SCRIPTS" = "./TASK_SCRIPTS",
+                          "TASK_DEFINE" = "./TASK_DEFINE")) {
   ## 创建配置文件目录
   if(!fs::dir_exists(path)) {
     fs::dir_create(path)
   }
   ## 写入配置
   config_write(path, yml, option)
-  ## 加载配置
-  config_load(path, yml)
-  ## 返回内存中的所有配置
-  get_config()
 }
 
 #' @title 读取yaml配置文件为列表
