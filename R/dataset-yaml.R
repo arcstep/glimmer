@@ -32,9 +32,9 @@ ds_yaml_write <- function(dsName, meta = c(), ex = c(),  data = tibble(), topic 
   ## 自动生成额外的元数据项
   updateTimestamp <- lubridate::now()
   datasetMeta$datasetId <- digest::digest(fs::path_join(c(topic, dsName)), algo = "xxhash32")
-  datasetMeta$topic <- topic
-  datasetMeta$name <- dsName
-  datasetMeta$type <- type
+  datasetMeta$topic <- topic |> paste(collapse = "/")
+  datasetMeta$name <- dsName |> paste(collapse = "/")
+  datasetMeta$type <- ds_type(type)
   datasetMeta$updateTime <- updateTimestamp |> as.integer()
   datasetMeta$updateTimeDesc <- lubridate::as_datetime(updateTimestamp, tz = "Asia/Shanghai") |> as.character()
 

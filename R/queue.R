@@ -22,7 +22,7 @@ queue_dataset_init <- function(dsName = "__TASK_QUEUE__", cacheTopic = "CACHE") 
     data = sampleData,
     keyColumns = c("id"),
     partColumns = c("year", "month"),
-    type = "__QUEUE__")
+    type = "__STATE__")
 }
 
 #

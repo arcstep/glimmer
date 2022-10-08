@@ -42,6 +42,16 @@ ds_init <- function(dsName,
   ds_yaml_write(dsName = dsName, meta = meta, data = data, topic = topic, type = type)
 }
 
+#' @title 规范数据存储类型
+#' @family dataset function
+#' @export
+ds_type <- function(type = "__UNKNOWN__") {
+  if(type %in% c("__STATE__", "__IMPORTED__", "__BUILT__", "__RISK__")) {
+    type
+  } else {
+    "__UNKNOWN__"
+  }}
+
 #' @title 批量追加更新的数据
 #' @description 
 #' 为了避免修改原数据文件，追加数据时不查询旧数据，提交归档时再统一处理。
