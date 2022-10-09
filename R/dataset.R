@@ -406,58 +406,6 @@ ds_schema <- function(ds) {
   }
 }
 
-#' @title 返回schema所有支持的字段
-#' @family schema function
-#' @export
-ds_field <- function(x) {
-  allFields <- list(
-    "int8" = int8(),
-    "int16" = int16(),
-    "int32" = int32(),
-    "int64" = int64(),
-    "uint8" = uint8(),
-    "uint16" = uint16(),
-    "uint32" = uint32(),
-    "uint64" = uint64(),
-    "float16" = float16(),
-    "halffloat" = halffloat(),
-    "float32" = float32(),
-    "float" = float(),
-    "float64" = float64(),
-    "double" = float64(),
-    "logical" = boolean(),
-    "boolean" = boolean(),
-    "bool" = bool(),
-    "utf8" = utf8(),
-    "large_utf8" = large_utf8(),
-    "binary" = binary(),
-    "large_binary" = large_binary(),
-    "character" = string(),
-    "string" = string(),
-    "dictionary<values=string, indices=int32>" = dictionary(index_type = int32(), value_type = utf8(), ordered = FALSE),
-    "day" = date32(),
-    "date32" = date32(),
-    "date32[day]" = date32(),
-    "date64" = date64(),
-    "time32" = time32(unit = c("ms", "s")),
-    "time64" = time64(unit = c("ns", "us")),
-    "null" = null(),
-    "timestamp" = timestamp(unit = c("s", "ms", "us", "ns")),
-    "timestamp[s]" = timestamp(unit = c("s", "ms", "us", "ns")),
-    "timestamp[us]" = timestamp(unit = c("us")),
-    "timestamp[us, tz=UTC]" = timestamp(unit = c("us")),
-    "timestamp[us, tz=Asia/Shanghai]" = timestamp(unit = c("us"), timezone = "Asia/Shanghai")
-  )
-  allFields[[x]]
-}
-
-dt_bool <- function() TRUE
-dt_int <- function() 1000L
-dt_double <- function() 3.14
-dt_string <- function() "I_AM_STRING"
-dt_date <- function() as_date("2022-10-01", tz = "Asia/Shanghai")
-dt_datetime <- function() as_datetime("2022-10-01 08:28:15", tz = "Asia/Shanghai")
-
 #' @title 构造Arrow的schema
 #' @description 
 #' 从数据框格式的schema转换为Arrow的Schema对象
@@ -467,24 +415,20 @@ dt_datetime <- function() as_datetime("2022-10-01 08:28:15", tz = "Asia/Shanghai
 #' @family dataset function
 #' @export
 ds_schema_obj <- function(dsName, topic = "CACHE") {
-  # schemaName <- paste(topic, dsName, sep = "__")
-  ##
-  # if(!exists(schemaName, envir = SCHEMA.ENV)) {
-    s <- list()
-    yml <- ds_yaml(dsName, topic)
-    if(!rlang::is_empty(yml$schema)) {
-      yml$schema |> purrr::walk(function(item) s[[item$fieldName]] <<- ds_field(item$fieldType))
-      s$`@deleted` <- ds_field("bool")
-      s$`@action` <- ds_field("string")
-      s$`@batchId` <- ds_field("string")
-      s$`@lastmodifiedAt` <- ds_field("timestamp[us, tz=Asia/Shanghai]")
-      # assign(schemaName, s, envir = SCHEMA.ENV)
-    } else {
-      stop("No Schema in metada: ", topic, "/", dsName, "/.metadata.yml")
-    }
-    s
-  # }
-  # get(schemaName, envir = SCHEMA.ENV)
+  s <- list()
+  yml <- ds_yaml(dsName, topic)
+  if(!rlang::is_empty(yml$schema)) {
+    yml$schema |> purrr::walk(function(item) {
+      s[[item$fieldName]] <<- dt_field(item$fieldType)
+    }) 
+    s$`@deleted` <- dt_field("bool")
+    s$`@action` <- dt_field("string")
+    s$`@batchId` <- dt_field("string")
+    s$`@lastmodifiedAt` <- dt_field("timestamp[us, tz=Asia/Shanghai]")
+  } else {
+    stop("No Schema in metada: ", topic, "/", dsName, "/.metadata.yml")
+  }
+  s
 }
 
 
