@@ -5,7 +5,7 @@
 \title{构建导入任务的批处理队列}
 \usage{
 import_task_queue_create(
-  taskDataset = "__TASK_QUEUE__",
+  taskQueue = "__TASK_QUEUE__",
   importDataset = "__IMPORT_FILES__",
   taskTopic = "TASK_DEFINE",
   importTopic = "IMPORT",

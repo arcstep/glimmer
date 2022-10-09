@@ -49,5 +49,4 @@ bench_sqlite3 <- function() {
   system.time({
     ds_read("mtcars") |> summarise(value = sum(mpg)) |> collect()
   })
-  
 }
