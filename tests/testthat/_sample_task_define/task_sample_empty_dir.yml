@@ -1,0 +1,13 @@
+taskId: task_sample_empty_dir
+runLevel: 500
+online: yes
+taskType: __UNKNOWN__
+desc: '-'
+taskTopic: TASK_DEFINE
+createdAt: 2022-10-09 15:49:00
+items:
+  scriptsTopic: TASK_SCRIPTS
+  taskScript: EMPTY_FOLDER
+  params:
+  - - ~
+  scriptType: dir

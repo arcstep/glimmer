@@ -1,6 +1,5 @@
 #' @title 创建任务执行框架
 #' @param taskId 任务唯一标识，每个\code{taskId}会保存为一个独立文件
-#' @param items 子任务清单，包含子任务的执行脚本、参数设定等
 #' @param runLevel 同一批次任务中，运行时的优先级
 #' @param online 任务是否启用
 #' @param taskType 任务类型
@@ -8,21 +7,21 @@
 #' @param taskTopic 保存任务定义的存储主题文件夹
 #' @param family task-define function
 #' @export
-task_create <- function(taskId, items = tibble(), runLevel = 500, online = TRUE,
+task_create <- function(taskId, runLevel = 500L, online = TRUE,
                         taskType = "__UNKNOWN__", desc = "-", taskTopic = "TASK_DEFINE") {
   path <- get_path(taskTopic, paste0(taskId, ".yml"))
   fs::path_dir(path) |> fs::dir_create()
   list(
     "taskId" = taskId,
-    "items" = items,
     "runLevel" = runLevel,
     "online" = online,
     "taskType" = taskType,
     "desc" = desc,
     "taskTopic" = taskTopic,
-    "createdAt" = lubridate::as_datetime(lubridate::now(), tz = "Asia/Shanghai")
+    "createdAt" = as_datetime(lubridate::now(), tz = "Asia/Shanghai") |> as.character()
   ) |>
     yaml::write_yaml(path)
+  taskId
 }
 
 #' @title 增加子任务
@@ -31,6 +30,7 @@ task_create <- function(taskId, items = tibble(), runLevel = 500, online = TRUE,
 #' @param params 子任务的参数设置
 #' @param scriptType 可以是string,file或folder
 #' @param taskTopic 保存任务定义的存储主题文件夹
+#' @param scriptsTopic 保存R脚本定义的存储主题文件夹
 #' @param family task-define function
 #' @export
 task_item_add <- function(
@@ -38,11 +38,13 @@ task_item_add <- function(
     taskScript,
     params = list(NULL),
     scriptType = "string",
-    taskTopic = "TASK_DEFINE") {
+    taskTopic = "TASK_DEFINE",
+    scriptsTopic = "TASK_SCRIPTS") {
   path <- get_path(taskTopic, paste0(taskId, ".yml"))
   if(fs::file_exists(path)) {
     meta <- yaml::read_yaml(path)
     item <- tibble(
+      "scriptsTopic" = scriptsTopic,
       "taskScript" = taskScript,
       "params" = list(params %empty% NULL),
       "scriptType" = scriptType)
@@ -52,6 +54,7 @@ task_item_add <- function(
       meta$items <- rbind(as_tibble(meta$items), item)
     }
     meta |> yaml::write_yaml(path)
+    taskId
   } else {
     stop("Can't Add Task Before Task Define: ", taskId)
   }
@@ -119,7 +122,7 @@ task_run <- function(taskId, taskTopic = "TASK_DEFINE", runMode = "in-process", 
     
     assign("__RESULT__", list(), envir = TaskRun.ENV)
     ## 逐项执行子任务
-    task$items |> purrr::pwalk(function(taskScripts, params, scriptType) {
+    task$items |> purrr::pwalk(function(scriptsTopic, taskScripts, params, scriptType) {
       names(params) |> purrr::walk(function(i) {
         assign(i, params[[i]], envir = TaskRun.ENV)
       })
@@ -128,19 +131,21 @@ task_run <- function(taskId, taskTopic = "TASK_DEFINE", runMode = "in-process", 
                parse(text = taskScripts) |> eval(envir = TaskRun.ENV),
                envir = TaskRun.ENV)
       } else if(scriptType == "file") {
-        if(!fs::file_exists(taskScripts)) {
-          stop("No such script file: ", taskScripts)
+        pathScripts <- get_path(scriptsTopic, taskScripts)
+        if(!fs::file_exists(pathScripts)) {
+          stop("No such script file: ", pathScripts)
         }
         assign("__RESULT__",
-               parse(file = taskScripts) |> eval(envir = TaskRun.ENV),
+               parse(file = pathScripts) |> eval(envir = TaskRun.ENV),
                envir = TaskRun.ENV)
       } else if(scriptType == "dir") {
-        if(!fs::dir_exists(taskScripts)) {
-          stop("No such script dir: ", taskScripts)
+        pathScripts <- get_path(scriptsTopic, taskScripts)
+        if(!fs::dir_exists(pathScripts)) {
+          stop("No such script dir: ", pathScripts)
         }
-        allFiles <- fs::dir_ls(taskScripts, type = "file", recurse = T, glob = "*.R")
+        allFiles <- fs::dir_ls(pathScripts, type = "file", recurse = T, glob = "*.R")
         if(length(allFiles) == 0) {
-          stop("None R file existing in scripts dir: ", taskScripts)
+          stop("None R file existing in scripts dir: ", pathScripts)
         }
         allFiles |> sort() |> purrr::walk(function(p) {
           assign("__RESULT__",
@@ -160,6 +165,6 @@ task_run <- function(taskId, taskTopic = "TASK_DEFINE", runMode = "in-process", 
   } else if(runMode == "r_bg"){
     callr::r_bg(toRun, args = list(..., "task" = taskread))
   } else {
-    do.call("toRun", args = list(..., "task" = task_read(taskId, taskTopic)))
+    do.call("toRun", args = list(..., "task" = taskread))
   }
 }

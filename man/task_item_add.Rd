@@ -9,7 +9,8 @@ task_item_add(
   taskScript,
   params = list(NULL),
   scriptType = "string",
-  taskTopic = "TASK_DEFINE"
+  taskTopic = "TASK_DEFINE",
+  scriptsTopic = "TASK_SCRIPTS"
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ task_item_add(
 \item{scriptType}{可以是string,file或folder}
 
 \item{taskTopic}{保存任务定义的存储主题文件夹}
+
+\item{scriptsTopic}{保存R脚本定义的存储主题文件夹}
 
 \item{family}{task-define function}
 }

@@ -1,225 +1,80 @@
-library(dplyr)
-library(tibble)
-
-set_topic("STATE", "/tmp/glimmer/STATE")
-set_topic("IMPORT", "/tmp/glimmer/IMPORT")
-set_topic("CACHE", "/tmp/glimmer/CACHE")
-set_topic("TASK/BUILD", "/tmp/glimmer/TASK/BUILD")
-set_topic("TASK/IMPORT", "/tmp/glimmer/TASK/IMPORT")
-
-clear_dir <- function() {
-  get_path("STATE") |> remove_dir()
-  get_path("IMPORT") |> remove_dir()
-  get_path("CACHE") |> remove_dir()
-  get_path("TASK/BUILD") |> remove_dir()
-  get_path("TASK/IMPORT") |> remove_dir()
-}
-
-#
-prepare_csv <- function(range, taskFolder, dsName) {
-  fs::dir_create(get_path("IMPORT", taskFolder, dsName))
-  tibble(a = 1:100, b = 1:100) |>
-    as_tibble() |>
-    slice(range) |>
-    readr::write_excel_csv(get_path("IMPORT", taskFolder, dsName, "1.csv"))
-}
-
-test_that("任务文件夹尚未建立", {
-  set_topic("TASK/IMPORT", "/tmp/glimmer/TASK/IMPORT")
-  task_dir(taskTopic = "TASK/IMPORT") |> testthat::expect_equal(tibble())
-  task_files(taskTopic = "TASK/IMPORT") |> testthat::expect_equal(tibble())
-  clear_dir()
-})
-
-test_that("任务文件夹内文件为空", {
-  set_topic("TASK/IMPORT", "/tmp/glimmer/TASK/IMPORT")
-  create_dir(get_path("TASK/IMPORT"))
-  task_dir(taskTopic = "TASK/IMPORT") |> testthat::expect_equal(tibble())
-  task_files(taskTopic = "TASK/IMPORT") |> testthat::expect_equal(tibble())
-  clear_dir()
-})
-
-test_that("查看脚本目录", {
-  fs::dir_create(get_path("IMPORT", "ABC"))
-  fs::dir_create(get_path("IMPORT", "DEF"))
-  fs::file_touch(get_path("IMPORT", "DEF/2.R"))
-  fs::file_touch(get_path("IMPORT", "ABC/1.R"))
-  fs::file_touch(get_path("IMPORT", "ABC/4.R"))
-  fs::file_touch(get_path("IMPORT", "3.R"))
-  task_dir("IMPORT") |>
-    testthat::expect_equal(
-      tribble(
-        ~topic, ~folder, ~task, ~folder_path, ~n,
-        "IMPORT", "", "ABC", "/tmp/glimmer/IMPORT/ABC", 2,
-        "IMPORT", "", "DEF", "/tmp/glimmer/IMPORT/DEF", 1,
-        "IMPORT", "", ".", "/tmp/glimmer/IMPORT", 1
-      ) |> arrange(folder_path)
-    )
-  clear_dir()
-})
-
-test_that("查看脚本目录：指定文件夹", {
-  fs::dir_create(get_path("IMPORT", "A/BC"))
-  fs::dir_create(get_path("IMPORT", "D/EF"))
-  fs::file_touch(get_path("IMPORT", "D/EF/2.R"))
-  fs::file_touch(get_path("IMPORT", "A/BC/1.R"))
-  fs::file_touch(get_path("IMPORT", "A/BC/4.R"))
-  fs::file_touch(get_path("IMPORT", "3.R"))
-  task_dir("IMPORT", taskFolder = "A") |>
-    testthat::expect_equal(
-      tribble(
-        ~topic, ~folder, ~task, ~folder_path, ~n,
-        "IMPORT", "A", "BC", "/tmp/glimmer/IMPORT/A/BC", 2
-      ) |> arrange(folder_path)
-    )
-  clear_dir()
-})
-
-test_that("查看脚本文件", {
-  fs::dir_create(get_path("IMPORT", "ABC"))
-  fs::file_touch(get_path("IMPORT", "2.R"))
-  fs::file_touch(get_path("IMPORT", "ABC/1.R"))
-  fs::file_touch(get_path("IMPORT", "3.R"))
-  task_files("IMPORT") |>
-    testthat::expect_equal(
-      tribble(
-        ~topic, ~folder, ~name, ~path,
-        "IMPORT", "", "ABC/1.R", "/tmp/glimmer/IMPORT/ABC/1.R",
-        "IMPORT", "", "2.R", "/tmp/glimmer/IMPORT/2.R",
-        "IMPORT", "", "3.R", "/tmp/glimmer/IMPORT/3.R"
-      ) |> arrange(path) |> mutate(path = fs::as_fs_path(path))
-    )
-  clear_dir()
-})
-
-test_that("查看脚本文件：指定文件夹", {
-  fs::dir_create(get_path("IMPORT", "A/BC"))
-  fs::dir_create(get_path("IMPORT", "D/EF"))
-  fs::file_touch(get_path("IMPORT", "D/EF/2.R"))
-  fs::file_touch(get_path("IMPORT", "A/BC/1.R"))
-  fs::file_touch(get_path("IMPORT", "A/BC/4.R"))
-  fs::file_touch(get_path("IMPORT", "3.R"))
-  task_files("IMPORT", taskFolder = "A") |>
-    testthat::expect_equal(
-      tribble(
-        ~topic, ~folder, ~name, ~path,
-        "IMPORT", "A", "BC/1.R", "/tmp/glimmer/IMPORT/A/BC/1.R",
-        "IMPORT", "A", "BC/4.R", "/tmp/glimmer/IMPORT/A/BC/4.R"
-      ) |> arrange(path) |> mutate(path = fs::as_fs_path(path))
-    )
-  clear_dir()
-})
-
-test_that("执行目标文件夹下的脚本", {
-  fs::dir_create(get_path("TASK/BUILD"))
-  write("f2 <- f1 + 1", get_path("TASK/BUILD", "2.R"))
-  write("f1 <- 1", get_path("TASK/BUILD", "1.R"))
-  write("f3 <- f2 + f1", get_path("TASK/BUILD", "3.R"))
-  task_run(taskTopic = "TASK/BUILD")
-  testthat::expect_equal(f3, 3)
-  clear_dir()
-})
-
-test_that("执行目标文件夹下的脚本，哪怕是多层子目录", {
-  fs::dir_create(get_path("TASK/BUILD", "1-FF"))
-  fs::dir_create(get_path("TASK/BUILD", "2-EE"))
-  write("f2 <- f1 + 1", get_path("TASK/BUILD", "1-FF/2.R"))
-  write("f1 <- 1", get_path("TASK/BUILD", "1-FF/1.R"))
-  write("f3 <- f2 + f1", get_path("TASK/BUILD", "2-EE/1.R"))
-  task_run(taskTopic = "TASK/BUILD")
-  testthat::expect_equal(f3, 3)
-  clear_dir()
-})
-
-test_that("执行特定脚本文件", {
-  fs::dir_create(get_path("TASK/BUILD", "1-FF"))
-  fs::dir_create(get_path("TASK/BUILD", "2-EE"))
-  write("f2 <- f1 + 1", get_path("TASK/BUILD", "1-FF/2.R"))
-  write("f1 <- 1", get_path("TASK/BUILD", "1-FF/1.R"))
-  write("f3 <- f2 + f1", get_path("TASK/BUILD", "2-EE/1.R"))
-  task_run(taskTopic = "TASK/BUILD", taskFolder = "1-FF", glob = "**/1.R")
-  task_run(taskTopic = "TASK/BUILD", taskFolder = "1-FF", glob = "**/2.R")
-  task_run(taskTopic = "TASK/BUILD", taskFolder = "2-EE", glob = "**/1.R")
-  testthat::expect_equal(f3, 3)
-  clear_dir()
-})
-
-test_that("根据导入文件夹，执行导入计划", {
-  prepare_csv( 1:10, taskFolder = "task001", dsName = "车型")
-  prepare_csv(11:20, taskFolder = "task002", dsName = "车型")
-  prepare_csv(21:30, taskFolder = "task003", dsName = "车型")
+test_that("定义任务：string类型", {
+  temp_config_init()
   
-  fs::dir_create(get_path("TASK/IMPORT"))
-  '
-  path <- get_path("IMPORT", get_importing_folder(), "车型")
-  if(path |> fs::dir_exists()) {
-    arrow::open_dataset(path, format = "csv") |> collect() |> ds_write("车型")
-  }
-  ' |> write(get_path("TASK/IMPORT", "1.R"))
+  task_create(taskId = "A", list())
+  task_read("A")$taskType |>
+    testthat::expect_equal("__UNKNOWN__")
 
-  import_todo()
-  testthat::expect_equal(nrow(ds_read("车型")), 30)
-  clear_dir()
+  task_item_add(taskId = "A", taskScript = "ls()", scriptType = "string")
+  task_read("A")$items |> nrow() |>
+    testthat::expect_equal(1)
+  
+  task_item_add(taskId = "A", taskScript = "ls()", params = list(batchFoler = NULL), scriptType = "string")
+  task_read("A")$items |> nrow() |>
+    testthat::expect_equal(2)
+  
+  task_item_add(taskId = "A", taskScript = "ls()", params = list(batchFoler = "schedual_1001", data = 1:3), scriptType = "string")
+  task_read("A")$items |> nrow() |>
+    testthat::expect_equal(3)
+  
+  temp_remove()
 })
 
-test_that("仅对未处理文件夹执行导入计划", {
-  prepare_csv( 1:10, taskFolder = "task001", dsName = "车型")
-  prepare_csv(11:20, taskFolder = "task002", dsName = "车型")
+test_that("定义任务：file类型，且使用管道风格", {
+  temp_config_init()
   
-  fs::dir_create(get_path("TASK/IMPORT"))
-  '
-  path <- get_path("IMPORT", get_importing_folder(), "车型")
-  if(path |> fs::dir_exists()) {
-    arrow::open_dataset(path, format = "csv") |> collect() |> ds_write("车型")
-  }
-  ' |> write(get_path("TASK/IMPORT", "1.R"))
+  task_create(taskId = "B", list()) |>
+    task_item_add(taskScript = "A/a.R", scriptType = "file") |>
+    task_item_add(taskScript = "result <- (x |> filter(age > 6))", scriptType = "string")
+  task_read("B")$items |> nrow() |>
+    testthat::expect_equal(2)
   
-  import_todo(taskTopic = "TASK/IMPORT")
-  testthat::expect_equal(nrow(ds_read("车型")), 20)
-  
-  prepare_csv(21:30, taskFolder = "task003", dsName = "车型")
-  import_todo(taskTopic = "TASK/IMPORT")
-  testthat::expect_equal(nrow(ds_read("车型")), 30)
-  clear_dir()
+  temp_remove()
 })
 
-
-test_that("手工指定导入文件夹，执行导入脚本", {
-  prepare_csv(1:2, taskFolder = "task001", dsName = "车型")
-  prepare_csv(3:4, taskFolder = "task002", dsName = "车型")
-  prepare_csv(5:6, taskFolder = "task003", dsName = "车型")
-  prepare_csv(7:8, taskFolder = "task001", dsName = "cars")
-  prepare_csv(9:10, taskFolder = "task002", dsName = "cars")
-
-  create_dir(get_path("TASK/IMPORT"))
-  '
-  path <- get_path("IMPORT", get_importing_folder(), "车型")
-  if(path |> fs::dir_exists()) {
-    arrow::open_dataset(path, format = "csv") |> collect() |> ds_write("车型")
-  }
-  ' |> write(get_path("TASK/IMPORT", "1.R"))
-  '
-  path <- get_path("IMPORT", get_importing_folder(), "cars")
-  if(path |> fs::dir_exists()) {
-    arrow::open_dataset(path, format = "csv") |> collect() |> ds_write("cars")
-  }
-  ' |> write(get_path("TASK/IMPORT", "2.R"))
-
-  import_redo(todo = c("task002", "task003"), taskTopic = "TASK/IMPORT")
-  testthat::expect_equal(nrow(ds_read("车型")), 4)
-  testthat::expect_equal(nrow(ds_read("cars")), 2)
+test_that("定义任务：dir类型", {
+  temp_config_init()
   
-  clear_dir()
+  task_create(taskId = "C") |>
+    task_item_add(taskScript = "A", scriptType = "dir")
+  task_read("C")$items |> nrow() |>
+    testthat::expect_equal(1)
+
+  temp_remove()
 })
 
-test_that("定义导入脚本", {
-  prepare_csv(1:2, taskFolder = "task001", dsName = "车型")
-  create_dir(get_path("TASK/IMPORT"))
-  'import_define("比亚迪", function(path) {})' |> write(get_path("TASK/IMPORT", "1.R"))
-  'import_define("长安福特", function(path) {})' |> write(get_path("TASK/IMPORT", "2.R"))
+test_that("运行任务：成功运行", {
+  sample_config_init()
   
-  import_redo(todo = c("task001"), taskTopic = "TASK/IMPORT")
-  import_datasets("IMPORT") |> names() |> testthat::expect_equal(c("比亚迪", "长安福特"))
+  task_run("task_sample_simple") |> nrow() |>
+    testthat::expect_equal(1)
 
-  clear_dir()
+  task_run("task_sample_dir") |> ncol() |>
+    testthat::expect_equal(3)
+  
+  task_run("task_sample_define_param") |> nrow() |>
+    testthat::expect_equal(4)
+  
+  task_run("task_sample_runtime_param", myage = 6) |> nrow() |>
+    testthat::expect_equal(1)
+  
+  temp_remove()
+})
+
+test_that("运行任务：异常情况", {
+  sample_config_init()
+    
+  task_run("task_sample_error", myage = 6) |>
+    testthat::expect_error("I m an error")
+  
+  task_run("task_sample_file_not_exist", myage = 6) |>
+    testthat::expect_error("No such script file")
+  
+  task_run("task_sample_dir_not_exist", myage = 6) |>
+    testthat::expect_error("No such script dir")
+  
+  task_run("task_sample_empty_dir", myage = 6) |>
+    testthat::expect_error("None R file existing in scripts dir")
+  
+  temp_remove()
 })

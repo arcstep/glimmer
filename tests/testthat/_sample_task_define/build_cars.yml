@@ -1,0 +1,13 @@
+taskId: build_cars
+runLevel: 500
+online: yes
+taskType: __BUILD__
+desc: '-'
+taskTopic: TASK_DEFINE
+createdAt: 2022-10-09 15:49:00
+items:
+  scriptsTopic: TASK_SCRIPTS
+  taskScript: BUILD/cars.R
+  params:
+  - - ~
+  scriptType: file

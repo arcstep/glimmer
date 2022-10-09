@@ -6,8 +6,7 @@
 \usage{
 task_create(
   taskId,
-  items = tibble(),
-  runLevel = 500,
+  runLevel = 500L,
   online = TRUE,
   taskType = "__UNKNOWN__",
   desc = "-",
@@ -16,8 +15,6 @@ task_create(
 }
 \arguments{
 \item{taskId}{任务唯一标识，每个\code{taskId}会保存为一个独立文件}
-
-\item{items}{子任务清单，包含子任务的执行脚本、参数设定等}
 
 \item{runLevel}{同一批次任务中，运行时的优先级}
 

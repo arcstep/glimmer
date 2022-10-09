@@ -4,12 +4,7 @@
 \alias{config_init}
 \title{初始化配置项}
 \usage{
-config_init(
-  path = "./",
-  yml = "config.yml",
-  option = list(ROOT_PATH = fs::path_abs(path), IMPORT = "./IMPORT", CACHE = "./CACHE",
-    TASK_SCRIPTS = "./TASK_SCRIPTS", TASK_DEFINE = "./TASK_DEFINE")
-)
+config_init(path = "./", yml = "config.yml", option = list())
 }
 \arguments{
 \item{path}{YAML配置文件目录}

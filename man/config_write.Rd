@@ -4,7 +4,7 @@
 \alias{config_write}
 \title{创建或补写配置项到磁盘}
 \usage{
-config_write(path, yml = "config.yml", option = list())
+config_write(path = "./", yml = "config.yml", option = list())
 }
 \arguments{
 \item{path}{YAML配置文件目录}

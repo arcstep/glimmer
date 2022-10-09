@@ -74,10 +74,19 @@ config_load <- function(path = "./", yml = "config.yml") {
 #' @param option 配置项
 #' @family config functions
 #' @export
-config_write <- function(path, yml = "config.yml", option = list()) {
+config_write <- function(path = "./", yml = "config.yml", option = list()) {
   if(fs::dir_exists(path)) {
     ## 写入配置
-    xoption <- config_yaml(path, yml)
+    if(fs::file_exists(fs::path_join(c(path, yml)))) {
+      xoption <- config_yaml(path, yml)
+    } else {
+      xoption <- list(
+        "ROOT_PATH" = fs::path_abs(path),
+        "IMPORT" = "./IMPORT",
+        "CACHE" = "./CACHE",
+        "TASK_SCRIPTS" = "./TASK_SCRIPTS",
+        "TASK_DEFINE" = "./TASK_DEFINE")
+    }
     names(option) |> purrr::walk(function(i) {
       xoption[[i]] <<- option[[i]]
     })
@@ -99,12 +108,7 @@ config_write <- function(path, yml = "config.yml", option = list()) {
 #' @export
 config_init <- function(path = "./",
                         yml = "config.yml",
-                        option = list(
-                          "ROOT_PATH" = fs::path_abs(path),
-                          "IMPORT" = "./IMPORT",
-                          "CACHE" = "./CACHE",
-                          "TASK_SCRIPTS" = "./TASK_SCRIPTS",
-                          "TASK_DEFINE" = "./TASK_DEFINE")) {
+                        option = list()) {
   ## 创建配置文件目录
   if(!fs::dir_exists(path)) {
     fs::dir_create(path)
