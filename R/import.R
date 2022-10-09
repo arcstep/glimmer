@@ -9,7 +9,7 @@
 #' 如果有补充采集，则视情况将旧文件标记为“忽略”。
 #' @family import function
 #' @export
-import_dataset_init <- function(dsName = "__IMPORT_FILES__", cacheTopic = "CACHE") {
+import_init <- function(dsName = "__IMPORT_FILES__", cacheTopic = "CACHE") {
   ## 任务数据样本
   sampleData <- tibble(
     "importTopic" = dt_string(),
@@ -77,7 +77,7 @@ import_files_all <- function(importTopic = "IMPORT") {
 #' 处理导入任务时也将修改这一状态库，标记taskReadAt、taskDoneAt、taskDoneAt、ignore等字段。
 #' @family import function
 #' @export
-ds_import_write <- function(importDataset = "__IMPORT_FILES__", importTopic = "IMPORT", cacheTopic = "CACHE") {
+import_files_scan <- function(importDataset = "__IMPORT_FILES__", importTopic = "IMPORT", cacheTopic = "CACHE") {
   all_files <- import_files_all(importTopic)
   if(!rlang::is_empty(all_files)) {
     ## 筛查未曾入库或虽曾入库但已修改的素材文件
@@ -95,7 +95,7 @@ ds_import_write <- function(importDataset = "__IMPORT_FILES__", importTopic = "I
 }
 
 #' @title 扫描所有未处理、未忽略的文件
-ds_import_read <- function(dsName = "__IMPORT_FILES__", topic = "CACHE", onlyNewFiles = TRUE) {
+import_files_read <- function(dsName = "__IMPORT_FILES__", topic = "CACHE", onlyNewFiles = TRUE) {
   filesToRead <- ds_read(dsName = importDataset, topic = cacheTopic) |>
     filter(!ignore) |>
     collect()
@@ -113,7 +113,7 @@ ds_import_read <- function(dsName = "__IMPORT_FILES__", topic = "CACHE", onlyNew
 #' 此时，可以根据实际情况决定仅针对未处理状态还是所有的导入素材做匹配。
 #' @family import function
 #' @export
-ds_import_match <- function(taskDataset = "__TASK_QUEUE__", importDataset = "__IMPORT_FILES__",
+import_task_match <- function(taskDataset = "__TASK_QUEUE__", importDataset = "__IMPORT_FILES__",
                                      taskTopic = "TASK_DEFINE", cacheTopic = "CACHE", onlyNewFiles = TRUE) {
   ## 扫描所有未处理、未忽略的文件
   filesToRead <- ds_import_files_read(dsName = importDataset, topic = cacheTopic, onlyNewFiles = onlyNewFiles)
@@ -159,7 +159,7 @@ ds_import_match <- function(taskDataset = "__TASK_QUEUE__", importDataset = "__I
 #' （6）追加一个任务：导入结束后，更新这些素材文件的状态信息。
 #' @family import function
 #' @export
-import_task_create <- function(taskDataset = "__TASK_QUEUE__", importDataset = "__IMPORT_FILES__",
+import_task_queue_create <- function(taskDataset = "__TASK_QUEUE__", importDataset = "__IMPORT_FILES__",
                             taskTopic = "TASK_DEFINE", importTopic = "IMPORT", cacheTopic = "CACHE") {
   ## 扫描所有未处理、未忽略、已完成匹配的导入素材文件
   filesToRead <- ds_read(dsName = importDataset, topic = cacheTopic) |>
@@ -171,8 +171,8 @@ import_task_create <- function(taskDataset = "__TASK_QUEUE__", importDataset = "
     tasksToCreate <- filesToRead |>
       nest(taskTopic, taskId) |>
       purrr::pmap_df(function(taskTopic, taskId, data) {
-        params <- list("filePath" = data$filePath) |> queue_param_to_yaml()
-        ds_task_queue_item(taskId = taskId,
+        params <- list("filePath" = data$filePath) |> task_queue_param_to_yaml()
+        task_queue_item(taskId = taskId,
                         params = params,
                         taskType = "__TYPE_IMPORT__",
                         taskTopic = cacheTopic)
@@ -189,7 +189,7 @@ import_task_create <- function(taskDataset = "__TASK_QUEUE__", importDataset = "
 #' @title 执行导入任务
 #' @family import function
 #' @export
-import_task_run <- function() {
-  ds_task_queue_todo(taskType == "__TYPE_IMPORT__") |>
-    purrr::walk(function(batchId) ds_task_queue_run(batchId))
+import_task_queue_run <- function() {
+  task_queue_todo(taskType == "__TYPE_IMPORT__") |>
+    purrr::walk(function(batchId) task_queue_run(batchId))
 }

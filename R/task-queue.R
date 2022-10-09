@@ -1,8 +1,8 @@
 #' @title 初始化队列数据集
 #' @description  批处理任务的队列
-#' @family task function
+#' @family queue function
 #' @export
-ds_task_queue_init <- function(dsName = "__TASK_QUEUE__", cacheTopic = "CACHE") {
+task_queue_init <- function(dsName = "__TASK_QUEUE__", cacheTopic = "CACHE") {
   ## 任务数据样本
   sampleData <- tibble(
     "id" = dt_string(),
@@ -25,14 +25,20 @@ ds_task_queue_init <- function(dsName = "__TASK_QUEUE__", cacheTopic = "CACHE") 
     type = "__STATE__")
 }
 
-#
-queue_param_from_yaml <- function(ymlParams) ymlParams |> yaml::yaml.load()
-queue_param_to_yaml <- function(params) params |> yaml::as.yaml()
+#' @title 从压马路格式提取队列参数
+#' @family queue function
+#' @export
+task_queue_param_from_yaml <- function(ymlParams) ymlParams |> yaml::yaml.load()
+
+#' @title 转换队列参数为yaml格式
+#' @family queue function
+#' @export
+task_queue_param_to_yaml <- function(params) params |> yaml::as.yaml()
 
 #' @title 构造队列中的一条数据
-#' @family task function
+#' @family queue function
 #' @export
-ds_task_queue_item <- function(taskId, params, taskType = "__TYPE_UNKNOWN__", taskTopic = "CACHE", id = gen_batchNum()) {
+task_queue_item <- function(taskId, params, taskType = "__TYPE_UNKNOWN__", taskTopic = "CACHE", id = gen_batchNum()) {
   createdAt <- now(tzone = "Asia/Shanghai")
   list(
     "id" = id,
@@ -46,9 +52,9 @@ ds_task_queue_item <- function(taskId, params, taskType = "__TYPE_UNKNOWN__", ta
 }
 
 #' @title 待执行的队列任务
-#' @family task function
+#' @family queue function
 #' @export
-ds_task_queue_todo <- function(taskType = NULL, dsName = "__TASK_QUEUE__", cacheTopic = "CACHE") {
+task_queue_todo <- function(taskType = NULL, dsName = "__TASK_QUEUE__", cacheTopic = "CACHE") {
   all_tasks <- ds_read(dsName = dsName, topic = cacheTopic)
   if(!rlang::is_empty(all_tasks)) {
     (all_tasks |>
@@ -63,14 +69,16 @@ ds_task_queue_todo <- function(taskType = NULL, dsName = "__TASK_QUEUE__", cache
 
 #' @title 批量执行队列任务
 #' @description 
+#' 按批次执行队列内的任务。
+#' 
 #' 相同批次的任务按优先级大小依次执行；
-#' 执行后的结果统一更新到队列。
+#' 执行结果统一更新到队列。
 #' 
 #' 如果批任务中部分任务失败，则整体批次任务暂停，
 #' 批次中的所有任务信息都不更新。
-#' @family task function
+#' @family queue function
 #' @export
-ds_task_queue_run <- function(batchId, runMode = "in-process", dsName = "__TASK_QUEUE__", cacheTopic = "CACHE") {
+task_queue_run <- function(batchId, runMode = "in-process", dsName = "__TASK_QUEUE__", cacheTopic = "CACHE") {
   all_tasks <- ds_read(dsName = dsName, topic = cacheTopic) |>
     filter(`@batchId` == batchId) |>
     arrange(desc(runLevel)) |>
