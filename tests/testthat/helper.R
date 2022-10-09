@@ -50,3 +50,8 @@ sample_config_init <- function() {
 }
 
 temp_remove <- function() rootPath |> fs::dir_delete()
+
+remove_cache <- function(dsName) {
+  path <- get_path("CACHE", dsName)
+  if(fs::dir_exists(path)) fs::dir_delete(path)
+}

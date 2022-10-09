@@ -1,7 +1,8 @@
 library(dplyr, warn.conflicts = F)
 library(tibble, warn.conflicts = F)
 
-config_init(tempdir())
+rootPath <- tempdir()
+config_init(rootPath)
 
 clear_dir <- function() {
   get_path("CACHE") |> remove_dir()
@@ -364,3 +365,4 @@ test_that("使用schema：控制返回结果的列结构", {
   clear_dir()  
 })
 
+fs::dir_delete(rootPath)

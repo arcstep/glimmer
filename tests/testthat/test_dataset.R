@@ -1,22 +1,15 @@
-library(dplyr, warn.conflicts = F)
-library(tibble, warn.conflicts = F)
-
-config_init(tempdir())
-
-clear_dir <- function() {
-  get_path("CACHE") |> remove_dir()
-}
-
 test_that("当数据集配置文件不存在时", {
-  ds_remove_path("车数据")
+  sample_config_init()
+  remove_cache("车数据")
   ds_append(mtcars, "车数据") |>
     testthat::expect_error("Empty Dataset Metadata")
   
-  clear_dir()
+  temp_remove()
 })
 
 test_that("当新数据集结构不一致", {
-  ds_remove_path("车数据")
+  sample_config_init()
+  remove_cache("车数据")
   ds_init("车数据", data = mtcars |> head())
   
   ## 接受缺少字段
@@ -29,11 +22,12 @@ test_that("当新数据集结构不一致", {
   ("xx" %in% names(ds_read("车数据") |> collect())) |>
     testthat::expect_false()
   
-  clear_dir()
+  temp_remove()
 })
 
 test_that("当新数据集结构不一致，且缺少关键字段", {
-  ds_remove_path("车数据")
+  sample_config_init()
+  remove_cache("车数据")
   m <- mtcars |> as_tibble() |> rownames_to_column("id")
   ds_init("车数据", data = m |> head(), keyColumns = "id", partColumns = "cyl")
   
@@ -49,16 +43,16 @@ test_that("当新数据集结构不一致，且缺少关键字段", {
     testthat::expect_error("No partColumns")
   
   ## 删除时仅提供主键字段
-  tibble("id" = 1, "cyl" = 4) |>
-    ds_delete("车数据")
-  ds_read("车数据", noDeleted = F) |> collect()
-  arrow::open_dataset(get_path("CACHE", "车数据")) |> collect()
+  tibble("id" = 1, "cyl" = 4) |> ds_delete("车数据")
+  (ds_read("车数据", noDeleted = F) |> collect())$`@deleted` |>
+    testthat::expect_true()
 
-  clear_dir()
+  temp_remove()
 })
 
 test_that("当新数据集架构不一致，按要求转换", {
-  ds_remove_path("AAA")
+  sample_config_init()
+  remove_cache("AAA")
   ds_init("AAA", schema = list(
     list("fieldName" = "a", "fieldType" = "int32"),
     list("fieldName" = "b", "fieldType" = "timestamp[us, tz=Asia/Shanghai]")))
@@ -68,22 +62,25 @@ test_that("当新数据集架构不一致，按要求转换", {
   (ds_read("AAA") |> collect())$a |> class() |>
     testthat::expect_equal("integer")
   
-  ds_remove_path("AAA")
-
+  temp_remove()
 })
 
 test_that("追加数据：缺少架构描述", {
+  sample_config_init()
   m <- mtcars |> as_tibble() |> rownames_to_column()
-  ds_remove_path("车数据")
+  remove_cache("车数据")
   ds_init("车数据", keyColumns = "rowname")
   
   m |> slice(1:10) |> as_tibble() |> ds_append("车数据") |>
     testthat::expect_error("No Schema")
+  
+  temp_remove()
 })
 
 test_that("追加数据：创建新数据", {
+  sample_config_init()
   m <- mtcars |> as_tibble() |> rownames_to_column()
-  ds_remove_path("车数据")
+  remove_cache("车数据")
   ds_init("车数据", keyColumns = "rowname", data = m |> head())
   
   m |> slice(1:10) |> as_tibble() |> ds_append("车数据")
@@ -95,29 +92,35 @@ test_that("追加数据：创建新数据", {
     testthat::expect_equal(20)
   ds_read("车数据") |> collect() |> nrow() |>
     testthat::expect_equal(10)
+  
+  temp_remove()
 })
 
 test_that("删除数据：没有设置主键时不允许删除", {
+  sample_config_init()
   ## 没有设置主键，删除失败
-  ds_remove_path("车数据")
+  remove_cache("车数据")
   ds_init("车数据", data = mtcars |> head())
     mtcars |> slice(1:10) |> as_tibble() |> ds_append("车数据")
   mtcars |> slice(1:3) |> as_tibble() |> ds_delete("车数据") |>
     testthat::expect_error("Can't Delete without keyColumns")
 
   ## 设置了主键，删除成功
-  ds_remove_path("车数据")
+  remove_cache("车数据")
   m <- mtcars |> as_tibble() |> rownames_to_column()
   ds_init("车数据", keyColumns = "rowname", data = m |> head())
   m |> slice(1:10) |> as_tibble() |> ds_append("车数据")
   m |> slice(1:3) |> as_tibble() |> ds_delete("车数据")
   ds_read("车数据") |> collect() |> nrow() |>
     testthat::expect_equal(7)
+  
+  temp_remove()
 })
 
 test_that("归档数据操作：无分区", {
+  sample_config_init()
   ## 设置了主键，删除成功
-  ds_remove_path("车数据")
+  remove_cache("车数据")
   m <- mtcars |> as_tibble() |> rownames_to_column()
   ds_init("车数据", keyColumns = "rowname", data = m |> head())
   m |> slice(1:10) |> as_tibble() |> ds_append("车数据")
@@ -126,11 +129,14 @@ test_that("归档数据操作：无分区", {
   ds_submit("车数据")
   ds_read("车数据") |> collect() |> nrow() |>
     testthat::expect_equal(7)
+  
+  temp_remove()
 })
 
 test_that("归档数据操作：有分区", {
+  sample_config_init()
   ## 设置了主键，删除成功
-  ds_remove_path("车数据")
+  remove_cache("车数据")
   m <- mtcars |> as_tibble() |> rownames_to_column() |> mutate(cyl = as.integer(cyl))
   ds_init("车数据", keyColumns = "rowname", partColumns = c("cyl"), data = m |> head())
   m |> slice(1:10) |> as_tibble() |> ds_append("车数据")
@@ -145,9 +151,13 @@ test_that("归档数据操作：有分区", {
   ds_submit("车数据")
   ds_read("车数据") |> collect() |> nrow() |>
     testthat::expect_equal(21)
+  
+  temp_remove()
 })
 
 test_that("内存中对数据去重", {
+  sample_config_init()
+  
   all <- mtcars |> as_tibble() |>
     mutate(cyl = as.integer(cyl), am = as.integer(am)) |>
     mutate(id = row_number())
@@ -161,25 +171,31 @@ test_that("内存中对数据去重", {
     ds_as_unique("id") |>
     nrow() |>
     testthat::expect_equal(5)
+  
+  temp_remove()
 })
 
 test_that("读写数据时使用推荐的显示列", {
-  ds_remove_path("车数据")
+  sample_config_init()
+  
   all <- mtcars |> as_tibble() |>
     mutate(cyl = as.integer(cyl), am = as.integer(am)) |>
     mutate(id = row_number())
   
-  glimmer::ds_init("车数据", data = all, keyColumns = "id", suggestedColumns = c("id"))
+  remove_cache("车数据")
+  glimmer::ds_init("车数据", data = head(all), keyColumns = "id", suggestedColumns = c("id"))
   all |> glimmer::ds_append("车数据")
-  (glimmer::ds_read("车数据") |> names())[[1]] |>
-    testthat::expect_equal("id")
+  ("id" %in% (glimmer::ds_read("车数据") |> names())) |>
+    testthat::expect_true()
   glimmer::ds_read("车数据") |> names() |> length() |>
     testthat::expect_equal(length(all |> names()) + 4)
   
-  glimmer::ds_init("车数据2", data = all, keyColumns = "id", suggestedColumns = c("id", "cyl"))
+  remove_cache("车数据")
+  glimmer::ds_init("车数据2", data = head(all), keyColumns = "id", suggestedColumns = c("id", "cyl"))
   all |> glimmer::ds_append("车数据2")
   (glimmer::ds_read("车数据2") |> names())[[2]] |>
     testthat::expect_equal("cyl")
   
-  clear_dir()
+  temp_remove()
 })
+

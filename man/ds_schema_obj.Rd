@@ -4,10 +4,12 @@
 \alias{ds_schema_obj}
 \title{构造Arrow的schema}
 \usage{
-ds_schema_obj(dsSchema)
+ds_schema_obj(dsName, topic = "CACHE")
 }
 \arguments{
-\item{dsSchema}{数据框格式保存的schema}
+\item{dsName}{数据集名称}
+
+\item{topic}{数据集保存的主题目录，默认为CACHE}
 }
 \description{
 从数据框格式的schema转换为Arrow的Schema对象
@@ -22,6 +24,7 @@ Other dataset function:
 \code{\link{ds_diff_schema}()},
 \code{\link{ds_files}()},
 \code{\link{ds_init}()},
+\code{\link{ds_read0}()},
 \code{\link{ds_read}()},
 \code{\link{ds_remove_path}()},
 \code{\link{ds_schema}()},

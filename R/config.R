@@ -1,5 +1,7 @@
 ## 保存任务管理目录
 TASK.ENV <- new.env(hash = TRUE)
+## 保存schema对象
+SCHEMA.ENV <- new.env(hash = TRUE)
 
 ## 构造访问路径-------
 

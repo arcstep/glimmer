@@ -172,7 +172,7 @@ ds_submit <- function(dsName, topic = "CACHE") {
   if(rlang::is_empty(part)) {
     d <- ds_read(dsName, topic, noDeleted = FALSE) |> collect()
   } else {
-    myschema <- do.call("schema", ds_schema_obj(ds_yaml_schema(dsName, topic)))
+    myschema <- do.call("schema", ds_schema_obj(dsName, topic))
     to_append <- open_dataset(path, format = "parquet", schema = myschema) |>
       filter(`@action` ==  "__APPEND__") |>
       collect()
@@ -228,6 +228,33 @@ ds_files <- function(dsName, topic = "CACHE") {
   open_dataset(path)$files
 }
 
+#' @title 仅读取已归档数据
+#' @param dsName 数据集名称
+#' @param topic 主题域
+#' @param noDeleted 不返回标记为删除的数据
+#' @family dataset function
+#' @export
+ds_read0 <- function(dsName, topic = "CACHE", noDeleted = TRUE) {
+  meta <- ds_yaml(dsName, topic)
+  path <- get_path(topic, dsName)
+  
+  ## 按照yaml配置中的schema读取数据集
+  myschema <- do.call("schema", ds_schema_obj(dsName, topic))
+  d <- open_dataset(path, format = "parquet", schema = myschema)
+  
+  ##
+  if(length(d$files) == 0) return(tibble())
+  
+  ##
+  if(noDeleted) d <- d |> filter(!`@deleted`)
+  ## 按元数据中的读取建议整理结果
+  if(!rlang::is_empty(meta$suggestedColumns)) {
+    d |> select(!!!syms(meta$suggestedColumns), everything())
+  } else {
+    d
+  }
+}
+
 #' @title 读取数据集
 #' @param dsName 数据集名称
 #' @param topic 主题域
@@ -239,7 +266,7 @@ ds_read <- function(dsName, topic = "CACHE", noDeleted = TRUE) {
   path <- get_path(topic, dsName)
 
   ## 按照yaml配置中的schema读取数据集
-  myschema <- do.call("schema", ds_schema_obj(ds_yaml_schema(dsName, topic)))
+  myschema <- do.call("schema", ds_schema_obj(dsName, topic))
   d <- open_dataset(path, format = "parquet", schema = myschema)
   
   if(length(d$files) == 0) {
@@ -435,18 +462,29 @@ dt_datetime <- function() as_datetime("2022-10-01 08:28:15", tz = "Asia/Shanghai
 #' @description 
 #' 从数据框格式的schema转换为Arrow的Schema对象
 #' 
-#' @param dsSchema 数据框格式保存的schema
+#' @param dsName 数据集名称
+#' @param topic 数据集保存的主题目录，默认为CACHE
 #' @family dataset function
 #' @export
-ds_schema_obj <- function(dsSchema) {
-  s <- list()
-  dsSchema |>
-    purrr::pmap(function(fieldName, fieldType) s[[fieldName]] <<- ds_field(fieldType))
-  s$`@deleted` <- ds_field("bool")
-  s$`@action` <- ds_field("string")
-  s$`@batchId` <- ds_field("string")
-  s$`@lastmodifiedAt` <- ds_field("timestamp[us, tz=Asia/Shanghai]")
-  s
+ds_schema_obj <- function(dsName, topic = "CACHE") {
+  # schemaName <- paste(topic, dsName, sep = "__")
+  ##
+  # if(!exists(schemaName, envir = SCHEMA.ENV)) {
+    s <- list()
+    yml <- ds_yaml(dsName, topic)
+    if(!rlang::is_empty(yml$schema)) {
+      yml$schema |> purrr::walk(function(item) s[[item$fieldName]] <<- ds_field(item$fieldType))
+      s$`@deleted` <- ds_field("bool")
+      s$`@action` <- ds_field("string")
+      s$`@batchId` <- ds_field("string")
+      s$`@lastmodifiedAt` <- ds_field("timestamp[us, tz=Asia/Shanghai]")
+      # assign(schemaName, s, envir = SCHEMA.ENV)
+    } else {
+      stop("No Schema in metada: ", topic, "/", dsName, "/.metadata.yml")
+    }
+    s
+  # }
+  # get(schemaName, envir = SCHEMA.ENV)
 }
 
 

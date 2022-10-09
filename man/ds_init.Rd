@@ -52,6 +52,7 @@ Other dataset function:
 \code{\link{ds_diff_dataset}()},
 \code{\link{ds_diff_schema}()},
 \code{\link{ds_files}()},
+\code{\link{ds_read0}()},
 \code{\link{ds_read}()},
 \code{\link{ds_remove_path}()},
 \code{\link{ds_schema_obj}()},

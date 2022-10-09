@@ -1,12 +1,9 @@
 library(dplyr, warn.conflicts = F)
 library(tibble, warn.conflicts = F)
 
-clear_dir <- function() {
-  get_path("CACHE") |> remove_dir()
-}
-
 test_that("写入一个简单的文件", {
-  config_init(tempdir())
+  rootPath <- tempdir()
+  config_init(rootPath)
   
   ds_remove_path("车数据")
   list("dsName" = "车数据") |> ds_yaml_write(dsName = "车数据")
@@ -19,5 +16,5 @@ test_that("写入一个简单的文件", {
   list("dsName" = "我的车") |> ds_yaml_write(dsName = "车数据")
   ds_yaml("车数据")$dsName |> testthat::expect_equal(c("我的车"))
   
-  clear_dir()
+  rootPath |> fs::dir_delete()
 })

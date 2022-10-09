@@ -17,7 +17,6 @@ prepare_db <- function() {
   rbind(d, d, d, d, d)
 }
 
-
 clear_dir <- function() {
   get_path("CACHE") |> remove_dir()
   get_path("STATE") |> remove_dir()
