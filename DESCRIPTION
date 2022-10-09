@@ -23,4 +23,6 @@ Imports:
     yaml,
     digest,
     stringr,
-    callr
+    callr,
+    DT,
+    plotly
