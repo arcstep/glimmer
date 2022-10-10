@@ -9,6 +9,9 @@ task_plotly_hist(d, x, color = "brown", xtitle = NULL, ytitle = NULL)
 \description{
 直方图
 }
+\examples{
+mtcars |> task_plotly_hist(x = "mpg")
+}
 \seealso{
 Other task-lib functions: 
 \code{\link{task_DT}()},

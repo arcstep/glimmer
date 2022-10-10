@@ -25,6 +25,8 @@ options(DT.options = list(
   )))
 
 #' @title 数据表
+#' @examples 
+#' mtcars |> task_DT()
 #' @family task-lib functions
 #' @export
 task_DT <- function(d,

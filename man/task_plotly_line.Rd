@@ -17,6 +17,9 @@ task_plotly_line(
 线图
 }
 \examples{
+mtcars |>
+  count(cyl) |> 
+  task_plotly_line(x = "cyl", y = "n")
 
 }
 \seealso{

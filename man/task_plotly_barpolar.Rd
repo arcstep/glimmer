@@ -17,6 +17,13 @@ task_plotly_barpolar(
 \description{
 极坐标柱
 }
+\examples{
+mtcars |>
+  count(cyl) |>
+  mutate(cyl = sprintf("CYL: \%d", cyl)) |>
+  task_plotly_barpolar(theta = "cyl", r = "n")
+  
+}
 \seealso{
 Other task-lib functions: 
 \code{\link{task_DT}()},

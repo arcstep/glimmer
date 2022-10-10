@@ -10,9 +10,14 @@ task_plotly_area(d, x, y, fill = "tozeroy", color = "red", shape = "spline")
 面积图
 }
 \examples{
-mpg |> group_by(model) |>
- summarise(displ = mean(displ)) |>
- task_plotly_area(x = "model", y = "displ")
+mtcars |>
+  count(cyl) |>
+  task_plotly_area(x = "cyl", y = "n")
+  
+mtcars |> group_by(cyl) |>
+  summarise(displ = mean(disp)) |>
+  task_plotly_area(x = "cyl", y = "displ")
+  
 }
 \seealso{
 Other task-lib functions: 

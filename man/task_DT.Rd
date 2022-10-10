@@ -17,6 +17,9 @@ task_DT(
 \description{
 数据表
 }
+\examples{
+mtcars |> task_DT()
+}
 \seealso{
 Other task-lib functions: 
 \code{\link{task_plotly_area}()},

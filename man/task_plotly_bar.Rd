@@ -10,6 +10,10 @@ task_plotly_bar(d, x, y)
 柱图
 }
 \examples{
+mtcars |>
+  count(cyl) |>
+  task_plotly_bar(x = "cyl", y = "n")
+
 mpg |> count(class) |>
   mutate(class = forcats::fct_reorder(class, n, .desc = TRUE)) |>
   task_plotly_bar(x = "class", y = "n")

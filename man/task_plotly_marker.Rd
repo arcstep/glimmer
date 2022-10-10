@@ -10,7 +10,8 @@ task_plotly_marker(d, x, y, alpha = 0.2, name = NULL)
 散点图
 }
 \examples{
-mpg |> task_plotly_marker("cty", "hwy")
+mtcars |>
+ task_plotly_marker(x = "mpg", y = "disp", alpha = 0.6)
 }
 \seealso{
 Other task-lib functions: 

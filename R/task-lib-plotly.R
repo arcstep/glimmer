@@ -1,13 +1,15 @@
 #' @title 直方图
+#' @examples 
+#' mtcars |> task_plotly_hist(x = "mpg")
 #' @family task-lib functions
 #' @export
 task_plotly_hist <- function(d, x, color = "brown", xtitle = NULL, ytitle = NULL) {
-  plotly::plot_ly(x = as.formula(paste("~", x))) |>
-    plotly::add_histogram(
+  plot_ly(x = as.formula(paste("~", x))) |>
+    add_histogram(
       data = d |> collect(),
       color = I(color),
       name = paste(x, "")) |>
-    plotly::layout(
+    layout(
       xaxis = list("title" = xtitle %empty% x),
       yaxis = list("title" = ytitle %empty% "数量"))
 }
@@ -16,18 +18,23 @@ task_plotly_hist <- function(d, x, color = "brown", xtitle = NULL, ytitle = NULL
 #' @title 散点图
 #' @family task-lib functions
 #' @examples 
-#' mpg |> task_plotly_marker("cty", "hwy")
+#' mtcars |>
+#'  task_plotly_marker(x = "mpg", y = "disp", alpha = 0.6)
 #' @export
 task_plotly_marker <- function(
     d, x, y, alpha = 0.2, name = NULL) {
   d |>
-    plotly::plot_ly(x = as.formula(paste("~", x)), y = as.formula(paste("~", y))) |>
-    plotly::add_markers(alpha = alpha, name = name %empty% "alpha")
+    plot_ly(x = as.formula(paste("~", x)), y = as.formula(paste("~", y))) |>
+    add_markers(alpha = alpha, name = name %empty% "alpha")
 }
 
 #' @title 柱图
 #' @family task-lib functions
 #' @examples 
+#' mtcars |>
+#'   count(cyl) |>
+#'   task_plotly_bar(x = "cyl", y = "n")
+#' 
 #' mpg |> count(class) |>
 #'   mutate(class = forcats::fct_reorder(class, n, .desc = TRUE)) |>
 #'   task_plotly_bar(x = "class", y = "n")
@@ -35,21 +42,24 @@ task_plotly_marker <- function(
 task_plotly_bar <- function(
     d, x, y) {
   d |>
-    plotly::plot_ly() |>
-    plotly::add_bars(x = as.formula(paste("~", x)), y = as.formula(paste("~", y)))
+    plot_ly() |>
+    add_bars(x = as.formula(paste("~", x)), y = as.formula(paste("~", y)))
 }
 
 #' @title 线图
+#' @examples 
+#' mtcars |>
+#'   count(cyl) |> 
+#'   task_plotly_line(x = "cyl", y = "n")
+#' 
 #' @family task-lib functions
 #' @export
-#' @examples 
-#' 
 task_plotly_line <- function(
     d, x, y,
     fillcolor = "red", linecolor = "rgb(205, 12, 24)", shape = "spline") {
   d |>
-    plotly::plot_ly(x = as.formula(paste("~", x)), y = as.formula(paste("~", y))) |>
-    plotly::add_lines(
+    plot_ly(x = as.formula(paste("~", x)), y = as.formula(paste("~", y))) |>
+    add_lines(
       fillcolor = I(fillcolor),
       line = list(shape = shape, color = linecolor))
 }
@@ -57,16 +67,21 @@ task_plotly_line <- function(
 #' @title 面积图
 #' @family task-lib functions
 #' @examples 
-#' mpg |> group_by(model) |>
-#'  summarise(displ = mean(displ)) |>
-#'  task_plotly_area(x = "model", y = "displ")
+#' mtcars |>
+#'   count(cyl) |>
+#'   task_plotly_area(x = "cyl", y = "n")
+#'   
+#' mtcars |> group_by(cyl) |>
+#'   summarise(displ = mean(disp)) |>
+#'   task_plotly_area(x = "cyl", y = "displ")
+#'   
 #' @export
 task_plotly_area <- function(
     d, x, y,
     fill = "tozeroy", color = "red", shape = "spline") {
   d |>
-    plotly::plot_ly() |>
-    plotly::add_trace(
+    plot_ly() |>
+    add_trace(
       x = as.formula(paste("~", x)),
       y = as.formula(paste("~", y)),
       type = "scatter",
@@ -77,12 +92,14 @@ task_plotly_area <- function(
 }
 
 #' @title 饼图
+#' @examples 
+#' mtcars |> task_plotly_pie(value = "cyl")
 #' @family task-lib functions
 #' @export
 task_plotly_pie <- function(d, value, label = NULL, hole = 0.4) {
   d |> 
-    plotly::plot_ly() |>
-    plotly::add_pie(
+    plot_ly() |>
+    add_pie(
       values = as.formula(paste("~", value)),
       labels = as.formula(paste("~", label %empty% value)),
       hole = hole)
@@ -96,7 +113,7 @@ task_plotly_pie <- function(d, value, label = NULL, hole = 0.4) {
 #' @export
 task_plotly_pie2 <- function(d, value, label = NULL, pull = 0, hole = 0.25) {
   d |> 
-    plotly::plot_ly() |>
+    plot_ly() |>
     add_trace(
       type = "pie",
       marker = list(line = list(width = 3, color = "black")),
@@ -106,17 +123,23 @@ task_plotly_pie2 <- function(d, value, label = NULL, pull = 0, hole = 0.25) {
 }
 
 #' @title 极坐标柱
+#' @examples 
+#' mtcars |>
+#'   count(cyl) |>
+#'   mutate(cyl = sprintf("CYL: %d", cyl)) |>
+#'   task_plotly_barpolar(theta = "cyl", r = "n")
+#'   
 #' @family task-lib functions
 #' @export
 task_plotly_barpolar <- function(d, theta, r, color = NULL, bargap = 0, hole = 0.05, direction = "clockwise") {
   d |> 
-    plotly::plot_ly() |>
-    plotly::add_trace(
+    plot_ly() |>
+    add_trace(
       type = "barpolar",
       theta = as.formula(paste("~", theta)),
       r = as.formula(paste("~", r)),
       color = color %empty% as.formula(paste("~", theta))) |>
-    plotly::layout(
+    layout(
       polar = list(
         bargap = bargap,
         hole = hole,

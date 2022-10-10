@@ -9,6 +9,9 @@ task_plotly_pie(d, value, label = NULL, hole = 0.4)
 \description{
 饼图
 }
+\examples{
+mtcars |> task_plotly_pie(value = "cyl")
+}
 \seealso{
 Other task-lib functions: 
 \code{\link{task_DT}()},
