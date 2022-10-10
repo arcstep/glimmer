@@ -1,7 +1,7 @@
 taskId: A/score
 runLevel: 500
 online: yes
-taskType: __UNKNOWN__
+taskType: __IMPORT__
 desc: '-'
 taskTopic: TASK_DEFINE
 createdAt: 2022-10-10 11:15:41

@@ -38,10 +38,13 @@ task_queue_param_to_yaml <- function(params) params |> yaml::as.yaml()
 #' @title 构造队列中的一条数据
 #' @family queue function
 #' @export
-task_queue_item <- function(taskId, params, taskType = "__TYPE_UNKNOWN__", taskTopic = "CACHE", id = gen_batchNum()) {
+task_queue_item <- function(taskId, params,
+                            taskType = "__TYPE_UNKNOWN__", taskTopic = "CACHE",
+                            id = gen_batchNum(), runLevel = 500L) {
   createdAt <- now(tzone = "Asia/Shanghai")
   list(
     "id" = id,
+    "runLevel" = runLevel,
     "taskTopic" = taskTopic,
     "taskType" = taskType,
     "taskId" = taskId,
@@ -64,8 +67,15 @@ task_queue_todo <- function(taskTypes = c("__IMPORT__", "__BUILD__", "__RISK__",
       filter(taskType %in% taskTypes) |>
       arrange(`@batchId`)
   } else {
-    list("batchId" = NULL)
+    tibble()
   }
+}
+
+#' @title 所有队列任务
+#' @family queue function
+#' @export
+task_queue_all <- function(dsName = "__TASK_QUEUE__", cacheTopic = "CACHE") {
+  ds_read(dsName = dsName, topic = cacheTopic) |> collect()
 }
 
 #' @title 批量执行队列任务
@@ -83,34 +93,30 @@ task_queue_run <- function(dsQueue,
                            dsName = "__TASK_QUEUE__",
                            cacheTopic = "CACHE",
                            runMode = "in-process") {
-  dsQueue |> group_by(`@batchId`) |>
-    nest() |>
-    purrr::pwalk(function(`@batchId`, data) {
-      data |>
-        arrange(desc(runLevel)) |>
-        select(id, taskId, taskTopic, taskType, runLevel, ymlParams, createdAt, year, month) |>
-        purrr::pmap_df(function(id, taskId, taskTopic, taskType, runLevel, ymlParams, createdAt, year, month) {
-          arg <- ymlParams |> task_queue_param_from_yaml()
-          arg$taskId <- taskId
-          arg$taskTopic <- taskTopic
-          arg$runMode <- runMode
-          ## 执行任务
-          runAt <- now(tzone = "Asia/Shanghai")
-          do.call("task_run", args = arg)
-          doneAt <- now(tzone = "Asia/Shanghai")
-          ## 更新队列状态
-          list(
-            "id" = id,
-            "taskTopic" = taskTopic,
-            "taskType" = taskType,
-            "taskId" = taskId,
-            "runLevel" = runLevel,
-            "ymlParams" = ymlParams,
-            "createdAt" = createdAt,
-            "runAt" = runAt,
-            "doneAt" = doneAt,
-            "year" = year,
-            "month" = month)
-        }) |> ds_append(dsName = dsName, topic = cacheTopic)
-    })
+  dsQueue |>
+    arrange(desc(runLevel)) |>
+    select(id, taskId, taskTopic, taskType, runLevel, ymlParams, createdAt, year, month) |>
+    purrr::pmap_df(function(id, taskId, taskTopic, taskType, runLevel, ymlParams, createdAt, year, month) {
+      arg <- ymlParams |> task_queue_param_from_yaml()
+      arg$taskId <- taskId
+      arg$taskTopic <- taskTopic
+      arg$runMode <- runMode
+      ## 执行任务
+      runAt <- now(tzone = "Asia/Shanghai")
+      do.call("task_run", args = arg)
+      doneAt <- now(tzone = "Asia/Shanghai")
+      ## 更新队列状态
+      list(
+        "id" = id,
+        "taskTopic" = taskTopic,
+        "taskType" = taskType,
+        "taskId" = taskId,
+        "runLevel" = runLevel,
+        "ymlParams" = ymlParams,
+        "createdAt" = createdAt,
+        "runAt" = runAt,
+        "doneAt" = doneAt,
+        "year" = year,
+        "month" = month)
+    }) |> ds_append(dsName = dsName, topic = cacheTopic)
 }

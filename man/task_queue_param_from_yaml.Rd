@@ -11,6 +11,7 @@ task_queue_param_from_yaml(ymlParams)
 }
 \seealso{
 Other queue function: 
+\code{\link{task_queue_all}()},
 \code{\link{task_queue_init}()},
 \code{\link{task_queue_item}()},
 \code{\link{task_queue_param_to_yaml}()},

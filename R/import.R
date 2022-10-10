@@ -21,6 +21,7 @@ import_init <- function(dsName = "__IMPORT_FILES__", cacheTopic = "CACHE") {
     "fileSize" = 537.0, # fs::bytes
     "taskTopic" = "TASK", # 匹配到的任务主题，"-" default
     "taskId" = dt_string(),  # 匹配到的任务，"-" default
+    "queueBatchId" = dt_string(), # 队列中的@batchId
     "taskReadAt" = dt_datetime(), # 已被任务读取
     "taskRunAt" = dt_datetime(), # 任务开始运行
     "taskDoneAt" = dt_datetime(), # 任务完成
@@ -111,9 +112,9 @@ import_dataset_read <- function(importDataset = "__IMPORT_FILES__",
   filesToRead <- ds_read(dsName = importDataset, topic = cacheTopic)
   if(!rlang::is_empty(filesToRead)) {
     if(newFilesFlag) {
-      filesToRead |> filter(ignore == ignoreFlag & is.na(taskReadAt)) |> collect()
+      filesToRead |> filter(ignore == ignoreFlag & is.na(taskReadAt))
     } else {
-      filesToRead |> filter(ignore == ignoreFlag) |> collect()
+      filesToRead |> filter(ignore == ignoreFlag)
     }
   } else {
     tibble()
@@ -132,9 +133,8 @@ import_dataset_task_match <- function(importDataset = "__IMPORT_FILES__",
                               cacheTopic = "CACHE",
                               onlyNewFiles = TRUE) {
   ## 扫描所有未处理、未忽略的文件
-  filesToRead <- import_dataset_read(importDataset = importDataset,
-                                   cacheTopic = cacheTopic) |>
-    filter(is.na(taskId))
+  filesToRead <- import_dataset_read(importDataset = importDataset, cacheTopic = cacheTopic) |>
+    filter(is.na(taskId)) |> collect()
   ## 匹配任务
   if(!rlang::is_empty(filesToRead)) {
     ## 按照约定，使用taskId匹配导入素材的filePath
@@ -152,7 +152,7 @@ import_dataset_task_match <- function(importDataset = "__IMPORT_FILES__",
             mutate(taskTopic = item$taskTopic, taskId = item$taskId)
           if(nrow(matched) > 0) {
             matched |> ds_append(dsName = importDataset, topic = cacheTopic)
-            hasMatched <- TRUE
+            hasMatched <<- TRUE
           }
         })
       if(hasMatched) {
@@ -214,12 +214,12 @@ import_task_queue_create <- function(taskQueue = "__TASK_QUEUE__", importDataset
                         taskType = "__IMPORT__",
                         taskTopic = taskTopic)
       })
+    ## 增加导入任务到队列
+    batchId <- tasksToCreate |> ds_append(dsName = taskQueue, topic = cacheTopic)      
     ## 修改导入素材文件状态
     filesToRead |>
-      mutate(taskReadAt = now(tzone = "Asia/Shanghai")) |>
+      mutate(taskReadAt = now(tzone = "Asia/Shanghai"), queueBatchId = batchId) |>
       ds_append(dsName = importDataset, topic = cacheTopic)
-    ## 增加导入任务到队列
-    tasksToCreate |> ds_append(dsName = taskQueue, topic = cacheTopic)      
   } else {
     message("No tasks into queue!!")
   }
@@ -228,10 +228,30 @@ import_task_queue_create <- function(taskQueue = "__TASK_QUEUE__", importDataset
 #' @title 执行导入任务
 #' @family import function
 #' @export
-import_task_queue_run <- function(taskQueue = "__TASK_QUEUE__", cacheTopic = "CACHE") {
-  t <- task_queue_todo(taskTypes = "__IMPORT__", dsName = taskQueue, cacheTopic = cacheTopic)
-  if(nrow(t) > 0) {
-    task_queue_run(t)
+import_task_queue_run <- function(taskQueue = "__TASK_QUEUE__", cacheTopic = "CACHE",
+                                  importDataset = "__IMPORT_FILES__") {
+  q <- task_queue_todo(taskTypes = "__IMPORT__", dsName = taskQueue, cacheTopic = cacheTopic)
+  if(nrow(q) > 0) {
+    q |> group_by(`@batchId`) |>
+      nest() |>
+      rename(batchId = `@batchId`) |>
+      purrr::pwalk(function(batchId, data) {
+        #
+        import_dataset_read(importDataset, cacheTopic, newFilesFlag = FALSE) |>
+          filter(queueBatchId %in% batchId) |>
+          collect() |>
+          mutate(taskRunAt = now(tzone = "Asia/Shanghai")) |>
+          ds_append(importDataset, cacheTopic)
+        #
+        task_queue_run(data)
+        #
+        import_dataset_read(importDataset, cacheTopic, newFilesFlag = FALSE) |>
+          filter(queueBatchId %in% batchId) |>
+          collect() |>
+          mutate(taskDoneAt = now(tzone = "Asia/Shanghai")) |>
+          ds_append(importDataset, cacheTopic)
+      })
+    ds_submit(importDataset, cacheTopic)
   } else {
     message("No tasks to run !!")
   }

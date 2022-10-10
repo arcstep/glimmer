@@ -8,6 +8,11 @@ rootPath <- tempdir()
 sample_dataset_init <- function() {
   ##
   ds_init("student", data = tibble("name" = "adi", "age" = 5L))
+  ds_init("score", schema = list(
+    list(fieldName = "name", fieldType = "string"),
+    list(fieldName = "english", fieldType = "int"),
+    list(fieldName = "chinese", fieldType = "int"),
+    list(fieldName = "math", fieldType = "int")))
 }
 
 sample_task_define <- function() {
@@ -44,10 +49,12 @@ sample_task_define <- function() {
     task_item_add(taskScript = "EMPTY_FOLDER", scriptType = "dir")
   
   ## import test
-  task_create(taskId = "A/student", taskType = "__IMPORT__") |>
-    task_item_add(taskScript = "IMPORT/student.R", scriptType = "file")
-  task_create(taskId = "A/score") |>
-    task_item_add(taskScript = "IMPORT/score.R", scriptType = "file")
+  mytask_add <- function(taskId, scriptFile) {
+    task_create(taskId = taskId, taskType = "__IMPORT__") |>
+      task_item_add(taskScript = scriptFile, scriptType = "file")
+  }
+  mytask_add("A/student", "IMPORT/student.R")
+  mytask_add("A/score", "IMPORT/score.R")
 }
 
 temp_config_init <- function() {

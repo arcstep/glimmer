@@ -120,8 +120,10 @@ ds_append <- function(d, dsName, topic = "CACHE", toDelete = FALSE) {
       } else {
         message("data append <", dsName, ">", " ", nrow(x), " rows wroted!")
       }
+      return(batch)
     }
   }
+  return(NULL)
 }
 
 #' @title 写入数据

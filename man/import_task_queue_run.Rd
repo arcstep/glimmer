@@ -4,7 +4,11 @@
 \alias{import_task_queue_run}
 \title{执行导入任务}
 \usage{
-import_task_queue_run(taskQueue = "__TASK_QUEUE__", cacheTopic = "CACHE")
+import_task_queue_run(
+  taskQueue = "__TASK_QUEUE__",
+  cacheTopic = "CACHE",
+  importDataset = "__IMPORT_FILES__"
+)
 }
 \description{
 执行导入任务

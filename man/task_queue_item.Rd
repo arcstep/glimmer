@@ -9,7 +9,8 @@ task_queue_item(
   params,
   taskType = "__TYPE_UNKNOWN__",
   taskTopic = "CACHE",
-  id = gen_batchNum()
+  id = gen_batchNum(),
+  runLevel = 500L
 )
 }
 \description{
@@ -17,6 +18,7 @@ task_queue_item(
 }
 \seealso{
 Other queue function: 
+\code{\link{task_queue_all}()},
 \code{\link{task_queue_init}()},
 \code{\link{task_queue_param_from_yaml}()},
 \code{\link{task_queue_param_to_yaml}()},
