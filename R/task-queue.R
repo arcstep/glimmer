@@ -54,16 +54,18 @@ task_queue_item <- function(taskId, params, taskType = "__TYPE_UNKNOWN__", taskT
 #' @title 待执行的队列任务
 #' @family queue function
 #' @export
-task_queue_todo <- function(taskType = NULL, dsName = "__TASK_QUEUE__", cacheTopic = "CACHE") {
+task_queue_todo <- function(taskTypes = c("__IMPORT__", "__BUILD__", "__RISK__", "__SUMMARISE__"),
+                            dsName = "__TASK_QUEUE__",
+                            cacheTopic = "CACHE") {
   all_tasks <- ds_read(dsName = dsName, topic = cacheTopic)
   if(!rlang::is_empty(all_tasks)) {
-    (all_tasks |>
-       filter(!is.na(runAt)) |>
-       filter(taskType %in% taskType) |>
-       collect() |>
-       distinct(`@batchId`))$`@batchId` |> sort()
+    all_tasks |>
+      filter(is.na(runAt)) |>
+      filter(taskType %in% taskTypes) |>
+      collect() |>
+      arrange(`@batchId`)
   } else {
-    c()
+    list("batchId" = NULL)
   }
 }
 

@@ -25,9 +25,17 @@ task_create(
 \item{desc}{任务描述}
 
 \item{taskTopic}{保存任务定义的存储主题文件夹}
-
-\item{family}{task-define function}
 }
 \description{
 创建任务执行框架
 }
+\seealso{
+Other task-define function: 
+\code{\link{task_all}()},
+\code{\link{task_item_add}()},
+\code{\link{task_read}()},
+\code{\link{task_run}()},
+\code{\link{task_script_dir_create}()},
+\code{\link{task_script_file_create}()}
+}
+\concept{task-define function}

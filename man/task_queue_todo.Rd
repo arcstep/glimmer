@@ -5,7 +5,7 @@
 \title{待执行的队列任务}
 \usage{
 task_queue_todo(
-  taskType = NULL,
+  taskTypes = list(),
   dsName = "__TASK_QUEUE__",
   cacheTopic = "CACHE"
 )

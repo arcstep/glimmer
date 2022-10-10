@@ -1,0 +1,13 @@
+taskId: A/student
+runLevel: 500
+online: yes
+taskType: __IMPORT__
+desc: '-'
+taskTopic: TASK_DEFINE
+createdAt: 2022-10-10 11:15:38
+items:
+  scriptsTopic: TASK_SCRIPTS
+  taskScript: IMPORT/student.R
+  params:
+  - - ~
+  scriptType: file

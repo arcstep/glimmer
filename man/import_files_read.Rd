@@ -5,11 +5,22 @@
 \title{扫描所有未处理、未忽略的文件}
 \usage{
 import_files_read(
-  dsName = "__IMPORT_FILES__",
-  topic = "CACHE",
-  onlyNewFiles = TRUE
+  importDataset = "__IMPORT_FILES__",
+  cacheTopic = "CACHE",
+  ignoreFlag = FALSE,
+  newFilesFlag = TRUE
 )
 }
 \description{
 扫描所有未处理、未忽略的文件
 }
+\seealso{
+Other import function: 
+\code{\link{import_files_all}()},
+\code{\link{import_files_scan}()},
+\code{\link{import_init}()},
+\code{\link{import_task_match}()},
+\code{\link{import_task_queue_create}()},
+\code{\link{import_task_queue_run}()}
+}
+\concept{import function}

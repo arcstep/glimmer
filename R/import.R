@@ -95,13 +95,16 @@ import_files_scan <- function(importDataset = "__IMPORT_FILES__", importTopic = 
 }
 
 #' @title 扫描所有未处理、未忽略的文件
-import_files_read <- function(dsName = "__IMPORT_FILES__",
-                              topic = "CACHE",
-                              onlyNewFiles = TRUE) {
+#' @family import function
+#' @export
+import_files_read <- function(importDataset = "__IMPORT_FILES__",
+                              cacheTopic = "CACHE",
+                              ignoreFlag = FALSE,
+                              newFilesFlag = TRUE) {
   filesToRead <- ds_read(dsName = importDataset, topic = cacheTopic) |>
-    filter(!ignore) |>
+    filter(ignore == ignoreFlag) |>
     collect()
-  if(onlyNewFiles) {
+  if(newFilesFlag) {
     filesToRead |> filter(is.na(taskReadAt))
   } else {
     filesToRead
@@ -120,9 +123,8 @@ import_task_match <- function(importDataset = "__IMPORT_FILES__",
                               cacheTopic = "CACHE",
                               onlyNewFiles = TRUE) {
   ## 扫描所有未处理、未忽略的文件
-  filesToRead <- import_files_read(dsName = importDataset,
-                                   topic = cacheTopic,
-                                   onlyNewFiles = onlyNewFiles)
+  filesToRead <- import_files_read(importDataset = importDataset,
+                                   cacheTopic = cacheTopic)
   ## 匹配任务
   if(!rlang::is_empty(filesToRead)) {
     ## 按照约定，使用taskId匹配导入素材的filePath
@@ -132,10 +134,11 @@ import_task_match <- function(importDataset = "__IMPORT_FILES__",
         filter(taskType == "__IMPORT__" & online) |>
         select(taskTopic, taskId) |>
         purrr::pwalk(function(taskTopic, taskId) {
+          item <- list("taskTopic" = taskTopic, "taskId" = taskId)
           pat <- paste0("^", taskId)
           filesToRead |>
             filter(stringr::str_detect(filePath, pat)) |>
-            mutate(taskTopic = taskTopic, taskId = taskId) |>
+            mutate(taskTopic = item$taskTopic, taskId = item$taskId) |>
             ds_append(dsName = importDataset, topic = cacheTopic)
         })
       ds_submit(dsName = importDataset, topic = cacheTopic)
@@ -175,9 +178,17 @@ import_task_queue_create <- function(taskQueue = "__TASK_QUEUE__", importDataset
     collect()
   if(!rlang::is_empty(filesToRead)) {
     tasksToCreate <- filesToRead |>
-      nest(taskTopic, taskId) |>
+      group_by(taskTopic, taskId) |>
+      nest() |>
       purrr::pmap_df(function(taskTopic, taskId, data) {
-        params <- list("filePath" = data$filePath) |> task_queue_param_to_yaml()
+        params <- list(
+          input = list(
+            "filePath" = data$filePath,
+            "importTopic" = importTopic,
+            "cacheTopic" = cacheTopic,
+            "taskId" = taskId,
+            "taskTopic" = taskTopic)) |>
+          task_queue_param_to_yaml()
         task_queue_item(taskId = taskId,
                         params = params,
                         taskType = "__IMPORT__",
@@ -196,6 +207,6 @@ import_task_queue_create <- function(taskQueue = "__TASK_QUEUE__", importDataset
 #' @family import function
 #' @export
 import_task_queue_run <- function() {
-  task_queue_todo(taskType == "__IMPORT__") |>
+  task_queue_todo(taskType == "__IMPORT__")$batchId |>
     purrr::walk(function(batchId) task_queue_run(batchId))
 }

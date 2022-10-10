@@ -5,10 +5,17 @@ library(glimmer, warn.conflicts = FALSE)
 
 rootPath <- tempdir()
 
+sample_dataset_init <- function() {
+  ##
+  ds_init("student", data = tibble("name" = "adi", "age" = 5L))
+}
+
 sample_task_define <- function() {
+  ## simple
   task_create(taskId = "build_cars", taskType = "__BUILD__") |>
     task_item_add(taskScript = "BUILD/cars.R", scriptType = "file")
 
+  ## tast test
   task_create(taskId = "task_sample_simple") |>
     task_item_add(taskScript = "SIMPLE/a.R", scriptType = "file") |>
     task_item_add(taskScript = "result <- (x |> filter(age > 6))", scriptType = "string")
@@ -35,6 +42,12 @@ sample_task_define <- function() {
 
   task_create(taskId = "task_sample_empty_dir") |>
     task_item_add(taskScript = "EMPTY_FOLDER", scriptType = "dir")
+  
+  ## import test
+  task_create(taskId = "A/student", taskType = "__IMPORT__") |>
+    task_item_add(taskScript = "IMPORT/student.R", scriptType = "file")
+  task_create(taskId = "A/score") |>
+    task_item_add(taskScript = "IMPORT/score.R", scriptType = "file")
 }
 
 temp_config_init <- function() {

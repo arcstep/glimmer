@@ -18,6 +18,7 @@ import_init(dsName = "__IMPORT_FILES__", cacheTopic = "CACHE")
 \seealso{
 Other import function: 
 \code{\link{import_files_all}()},
+\code{\link{import_files_read}()},
 \code{\link{import_files_scan}()},
 \code{\link{import_task_match}()},
 \code{\link{import_task_queue_create}()},

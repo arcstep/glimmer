@@ -2,7 +2,7 @@ library(dplyr, warn.conflicts = F)
 library(tibble, warn.conflicts = F)
 
 config_init(tempdir())
-queue_init()
+task_queue_init()
 
 prepare_data <- function() {
   expand_grid(batchFolder = c("scheduel_2002-10-01", "scheduel_2002-10-02", "scheduel_2002-10-03"),

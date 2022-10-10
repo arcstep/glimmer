@@ -14,9 +14,17 @@ task_run(taskId, taskTopic = "TASK_DEFINE", runMode = "in-process", ...)
 \item{runMode}{运行模式（默认为进程内执行，改为r或r_bg为子进程执行）}
 
 \item{params}{参数赋值}
-
-\item{family}{task-define function}
 }
 \description{
 运行任务
 }
+\seealso{
+Other task-define function: 
+\code{\link{task_all}()},
+\code{\link{task_create}()},
+\code{\link{task_item_add}()},
+\code{\link{task_read}()},
+\code{\link{task_script_dir_create}()},
+\code{\link{task_script_file_create}()}
+}
+\concept{task-define function}

@@ -25,9 +25,17 @@ task_item_add(
 \item{taskTopic}{保存任务定义的存储主题文件夹}
 
 \item{scriptsTopic}{保存R脚本定义的存储主题文件夹}
-
-\item{family}{task-define function}
 }
 \description{
 增加子任务
 }
+\seealso{
+Other task-define function: 
+\code{\link{task_all}()},
+\code{\link{task_create}()},
+\code{\link{task_read}()},
+\code{\link{task_run}()},
+\code{\link{task_script_dir_create}()},
+\code{\link{task_script_file_create}()}
+}
+\concept{task-define function}

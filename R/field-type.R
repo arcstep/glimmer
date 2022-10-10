@@ -11,7 +11,7 @@ allFields <- list(
   "float16" = function()float16(),
   "halffloat" = function()halffloat(),
   "float32" = function()float32(),
-  "float" = function()float(),
+  "float" = function()float32(),
   "float64" = function()float64(),
   "double" = function()float64(),
   "logical" = function()boolean(),
