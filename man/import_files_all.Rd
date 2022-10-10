@@ -11,10 +11,10 @@ import_files_all(importTopic = "IMPORT")
 }
 \seealso{
 Other import function: 
-\code{\link{import_files_read}()},
+\code{\link{import_dataset_read}()},
+\code{\link{import_dataset_task_match}()},
 \code{\link{import_files_scan}()},
 \code{\link{import_init}()},
-\code{\link{import_task_match}()},
 \code{\link{import_task_queue_create}()},
 \code{\link{import_task_queue_run}()}
 }

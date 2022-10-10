@@ -2,6 +2,7 @@ test_that("导入流程", {
   sample_config_init()
   import_init()
   task_queue_init()
+  sample_dataset_init()
 
   ## 列举所有素材
   import_files_all() |> nrow() |>
@@ -9,21 +10,24 @@ test_that("导入流程", {
 
   ## 扫描新素材
   import_files_scan()
-  import_files_read() |> nrow() |>
+  import_dataset_read() |> nrow() |>
     testthat::expect_equal(5)
   
   ## 匹配任务
   task_all() |> filter(taskType=="__IMPORT__")
-  import_task_match()
-  import_files_read() |> filter(!is.na(taskId)) |> nrow() |>
+  import_dataset_task_match()
+  import_dataset_read() |> filter(!is.na(taskId)) |> nrow() |>
     testthat::expect_equal(1)
   
   ## 创建批处理任务
   import_task_queue_create()
-  task_queue_todo(taskTypes = "__IMPORT__")
+  is.na(task_queue_todo(taskTypes = "__IMPORT__")$runAt) |>
+    testthat::expect_true()
   
   ## 执行批处理任务
   import_task_queue_run()
+  ds_read0("student") |> nrow() |>
+    testthat::expect_equal(3)
   
   temp_remove()
 })

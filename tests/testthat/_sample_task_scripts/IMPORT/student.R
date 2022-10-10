@@ -5,8 +5,10 @@
 # @param input$taskTopic 任务主题
 
 if(!rlang::is_empty(input$filePath)) {
-  input$filePath |> purrr::walk(function(f) {
-    readr::read_csv(f)
+  input$path |> purrr::walk(function(f) {
+    readr::read_csv(f) |>
+      ds_append("student")
   })
+  ds_submit("student")
 }
 

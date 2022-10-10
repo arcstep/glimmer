@@ -5,10 +5,10 @@
 \title{批量执行队列任务}
 \usage{
 task_queue_run(
-  batchId,
-  runMode = "in-process",
+  dsQueue,
   dsName = "__TASK_QUEUE__",
-  cacheTopic = "CACHE"
+  cacheTopic = "CACHE",
+  runMode = "in-process"
 )
 }
 \description{

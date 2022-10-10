@@ -97,17 +97,19 @@ import_files_scan <- function(importDataset = "__IMPORT_FILES__", importTopic = 
 #' @title 扫描所有未处理、未忽略的文件
 #' @family import function
 #' @export
-import_files_read <- function(importDataset = "__IMPORT_FILES__",
+import_dataset_read <- function(importDataset = "__IMPORT_FILES__",
                               cacheTopic = "CACHE",
                               ignoreFlag = FALSE,
                               newFilesFlag = TRUE) {
-  filesToRead <- ds_read(dsName = importDataset, topic = cacheTopic) |>
-    filter(ignore == ignoreFlag) |>
-    collect()
-  if(newFilesFlag) {
-    filesToRead |> filter(is.na(taskReadAt))
+  filesToRead <- ds_read(dsName = importDataset, topic = cacheTopic)
+  if(!rlang::is_empty(filesToRead)) {
+    if(newFilesFlag) {
+      filesToRead |> filter(ignore == ignoreFlag & is.na(taskReadAt)) |> collect()
+    } else {
+      filesToRead |> filter(ignore == ignoreFlag) |> collect()
+    }
   } else {
-    filesToRead
+    tibble()
   }
 }
 
@@ -118,12 +120,12 @@ import_files_read <- function(importDataset = "__IMPORT_FILES__",
 #' 此时，可以根据实际情况决定仅针对未处理状态还是所有的导入素材做匹配。
 #' @family import function
 #' @export
-import_task_match <- function(importDataset = "__IMPORT_FILES__",
+import_dataset_task_match <- function(importDataset = "__IMPORT_FILES__",
                               taskTopic = "TASK_DEFINE",
                               cacheTopic = "CACHE",
                               onlyNewFiles = TRUE) {
   ## 扫描所有未处理、未忽略的文件
-  filesToRead <- import_files_read(importDataset = importDataset,
+  filesToRead <- import_dataset_read(importDataset = importDataset,
                                    cacheTopic = cacheTopic)
   ## 匹配任务
   if(!rlang::is_empty(filesToRead)) {
@@ -183,8 +185,10 @@ import_task_queue_create <- function(taskQueue = "__TASK_QUEUE__", importDataset
       purrr::pmap_df(function(taskTopic, taskId, data) {
         params <- list(
           input = list(
+            "batchFolder" = data$batchFolder,
             "filePath" = data$filePath,
             "importTopic" = importTopic,
+            "path" = get_path(importTopic, data$batchFolder, data$filePath),
             "cacheTopic" = cacheTopic,
             "taskId" = taskId,
             "taskTopic" = taskTopic)) |>
@@ -192,7 +196,7 @@ import_task_queue_create <- function(taskQueue = "__TASK_QUEUE__", importDataset
         task_queue_item(taskId = taskId,
                         params = params,
                         taskType = "__IMPORT__",
-                        taskTopic = cacheTopic)
+                        taskTopic = taskTopic)
       })
     ## 修改导入素材文件状态
     filesToRead |>
@@ -206,7 +210,7 @@ import_task_queue_create <- function(taskQueue = "__TASK_QUEUE__", importDataset
 #' @title 执行导入任务
 #' @family import function
 #' @export
-import_task_queue_run <- function() {
-  task_queue_todo(taskType == "__IMPORT__")$batchId |>
-    purrr::walk(function(batchId) task_queue_run(batchId))
+import_task_queue_run <- function(taskQueue = "__TASK_QUEUE__", cacheTopic = "CACHE") {
+  task_queue_todo(taskTypes = "__IMPORT__", dsName = taskQueue, cacheTopic = cacheTopic) |>
+    task_queue_run()
 }
