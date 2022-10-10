@@ -81,16 +81,23 @@ import_files_scan <- function(importDataset = "__IMPORT_FILES__", importTopic = 
   all_files <- import_files_all(importTopic)
   if(!rlang::is_empty(all_files)) {
     ## 筛查未曾入库或虽曾入库但已修改的素材文件
-    existing <- ds_read(dsName = importDataset, topic = cacheTopic) |> collect()
+    existing <- ds_read(dsName = importDataset, topic = cacheTopic) |>
+      collect()
     if(rlang::is_empty(existing)) {
       newScan <- all_files
     } else {
       newScan <- all_files |>
-        anti_join(existing, by = c("filePath", "lastmodifiedAt"))
+        mutate(eTag = as.integer(lastmodifiedAt)) |>
+        anti_join(existing |> mutate(eTag = as.integer(lastmodifiedAt)),
+                  by = c("filePath", "eTag"))
     }
     ## 入库
-    newScan |> ds_append(dsName = importDataset, topic = cacheTopic)
-    ds_submit(dsName = importDataset, topic = cacheTopic)
+    if(nrow(newScan) > 0) {
+      newScan |> ds_append(dsName = importDataset, topic = cacheTopic)
+      ds_submit(dsName = importDataset, topic = cacheTopic)
+    } else {
+      message("No new files to import!!")
+    }
   }
 }
 
@@ -126,11 +133,13 @@ import_dataset_task_match <- function(importDataset = "__IMPORT_FILES__",
                               onlyNewFiles = TRUE) {
   ## 扫描所有未处理、未忽略的文件
   filesToRead <- import_dataset_read(importDataset = importDataset,
-                                   cacheTopic = cacheTopic)
+                                   cacheTopic = cacheTopic) |>
+    filter(is.na(taskId))
   ## 匹配任务
   if(!rlang::is_empty(filesToRead)) {
     ## 按照约定，使用taskId匹配导入素材的filePath
     allTasks <- task_all(taskTopic)
+    hasMatched <- FALSE
     if(!rlang::is_empty(allTasks)) {
       allTasks |>
         filter(taskType == "__IMPORT__" & online) |>
@@ -138,12 +147,19 @@ import_dataset_task_match <- function(importDataset = "__IMPORT_FILES__",
         purrr::pwalk(function(taskTopic, taskId) {
           item <- list("taskTopic" = taskTopic, "taskId" = taskId)
           pat <- paste0("^", taskId)
-          filesToRead |>
+          matched <- filesToRead |>
             filter(stringr::str_detect(filePath, pat)) |>
-            mutate(taskTopic = item$taskTopic, taskId = item$taskId) |>
-            ds_append(dsName = importDataset, topic = cacheTopic)
+            mutate(taskTopic = item$taskTopic, taskId = item$taskId)
+          if(nrow(matched) > 0) {
+            matched |> ds_append(dsName = importDataset, topic = cacheTopic)
+            hasMatched <- TRUE
+          }
         })
-      ds_submit(dsName = importDataset, topic = cacheTopic)
+      if(hasMatched) {
+        ds_submit(dsName = importDataset, topic = cacheTopic)
+      } else {
+        message("No import files to match with task defined!!")
+      }
     }
   }
 }
@@ -178,7 +194,7 @@ import_task_queue_create <- function(taskQueue = "__TASK_QUEUE__", importDataset
     filter(!ignore) |>
     filter(!is.na(taskId) & !is.na(taskTopic)) |>
     collect()
-  if(!rlang::is_empty(filesToRead)) {
+  if(nrow(filesToRead) > 0) {
     tasksToCreate <- filesToRead |>
       group_by(taskTopic, taskId) |>
       nest() |>
@@ -204,6 +220,8 @@ import_task_queue_create <- function(taskQueue = "__TASK_QUEUE__", importDataset
       ds_append(dsName = importDataset, topic = cacheTopic)
     ## 增加导入任务到队列
     tasksToCreate |> ds_append(dsName = taskQueue, topic = cacheTopic)      
+  } else {
+    message("No tasks into queue!!")
   }
 }
 
@@ -211,6 +229,10 @@ import_task_queue_create <- function(taskQueue = "__TASK_QUEUE__", importDataset
 #' @family import function
 #' @export
 import_task_queue_run <- function(taskQueue = "__TASK_QUEUE__", cacheTopic = "CACHE") {
-  task_queue_todo(taskTypes = "__IMPORT__", dsName = taskQueue, cacheTopic = cacheTopic) |>
-    task_queue_run()
+  t <- task_queue_todo(taskTypes = "__IMPORT__", dsName = taskQueue, cacheTopic = cacheTopic)
+  if(nrow(t) > 0) {
+    task_queue_run(t)
+  } else {
+    message("No tasks to run !!")
+  }
 }
