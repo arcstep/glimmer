@@ -170,19 +170,20 @@ ds_submit <- function(dsName, topic = "CACHE") {
   toRemoveFiles <- allFiles[stringr::str_detect(allFiles, "@action=__APPEND__")]
   force(toRemoveFiles)
   ## 找出更新数据的分区
-  part <- meta$partColumns[meta$partColumns != "@action"]
-  if(rlang::is_empty(part)) {
+  # part <- meta$partColumns[meta$partColumns != "@action"]
+  # if(rlang::is_empty(part)) {
     d <- ds_read(dsName, topic, noDeleted = FALSE) |> collect()
-  } else {
-    myschema <- do.call("schema", ds_schema_obj(dsName, topic))
-    to_append <- open_dataset(path, format = "parquet", schema = myschema) |>
-      filter(`@action` ==  "__APPEND__") |>
-      collect()
-    ## 仅归档__APPEND__数据中包含的分区
-    d <- ds_read(dsName, topic, noDeleted = FALSE) |>
-      semi_join(to_append, by = part) |>
-      collect()
-  }
+  # } else {
+  #   myschema <- do.call("schema", ds_schema_obj(dsName, topic))
+  #   to_append <- open_dataset(path, format = "parquet", schema = myschema) |>
+  #     filter(`@action` ==  "__APPEND__") |>
+  #     collect()
+  #   ## 仅归档__APPEND__数据中包含的分区
+  #   ## semi_join执行效率较低，暂时使用全量覆盖
+  #   d <- ds_read(dsName, topic, noDeleted = FALSE) |>
+  #     semi_join(to_append, by = part) |>
+  #     collect()
+  # }
 
   if(rlang::is_empty(d)) {
     warning("Empty Dataset to submit >>> ", dsName, "/", topic)
