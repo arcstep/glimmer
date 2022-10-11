@@ -46,7 +46,7 @@ ds_init <- function(dsName,
 #' @family dataset function
 #' @export
 ds_type <- function(type = "__UNKNOWN__") {
-  if(type %in% c("__STATE__", "__IMPORTED__", "__BUILT__", "__RISK__")) {
+  if(type %in% c("__STATE__", "__IMPORT__", "__BUILD__", "__RISK__")) {
     type
   } else {
     "__UNKNOWN__"
@@ -255,6 +255,15 @@ ds_read0 <- function(dsName, topic = "CACHE", noDeleted = TRUE) {
   } else {
     d
   }
+}
+
+#' @title 判断数据集是否已经定义
+#' @param dsName 数据集名称
+#' @param topic 主题域
+#' @family dataset function
+#' @export
+ds_exists <- function(dsName, topic = "CACHE") {
+  !rlang::is_empty(ds_yaml(dsName))
 }
 
 #' @title 读取数据集
@@ -473,3 +482,25 @@ ds_as_unique <- function(ds, keyColumns) {
   ds[!duplicated(ds[,keyColumns]),]
 }
 
+#' @title 转换字符串为时间日期类型
+#' @family dataset function
+#' @export
+ds_as_datetime <- function(ds, timestampColumn, datetimeColumn, tzone = "Asia/Shanghai")
+{
+  if (is.character(ds[[timestampColumn]])) {
+    mutate(ds, `:=`(
+      {{datetimeColumn}},
+      as_datetime(as.integer(stringi::stri_sub(!!sym(timestampColumn), to = 10)), tz = tzone)))
+  }
+  else if (is.numeric(ds[[timestampColumn]])) {
+    mutate(ds, `:=`(
+      {{datetimeColumn}},
+      as_datetime(as.integer(!!sym(timestampColumn)), tz = tzone)))
+  }
+  else {
+    ds
+  }
+}
+
+  
+  

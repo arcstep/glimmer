@@ -18,9 +18,11 @@ ds_as_unique(ds, keyColumns)
 Other dataset function: 
 \code{\link{ds_all}()},
 \code{\link{ds_append}()},
+\code{\link{ds_as_datetime}()},
 \code{\link{ds_delete}()},
 \code{\link{ds_diff_dataset}()},
 \code{\link{ds_diff_schema}()},
+\code{\link{ds_exists}()},
 \code{\link{ds_files}()},
 \code{\link{ds_init}()},
 \code{\link{ds_read0}()},

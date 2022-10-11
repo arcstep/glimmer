@@ -111,11 +111,8 @@ import_dataset_read <- function(importDataset = "__IMPORT_FILES__",
                               newFilesFlag = TRUE) {
   filesToRead <- ds_read(dsName = importDataset, topic = cacheTopic)
   if(!rlang::is_empty(filesToRead)) {
-    if(newFilesFlag) {
-      filesToRead |> filter(ignore == ignoreFlag & is.na(taskReadAt))
-    } else {
-      filesToRead |> filter(ignore == ignoreFlag)
-    }
+    d0 <- filesToRead |> filter(is.na(taskReadAt) == newFilesFlag)
+    d0 |> filter(ignore == ignoreFlag)
   } else {
     tibble()
   }

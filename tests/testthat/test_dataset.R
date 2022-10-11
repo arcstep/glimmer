@@ -96,6 +96,28 @@ test_that("追加数据：创建新数据", {
   temp_remove()
 })
 
+test_that("追加数据：修改旧数据", {
+  sample_config_init()
+  m <- mtcars |> as_tibble() |> rownames_to_column()
+  remove_cache("车数据")
+  ds_init("车数据", keyColumns = "rowname", data = m |> head())
+  
+  m |> slice(1:10) |> as_tibble() |> ds_append("车数据")
+  r1 <- ds_read("车数据") |> collect() |> select(mpg) |> head(1)
+  ds_read("车数据") |> collect() |> 
+    mutate(mpg = mpg + 10) |>
+    ds_append("车数据")
+  r2 <- ds_read("车数据") |> collect() |> select(mpg) |> head(1)
+  testthat::expect_equal(r1$mpg + 10, r2$mpg)
+  
+  ds_submit("车数据")
+  r3 <- ds_read("车数据") |> collect() |> select(mpg) |> head(1)
+  testthat::expect_equal(r1$mpg + 10, r3$mpg)
+  
+  temp_remove()
+})
+
+
 test_that("删除数据：没有设置主键时不允许删除", {
   sample_config_init()
   ## 没有设置主键，删除失败
@@ -142,7 +164,11 @@ test_that("归档数据操作：有分区", {
   m |> slice(1:10) |> as_tibble() |> ds_append("车数据")
   m |> slice(6:15) |> as_tibble() |> ds_append("车数据")
   m |> slice(1:3) |> as_tibble() |> ds_delete("车数据")
-  
+  ds_read("车数据") |> collect() |>
+    filter(cyl == 4) |>
+    mutate(mpg = mpg + 2) |>
+    ds_append("车数据")
+    
   ds_submit("车数据")
   ds_read("车数据") |> collect() |> nrow() |>
     testthat::expect_equal(10+5-3)
