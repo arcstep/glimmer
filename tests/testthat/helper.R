@@ -61,15 +61,20 @@ temp_config_init <- function() {
   config_init(rootPath)
 }
 
+
 sample_config_init <- function() {
-  config_init(rootPath, option = list(
-    "IMPORT" = testthat::test_path("_sample_import") |> fs::path_abs(),
-    "TASK_DEFINE" = testthat::test_path("_sample_task_define") |> fs::path_abs(),
-    "TASK_SCRIPTS" = testthat::test_path("_sample_task_scripts") |> fs::path_abs()
-  ))
+  config_init(rootPath)
 }
 
-temp_remove <- function() rootPath |> fs::dir_delete()
+sample_import_files <- function() {
+  fs::dir_copy(testthat::test_path("_sample_import"), get_path("IMPORT"), overwrite = TRUE)
+  fs::dir_copy(testthat::test_path("_sample_task_define"), get_path("TASK_DEFINE"), overwrite = TRUE)
+  fs::dir_copy(testthat::test_path("_sample_task_scripts"), get_path("TASK_SCRIPTS"), overwrite = TRUE)
+}
+
+temp_remove <- function() {
+  if(fs::dir_exists(rootPath)) rootPath |> fs::dir_delete()
+}
 
 remove_cache <- function(dsName) {
   path <- get_path("CACHE", dsName)

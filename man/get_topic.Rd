@@ -2,7 +2,7 @@
 % Please edit documentation in R/config.R
 \name{get_topic}
 \alias{get_topic}
-\title{获取配置}
+\title{获取配置项的值}
 \usage{
 get_topic(topic)
 }
@@ -10,7 +10,7 @@ get_topic(topic)
 \item{topic}{任务主题}
 }
 \description{
-获取配置
+获取配置项的值
 }
 \seealso{
 Other config functions: 

@@ -12,9 +12,9 @@ config_load(path = "./", yml = "config.yml")
 \item{yml}{默认为config.yml}
 }
 \description{
-自动创建\code{ROOT_PATH}目录。
+配置文件存在时，加载配置文件到运行环境。
 
-根据配置文件配置目录到运行环境。
+... >> ... >> 加载配置项
 }
 \details{
 使用\code{ROOT_PATH}时有一个关键约定：

@@ -14,7 +14,11 @@ config_init(path = "./", yml = "config.yml", option = list())
 \item{option}{配置项}
 }
 \description{
-初始化文件夹、配置项设定和加载
+自动创建\code{ROOT_PATH}目录。
+
+初始化配置文件夹 >> 写入配置项 >> 加载配置项
+
+如果配置文件路径已经存在，则使用已有的配置文件。
 }
 \seealso{
 Other config functions: 

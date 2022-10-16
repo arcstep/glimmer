@@ -14,30 +14,41 @@ get_path <- function(topic, ...) {
   fs::path_join(c(get_topic(topic), unlist(p)))
 }
 
-## 内存中配置项-------
+## 获取内存配置项-------
 
-#' @title 获取配置
+#' @title 获取配置项的值
 #' @param topic 任务主题
 #' @family config functions
 #' @export
-get_topic <- function(topic) get(topic, envir = TASK.ENV)
+get_topic <- function(topic) {
+  get(topic, envir = TASK.ENV)
+}
 
-#' @title 获得所有主题
+#' @title 列举所有配置项
 #' @family config functions
 #' @export
-get_topics <- function() ls(envir = TASK.ENV)
+get_topics <- function() {
+  ls(envir = TASK.ENV)
+}
 
 ## 操作内存配置项-------
-get_config <- function() as.list(TASK.ENV)
-set_topic <- function(topic, path) assign(topic, path, envir = TASK.ENV)
+#' @title 获取所有配置
+get_config <- function() {
+  as.list(TASK.ENV)
+}
+
+#' @title 设置配置项的值
+set_topic <- function(topic, path) {
+  assign(topic, path, envir = TASK.ENV)
+}
 
 ## 读写配置文件-----
 
 #' @title 加载配置文件到内存
 #' @description
-#' 自动创建\code{ROOT_PATH}目录。
+#' 配置文件存在时，加载配置文件到运行环境。
 #' 
-#' 根据配置文件配置目录到运行环境。
+#' ... >> ... >> 加载配置项
 #' @details 
 #' 使用\code{ROOT_PATH}时有一个关键约定：
 #' 配置项必须以\code{./}开头，才能使用\code{ROOT_PATH}扩展其路径；
@@ -64,13 +75,16 @@ config_load <- function(path = "./", yml = "config.yml") {
       } else {
         set_topic(item, topics[[item]])
       }
+      get_path(item) |> fs::dir_create()
     }
   })
 }
 
 #' @title 创建或补写配置项到磁盘
 #' @description
-#' 多次运行时会增量补充
+#' 多次运行时会增量补充。
+#' 
+#' ... >> 写入配置项 >> 加载配置项
 #' @param path YAML配置文件目录
 #' @param yml 默认为config.yml
 #' @param option 配置项
@@ -84,6 +98,7 @@ config_write <- function(path = "./", yml = "config.yml", option = list()) {
     } else {
       xoption <- list(
         "ROOT_PATH" = fs::path_abs(path),
+        "SNAP" = "./SNAP",
         "IMPORT" = "./IMPORT",
         "CACHE" = "./CACHE",
         "TASK_SCRIPTS" = "./TASK_SCRIPTS",
@@ -102,7 +117,13 @@ config_write <- function(path = "./", yml = "config.yml", option = list()) {
   }
 }
 #' @title 初始化配置项
-#' @description 初始化文件夹、配置项设定和加载
+#' @description
+#' 自动创建\code{ROOT_PATH}目录。
+#' 
+#' 初始化配置文件夹 >> 写入配置项 >> 加载配置项
+#' 
+#' 如果配置文件路径已经存在，则使用已有的配置文件。
+#' 
 #' @param path YAML配置文件目录
 #' @param yml 默认为config.yml
 #' @param option 配置项
@@ -120,6 +141,8 @@ config_init <- function(path = "./",
 }
 
 #' @title 读取yaml配置文件为列表
+#' @description 
+#' 读入配置文件，但暂不加载。
 #' @param path YAML配置文件目录
 #' @param yml 默认为config.yml
 #' @family config functions

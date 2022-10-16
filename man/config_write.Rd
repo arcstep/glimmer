@@ -14,7 +14,9 @@ config_write(path = "./", yml = "config.yml", option = list())
 \item{option}{配置项}
 }
 \description{
-多次运行时会增量补充
+多次运行时会增量补充。
+
+... >> 写入配置项 >> 加载配置项
 }
 \seealso{
 Other config functions: 

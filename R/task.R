@@ -113,7 +113,7 @@ task_read <- function(taskId, taskTopic = "TASK_DEFINE") {
 #' @param topic 主题域
 #' @family task-define function
 #' @export
-task_all <- function(taskTopic = "TASK_DEFINE") {
+task_search <- function(taskMatch = ".*", typeMatch = ".*", taskTopic = "TASK_DEFINE") {
   root_path <- get_path(taskTopic)
   if(fs::dir_exists(root_path)) {
     fs::dir_ls(root_path, type = "file", all = T, glob = "*.yml", recurse = T) |>
@@ -129,7 +129,9 @@ task_all <- function(taskTopic = "TASK_DEFINE") {
           "desc" = x$desc,
           "createdAt" = x$createdAt
         )
-      })
+      }) |>
+      filter(stringr::str_detect(taskId, taskMatch)) |>
+      filter(stringr::str_detect(taskType, typeMatch))
   } else {
     tibble()
   }

@@ -2,12 +2,12 @@
 % Please edit documentation in R/config.R
 \name{get_topics}
 \alias{get_topics}
-\title{获得所有主题}
+\title{列举所有配置项}
 \usage{
 get_topics()
 }
 \description{
-获得所有主题
+列举所有配置项
 }
 \seealso{
 Other config functions: 

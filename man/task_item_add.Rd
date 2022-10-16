@@ -31,11 +31,11 @@ task_item_add(
 }
 \seealso{
 Other task-define function: 
-\code{\link{task_all}()},
 \code{\link{task_create}()},
 \code{\link{task_read}()},
 \code{\link{task_run}()},
 \code{\link{task_script_dir_create}()},
-\code{\link{task_script_file_create}()}
+\code{\link{task_script_file_create}()},
+\code{\link{task_search}()}
 }
 \concept{task-define function}

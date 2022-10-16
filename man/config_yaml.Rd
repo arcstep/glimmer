@@ -12,7 +12,7 @@ config_yaml(path = "./", yml = "config.yml")
 \item{yml}{默认为config.yml}
 }
 \description{
-读取yaml配置文件为列表
+读入配置文件，但暂不加载。
 }
 \seealso{
 Other config functions: 

@@ -4,7 +4,11 @@
 \alias{import_init}
 \title{初始化导入状态数据集}
 \usage{
-import_init(dsName = "__IMPORT_FILES__", cacheTopic = "CACHE")
+import_init(
+  dsName = "__IMPORT_FILES__",
+  cacheTopic = "CACHE",
+  snapTopic = "SNAP"
+)
 }
 \description{
 导入素材中所有文件都将入库。
@@ -17,11 +21,9 @@ import_init(dsName = "__IMPORT_FILES__", cacheTopic = "CACHE")
 }
 \seealso{
 Other import function: 
-\code{\link{import_dataset_read}()},
-\code{\link{import_dataset_task_match}()},
-\code{\link{import_files_all}()},
-\code{\link{import_files_scan}()},
-\code{\link{import_task_queue_create}()},
-\code{\link{import_task_queue_run}()}
+\code{\link{import_changed}()},
+\code{\link{import_run}()},
+\code{\link{import_scan}()},
+\code{\link{import_search}()}
 }
 \concept{import function}

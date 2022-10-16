@@ -1,12 +1,10 @@
-# @param input$filePath 导入素材文件名
-# @param input$importTopic 导入素材主题
-# @param input$cacheTopic 保存主题
-# @param input$taskId 任务ID
-# @param input$taskTopic 任务主题
+#' @title 导入sutdent数据
+#' @param files 导入素材文件名
 
-if(!rlang::is_empty(input$filePath)) {
-  input$path |> purrr::walk(function(f) {
+if(!rlang::is_empty(files)) {
+  files |> purrr::walk(function(f) {
     readr::read_csv(f) |>
+      mutate(`@from` = f) |>
       ds_append("student")
   })
   ds_submit("student")
