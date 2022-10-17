@@ -15,9 +15,8 @@ import_init <- function(dsName = "__IMPORT_FILES__", cacheTopic = "CACHE", snapT
     "importTopic" = dt_string(),
     "createdAt" = dt_datetime(), # birth_time,
     "scanedAt" = dt_datetime(),
-    "batchFolder" = dt_string(),
-    "filePath" = "MY/IMPORT/FOLDER/my.csv",
-    "fullPath" = "/DATA/MY/IMPORT/FOLDER/my.csv",
+    "batchFolder" = "schedual_001",
+    "filePath" = "AAA/my.csv",
     "fileSize" = 537.0, # fs::bytes
     "lastmodifiedAt" = dt_datetime(), # modification_time
     "doneAt" = dt_datetime(),  # 任务处理完成时间
@@ -66,9 +65,8 @@ import_changed <- function(importTopic = "IMPORT", snapTopic = "SNAP") {
           mutate(filePath = stringr::str_remove(path, paste0(batchPath, "/"))) |>
           mutate(batchFolder = batchFolderName) |>
           mutate(importTopic = importTopic) |>
-          mutate(fullPath = fs::path_abs(path)) |>
           mutate(scanedAt = now(tzone = "Asia/Shanghai")) |>
-          select(importTopic, createdAt, scanedAt, lastmodifiedAt, batchFolder, filePath, fileSize, fullPath) |>
+          select(importTopic, createdAt, scanedAt, lastmodifiedAt, batchFolder, filePath, fileSize) |>
           mutate(year = as.integer(lubridate::year(createdAt))) |>
           mutate(month = as.integer(lubridate::month(createdAt)))
       }) |> purrr::reduce(rbind)
@@ -163,19 +161,21 @@ import_run <- function(files = tibble(),
         select(taskTopic, taskId) |>
         purrr::pmap_df(function(taskTopic, taskId) {
           pat <- paste0("^", taskId, "[./]")
-          matched <- filesToRead |> filter(stringr::str_detect(filePath, pat))
+          matched <- filesToRead |>
+            mutate(path = paste(batchFolder, filePath, sep = "/")) |>
+            filter(stringr::str_detect(filePath, pat))
           message("Task Define", " <", taskTopic, ": ", taskId, "> matched ",  nrow(matched), " files !!")
           ## 如果任务可以匹配到导入素材，则执行该任务
           if(nrow(matched) > 0) {
             if(toRun) {
-              task_run(taskId, taskTopic, files = matched$fullPath)
+              task_run(taskId, taskTopic, importTopic = importTopic, files = matched$path)
               filesToRead |>
                 mutate(doneAt = now(tzone = "Asia/Shanghai")) |>
                 ds_append(importDataset, cacheTopic)
             }
             hasMatched <<- hasMatched + nrow(matched)
           }
-          list("taskId" = taskId, "taskTopic" = taskTopic, "files" = matched$fullPath)
+          list("taskId" = taskId, "taskTopic" = taskTopic, "files" = matched$path)
         })
       if(hasMatched == 0) {
         message("Zero import files to MATCH task defined!!")

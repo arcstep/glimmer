@@ -150,6 +150,7 @@ task_search <- function(taskMatch = ".*", typeMatch = ".*", taskTopic = "TASK_DE
 #' @family task-define function
 #' @export
 task_run <- function(taskId, taskTopic = "TASK_DEFINE", runMode = "in-process", ...) {
+  paramInfo <- list(...)
   toRun <- function(..., task) {
     ## 子函数内定义一个设置返回值的函数，供内部使用
     TaskRun.ENV <- new.env(hash = TRUE)
@@ -203,6 +204,14 @@ task_run <- function(taskId, taskTopic = "TASK_DEFINE", runMode = "in-process", 
   } else if(runMode == "r_bg"){
     callr::r_bg(toRun, args = list(..., "task" = taskread))
   } else {
-    do.call("toRun", args = list(..., "task" = taskread))
+    tryCatch({
+      do.call("toRun", args = list(..., "task" = taskread))
+    }, error = function(e) {
+      stop(
+        e,
+        "Task Run Failed: ",
+        "<", taskId, "> ",
+        paramInfo |> unlist() |> paste(collapse = ","))
+    })
   }
 }
