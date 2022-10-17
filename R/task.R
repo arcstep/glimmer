@@ -124,7 +124,7 @@ task_search <- function(taskMatch = ".*", typeMatch = ".*", taskTopic = "TASK_DE
           list(
             "taskTopic" = x$taskTopic,
             "taskId" = x$taskId,
-            "items" = x$items |> as_tibble(),
+            "itemsCount" = x$items |> as_tibble() |> nrow(),
             "runLevel" = x$runLevel,
             "online" = x$online %empty% TRUE,
             "taskType" = x$taskType,
