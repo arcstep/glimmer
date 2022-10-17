@@ -144,14 +144,98 @@ task_search <- function(taskMatch = ".*", typeMatch = ".*", taskTopic = "TASK_DE
 
 #' @title 运行任务
 #' @param taskId 任务标识
-#' @param params 参数赋值
 #' @param taskTopic 保存任务定义的存储主题文件夹
 #' @param runMode 运行模式（默认为进程内执行，改为r或r_bg为子进程执行）
 #' @family task-define function
 #' @export
 task_run <- function(taskId, taskTopic = "TASK_DEFINE", runMode = "in-process", ...) {
   paramInfo <- list(...)
-  toRun <- function(..., task) {
+  ## 提取任务信息
+  items <- task_read(taskId, taskTopic)$items
+  tryCatch({
+    task_run0(items, runMode, ...)
+  }, error = function(e) {
+    stop(
+      e,
+      "task_run Failed: ",
+      "<", taskId, "> ",
+      paramInfo |> unlist() |> paste(collapse = ","))
+  })
+}
+
+
+#' @title 运行任务文件
+#' @param taskFile 任务文件路径
+#' @family task-define function
+#' @export
+task_run_file <- function(taskFile, params = list(NULL), scriptsTopic = "TASK_SCRIPTS", runMode = "in-process", ...) {
+  ## 提取任务信息
+  items <- tibble(
+    "scriptsTopic" = scriptsTopic,
+    "taskScript" = taskFile,
+    "params" = list(params %empty% NULL),
+    "scriptType" = "file")
+  tryCatch({
+    task_run0(items, runMode, ...)
+  }, error = function(e) {
+    stop(
+      e,
+      "task_run_file Failed: ",
+      "<", taskId, "> ",
+      paramInfo |> unlist() |> paste(collapse = ","))
+  })
+}
+
+#' @title 运行任务文件夹
+#' @param taskDir 任务文件夹路径
+#' @family task-define function
+#' @export
+task_run_dir <- function(taskDir, params = list(NULL), scriptsTopic = "TASK_SCRIPTS", runMode = "in-process", ...) {
+  ## 提取任务信息
+  items <- tibble(
+    "scriptsTopic" = scriptsTopic,
+    "taskScript" = taskDir,
+    "params" = list(params %empty% NULL),
+    "scriptType" = "dir")
+  tryCatch({
+    task_run0(items, runMode, ...)
+  }, error = function(e) {
+    stop(
+      e,
+      "task_run_dir Failed: ",
+      "<", taskId, "> ",
+      paramInfo |> unlist() |> paste(collapse = ","))
+  })
+}
+
+#' @title 运行任务
+#' @param taskFile 任务文件
+#' @family task-define function
+#' @export
+task_run_string <- function(taskString, params = list(NULL), runMode = "in-process", ...) {
+  ## 提取任务信息
+  items <- tibble(
+    "taskScript" = taskString,
+    "params" = list(params %empty% NULL),
+    "scriptType" = "string")
+  tryCatch({
+    task_run0(items, runMode, ...)
+  }, error = function(e) {
+    stop(
+      e,
+      "task_run_string Failed: ",
+      "<", taskId, "> ",
+      paramInfo |> unlist() |> paste(collapse = ","))
+  })
+}
+
+#' @title 按内容运行任务
+#' @param task 任务
+#' @param runMode 运行模式（默认为进程内执行，改为r或r_bg为子进程执行）
+#' @family task-define function
+#' @export
+task_run0 <- function(taskItems, runMode = "in-process", ...) {
+  toRun <- function(..., taskItems) {
     ## 子函数内定义一个设置返回值的函数，供内部使用
     TaskRun.ENV <- new.env(hash = TRUE)
     taskParams <- list(...)
@@ -161,7 +245,7 @@ task_run <- function(taskId, taskTopic = "TASK_DEFINE", runMode = "in-process", 
     
     assign("output", list(), envir = TaskRun.ENV)
     ## 逐项执行子任务
-    task$items |> purrr::pwalk(function(scriptsTopic, taskScripts, params, scriptType) {
+    taskItems |> purrr::pwalk(function(scriptsTopic, taskScripts, params, scriptType) {
       names(params) |> purrr::walk(function(i) {
         assign(i, params[[i]], envir = TaskRun.ENV)
       })
@@ -197,21 +281,12 @@ task_run <- function(taskId, taskTopic = "TASK_DEFINE", runMode = "in-process", 
     })
     get("output", envir = TaskRun.ENV)
   }
-  taskread <- task_read(taskId, taskTopic)
   
   if(runMode == "r") {
-    callr::r(toRun, args = list(..., "task" = taskread))
+    callr::r(toRun, args = list(..., "taskItems" = taskItems))
   } else if(runMode == "r_bg"){
-    callr::r_bg(toRun, args = list(..., "task" = taskread))
+    callr::r_bg(toRun, args = list(..., "taskItems" = taskItems))
   } else {
-    tryCatch({
-      do.call("toRun", args = list(..., "task" = taskread))
-    }, error = function(e) {
-      stop(
-        e,
-        "Task Run Failed: ",
-        "<", taskId, "> ",
-        paramInfo |> unlist() |> paste(collapse = ","))
-    })
+    do.call("toRun", args = list(..., "taskItems" = taskItems))
   }
 }

@@ -168,7 +168,7 @@ import_run <- function(files = tibble(),
           ## 如果任务可以匹配到导入素材，则执行该任务
           if(nrow(matched) > 0) {
             if(toRun) {
-              task_run(taskId, taskTopic, importTopic = importTopic, files = matched$path)
+              task_run(taskId = taskId, taskTopic = taskTopic, importTopic = importTopic, files = matched$path)
               filesToRead |>
                 mutate(doneAt = now(tzone = "Asia/Shanghai")) |>
                 ds_append(importDataset, cacheTopic)
