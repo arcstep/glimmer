@@ -57,11 +57,6 @@ sample_task_define <- function() {
   mytask_add("A/score", "IMPORT/score.R")
 }
 
-temp_config_init <- function() {
-  config_init(rootPath)
-}
-
-
 sample_config_init <- function() {
   config_init(rootPath)
 }
@@ -74,9 +69,4 @@ sample_import_files <- function() {
 
 temp_remove <- function() {
   if(fs::dir_exists(rootPath)) rootPath |> fs::dir_delete()
-}
-
-remove_cache <- function(dsName) {
-  path <- get_path("CACHE", dsName)
-  if(fs::dir_exists(path)) fs::dir_delete(path)
 }

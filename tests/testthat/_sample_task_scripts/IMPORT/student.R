@@ -4,7 +4,7 @@
 if(!rlang::is_empty(files)) {
   files |> purrr::walk(function(f) {
     readr::read_csv(f) |>
-      mutate(`@from` = f) |>
+      ds_as_from(f) |>
       ds_append("student")
   })
   ds_submit("student")

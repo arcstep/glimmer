@@ -63,7 +63,7 @@ ds_type <- function(type = "__UNKNOWN__") {
 #' @param toDelete 将数据标记为删除
 #' @family dataset function
 #' @export
-ds_append <- function(d, dsName, topic = "CACHE", toDelete = FALSE) {
+ds_append <- function(d, dsName, topic = "CACHE") {
   if(rlang::is_empty(d)) {
     warning("Empty Dataset to write >>> ", dsName, "/", topic)
   } else {
@@ -101,10 +101,12 @@ ds_append <- function(d, dsName, topic = "CACHE", toDelete = FALSE) {
       ## 写入数据
       batch <- gen_batchNum()
       x <- d |>
-        mutate(`@deleted` = toDelete) |>
         mutate(`@action` = "__APPEND__") |>
         mutate(`@batchId` = batch) |>
         mutate(`@lastmodifiedAt` = lubridate::now(tzone = "Asia/Shanghai"))
+      ## 如果没有提供删除标记，就补充这一列
+      if("@deleted" %nin% names(d)) x[["@deleted"]] <- FALSE
+      ## 写入parquet文件组
       x |>
         ungroup() |>
         write_dataset(
@@ -115,11 +117,7 @@ ds_append <- function(d, dsName, topic = "CACHE", toDelete = FALSE) {
           partitioning = meta$partColumns,
           version = "2.0",
           existing_data_behavior = "overwrite")
-      if(toDelete) {
-        message("data delete <", dsName, ">", " ", nrow(x), " rows deleted!")
-      } else {
         message("data append <", dsName, ">", " ", nrow(x), " rows wroted!")
-      }
       return(batch)
     }
   }
@@ -150,7 +148,11 @@ ds_delete <- function(d, dsName, topic = "CACHE") {
   if(rlang::is_empty(meta$keyColumns)) {
     stop("Can't Delete without keyColumns Setting!!!")
   }
-  ds_append(d, dsName = dsName, topic = topic, toDelete = TRUE)
+  ds_read(dsName, topic) |>
+    semi_join(d, by = meta$keyColumns) |>
+    collect() |>
+    ds_as_deleted() |>
+    ds_append(dsName = dsName, topic = topic)
 }
 
 #' @title 数据集归档
@@ -371,13 +373,13 @@ ds_all <- function(topic = "CACHE") {
   }
 }
 
-#' @title 移除数据文件夹
+#' @title 移除数据集
 #' @description 可以整个移除，也可以组装目录后按分区移除
 #' @param dsName 数据集名称
 #' @param topic 主题域
 #' @family dataset function
 #' @export
-ds_remove_path <- function(dsName, topic = "CACHE") {
+ds_drop <- function(dsName, topic = "CACHE") {
   path <- get_path(topic, dsName) |> fs::path_expand()
   if(fs::dir_exists(path)) {
     fs::dir_delete(path)
@@ -433,6 +435,7 @@ ds_schema_obj <- function(dsName, topic = "CACHE") {
     yml$schema |> purrr::walk(function(item) {
       s[[item$fieldName]] <<- dt_field(item$fieldType)
     }) 
+    s$`@from` <- dt_field("string")
     s$`@deleted` <- dt_field("bool")
     s$`@action` <- dt_field("string")
     s$`@batchId` <- dt_field("string")
@@ -503,5 +506,19 @@ ds_as_datetime <- function(ds, timestampColumn, datetimeColumn, tzone = "Asia/Sh
   }
 }
 
-  
+#' @title 设置数据来源
+#' @family dataset function
+#' @export
+ds_as_from <-function(ds, sourceFrom) {
+  ds["@from"] <- sourceFrom
+  ds
+}
+
+#' @title 设置删除标记
+#' @family dataset function
+#' @export
+ds_as_deleted <-function(ds, flag = TRUE) {
+  ds["@deleted"] <- flag
+  ds
+}  
   

@@ -1,5 +1,6 @@
 test_that("定义任务：string类型", {
-  temp_config_init()
+  sample_config_init()
+  sample_import_files()
   
   task_create(taskId = "A", list())
   task_read("A")$taskType |>
@@ -21,7 +22,8 @@ test_that("定义任务：string类型", {
 })
 
 test_that("定义任务：file类型，且使用管道风格", {
-  temp_config_init()
+  sample_config_init()
+  sample_import_files()
   
   task_create(taskId = "B", list()) |>
     task_item_add(taskScript = "A/a.R", scriptType = "file") |>
@@ -33,7 +35,8 @@ test_that("定义任务：file类型，且使用管道风格", {
 })
 
 test_that("定义任务：dir类型", {
-  temp_config_init()
+  sample_config_init()
+  sample_import_files()
   
   task_create(taskId = "C") |>
     task_item_add(taskScript = "A", scriptType = "dir")
@@ -45,6 +48,7 @@ test_that("定义任务：dir类型", {
 
 test_that("运行任务：成功运行", {
   sample_config_init()
+  sample_import_files()
   
   task_run("task_sample_simple") |> nrow() |>
     testthat::expect_equal(1)
@@ -63,7 +67,8 @@ test_that("运行任务：成功运行", {
 
 test_that("运行任务：异常情况", {
   sample_config_init()
-    
+  sample_import_files()
+  
   task_run("task_sample_error", myage = 6) |>
     testthat::expect_error("I m an error")
   

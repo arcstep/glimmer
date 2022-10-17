@@ -116,22 +116,27 @@ task_read <- function(taskId, taskTopic = "TASK_DEFINE") {
 task_search <- function(taskMatch = ".*", typeMatch = ".*", taskTopic = "TASK_DEFINE") {
   root_path <- get_path(taskTopic)
   if(fs::dir_exists(root_path)) {
-    fs::dir_ls(root_path, type = "file", all = T, glob = "*.yml", recurse = T) |>
-      purrr::map_df(function(path) {
-        x <- yaml::read_yaml(path)
-        list(
-          "taskTopic" = x$taskTopic,
-          "taskId" = x$taskId,
-          "items" = x$items |> as_tibble(),
-          "runLevel" = x$runLevel,
-          "online" = x$online %empty% TRUE,
-          "taskType" = x$taskType,
-          "desc" = x$desc,
-          "createdAt" = x$createdAt
-        )
-      }) |>
-      filter(stringr::str_detect(taskId, taskMatch)) |>
-      filter(stringr::str_detect(taskType, typeMatch))
+    tasks <- fs::dir_ls(root_path, type = "file", all = T, glob = "*.yml", recurse = T)
+    if(length(tasks) > 0) {
+      tasks |>
+        purrr::map_df(function(path) {
+          x <- yaml::read_yaml(path)
+          list(
+            "taskTopic" = x$taskTopic,
+            "taskId" = x$taskId,
+            "items" = x$items |> as_tibble(),
+            "runLevel" = x$runLevel,
+            "online" = x$online %empty% TRUE,
+            "taskType" = x$taskType,
+            "desc" = x$desc,
+            "createdAt" = x$createdAt
+          )
+        }) |>
+        filter(stringr::str_detect(taskId, taskMatch)) |>
+        filter(stringr::str_detect(taskType, typeMatch))
+    } else {
+      tibble()
+    }
   } else {
     tibble()
   }

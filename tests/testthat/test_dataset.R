@@ -1,6 +1,6 @@
 test_that("当数据集配置文件不存在时", {
   sample_config_init()
-  remove_cache("车数据")
+  ds_drop("车数据")
   ds_append(mtcars, "车数据") |>
     testthat::expect_error("Empty Dataset Metadata")
   
@@ -9,7 +9,7 @@ test_that("当数据集配置文件不存在时", {
 
 test_that("当新数据集结构不一致", {
   sample_config_init()
-  remove_cache("车数据")
+  ds_drop("车数据")
   ds_init("车数据", data = mtcars |> head())
   
   ## 接受缺少字段
@@ -27,7 +27,7 @@ test_that("当新数据集结构不一致", {
 
 test_that("当新数据集结构不一致，且缺少关键字段", {
   sample_config_init()
-  remove_cache("车数据")
+  ds_drop("车数据")
   m <- mtcars |> as_tibble() |> rownames_to_column("id")
   ds_init("车数据", data = m |> head(), keyColumns = "id", partColumns = "cyl")
   
@@ -43,16 +43,17 @@ test_that("当新数据集结构不一致，且缺少关键字段", {
     testthat::expect_error("No partColumns")
   
   ## 删除时仅提供主键字段
-  tibble("id" = 1, "cyl" = 4) |> ds_delete("车数据")
-  (ds_read("车数据", noDeleted = F) |> collect())$`@deleted` |>
-    testthat::expect_true()
+  m |> ds_append("车数据")
+  ds_read("车数据") |> collect() |> nrow() |> testthat::expect_equal(32)
+  tibble("id" = "1", "cyl" = 4) |> ds_delete("车数据")
+  ds_read("车数据") |> collect() |> nrow() |> testthat::expect_equal(31)
 
   temp_remove()
 })
 
 test_that("当新数据集架构不一致，按要求转换", {
   sample_config_init()
-  remove_cache("AAA")
+  ds_drop("AAA")
   ds_init("AAA", schema = list(
     list("fieldName" = "a", "fieldType" = "int32"),
     list("fieldName" = "b", "fieldType" = "timestamp[us, tz=Asia/Shanghai]")))
@@ -68,7 +69,7 @@ test_that("当新数据集架构不一致，按要求转换", {
 test_that("追加数据：缺少架构描述", {
   sample_config_init()
   m <- mtcars |> as_tibble() |> rownames_to_column()
-  remove_cache("车数据")
+  ds_drop("车数据")
   ds_init("车数据", keyColumns = "rowname")
   
   m |> slice(1:10) |> as_tibble() |> ds_append("车数据") |>
@@ -80,7 +81,7 @@ test_that("追加数据：缺少架构描述", {
 test_that("追加数据：创建新数据", {
   sample_config_init()
   m <- mtcars |> as_tibble() |> rownames_to_column()
-  remove_cache("车数据")
+  ds_drop("车数据")
   ds_init("车数据", keyColumns = "rowname", data = m |> head())
   
   m |> slice(1:10) |> as_tibble() |> ds_append("车数据")
@@ -99,7 +100,7 @@ test_that("追加数据：创建新数据", {
 test_that("追加数据：修改旧数据", {
   sample_config_init()
   m <- mtcars |> as_tibble() |> rownames_to_column()
-  remove_cache("车数据")
+  ds_drop("车数据")
   ds_init("车数据", keyColumns = "rowname", data = m |> head())
   
   m |> slice(1:10) |> as_tibble() |> ds_append("车数据")
@@ -121,14 +122,14 @@ test_that("追加数据：修改旧数据", {
 test_that("删除数据：没有设置主键时不允许删除", {
   sample_config_init()
   ## 没有设置主键，删除失败
-  remove_cache("车数据")
+  ds_drop("车数据")
   ds_init("车数据", data = mtcars |> head())
     mtcars |> slice(1:10) |> as_tibble() |> ds_append("车数据")
   mtcars |> slice(1:3) |> as_tibble() |> ds_delete("车数据") |>
     testthat::expect_error("Can't Delete without keyColumns")
 
   ## 设置了主键，删除成功
-  remove_cache("车数据")
+  ds_drop("车数据")
   m <- mtcars |> as_tibble() |> rownames_to_column()
   ds_init("车数据", keyColumns = "rowname", data = m |> head())
   m |> slice(1:10) |> as_tibble() |> ds_append("车数据")
@@ -142,7 +143,7 @@ test_that("删除数据：没有设置主键时不允许删除", {
 test_that("归档数据操作：无分区", {
   sample_config_init()
   ## 设置了主键，删除成功
-  remove_cache("车数据")
+  ds_drop("车数据")
   m <- mtcars |> as_tibble() |> rownames_to_column()
   ds_init("车数据", keyColumns = "rowname", data = m |> head())
   m |> slice(1:10) |> as_tibble() |> ds_append("车数据")
@@ -158,7 +159,7 @@ test_that("归档数据操作：无分区", {
 test_that("归档数据操作：有分区", {
   sample_config_init()
   ## 设置了主键，删除成功
-  remove_cache("车数据")
+  ds_drop("车数据")
   m <- mtcars |> as_tibble() |> rownames_to_column() |> mutate(cyl = as.integer(cyl))
   ds_init("车数据", keyColumns = "rowname", partColumns = c("cyl"), data = m |> head())
   m |> slice(1:10) |> as_tibble() |> ds_append("车数据")
@@ -208,15 +209,15 @@ test_that("读写数据时使用推荐的显示列", {
     mutate(cyl = as.integer(cyl), am = as.integer(am)) |>
     mutate(id = row_number())
   
-  remove_cache("车数据")
+  ds_drop("车数据")
   glimmer::ds_init("车数据", data = head(all), keyColumns = "id", suggestedColumns = c("id"))
   all |> glimmer::ds_append("车数据")
   ("id" %in% (glimmer::ds_read("车数据") |> names())) |>
     testthat::expect_true()
   glimmer::ds_read("车数据") |> names() |> length() |>
-    testthat::expect_equal(length(all |> names()) + 4)
+    testthat::expect_equal(length(all |> names()) + 5)
   
-  remove_cache("车数据")
+  ds_drop("车数据")
   glimmer::ds_init("车数据2", data = head(all), keyColumns = "id", suggestedColumns = c("id", "cyl"))
   all |> glimmer::ds_append("车数据2")
   (glimmer::ds_read("车数据2") |> names())[[2]] |>

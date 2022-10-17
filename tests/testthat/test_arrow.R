@@ -9,7 +9,7 @@ clear_dir <- function() {
 }
 
 test_that("空更新：写入空数据时, 数据目录不受影响", {
-  ds_remove_path("车数据")
+  ds_drop("车数据")
   mtcars |> as_tibble() |>
     mutate(cyl = as.integer(cyl)) |>
     arrow::write_dataset(
@@ -48,7 +48,7 @@ test_that("空更新：写入空数据时, 数据目录不受影响", {
 ## delete_matching 模式会覆盖涉及到的分区
 ## 但不会删除数据中没有涉及到的分区目录
 test_that("更新分区：重写数据中包含的分区目录", {
-  ds_remove_path("车数据")
+  ds_drop("车数据")
   mtcars |> as_tibble() |>
     mutate(cyl = as.integer(cyl)) |>
     arrow::write_dataset(
@@ -79,7 +79,7 @@ test_that("更新分区：重写数据中包含的分区目录", {
 ## overwrite 模式会覆盖同名文件
 ## 但不会删除名字不同的数据文件，即使分区相同
 test_that("更新文件：重写数据中包含的所有分区内文件", {
-  ds_remove_path("车数据")
+  ds_drop("车数据")
   mtcars |> as_tibble() |>
     mutate(cyl = as.integer(cyl)) |>
     arrow::write_dataset(
@@ -111,7 +111,7 @@ test_that("更新文件：重写数据中包含的所有分区内文件", {
 ## 列结构不同时，允许新数据文件写入
 ## 但读取时，会根据第一个（按字母排序）数据文件内的列结构读取所有数据
 test_that("更新结构：当新分区数据与旧数据不一致", {
-  ds_remove_path("车数据")
+  ds_drop("车数据")
   mtcars |> as_tibble() |>
     slice(1:10) |>
     select(cyl, 1:3) |>
@@ -160,8 +160,8 @@ test_that("更新结构：当新分区数据与旧数据不一致", {
 ## 1、写数据时分别写入
 ## 2、读数据时使用left_join、right_join等函数灵活合并结果
 test_that("合并读取：将列分为两组存储，合并读取时仍然支持惰性操作", {
-  ds_remove_path("车数据")
-  ds_remove_path("车数据补充")
+  ds_drop("车数据")
+  ds_drop("车数据补充")
   mtcars |>
     rownames_to_column() |>
     select(1:3) |>
@@ -196,7 +196,7 @@ test_that("合并读取：将列分为两组存储，合并读取时仍然支持
 ## 2、整理时使用delete_matching模式合并分散的文件，合并时按键值去重
 ## 3、读取时，根据元数据按键值去重
 test_that("追加新增：补充新增记录，读时合并", {
-  ds_remove_path("车数据")
+  ds_drop("车数据")
   mtcars |> as_tibble() |>
     slice(1) |>
     mutate(cyl = as.integer(cyl)) |>
@@ -254,7 +254,7 @@ test_that("追加新增：补充新增记录，读时合并", {
 ## 2、整理时使用delete_matching模式，剔除标记为删除的记录
 ## 3、读数据时将其过滤，合并时按删除记录的键值剔除
 test_that("追加删除：补充删除记录，读时过滤", {
-  ds_remove_path("车数据")
+  ds_drop("车数据")
   d <- mtcars |> as_tibble() |>
     rownames_to_column()
   ## 写入时增加`@delete`
@@ -293,7 +293,7 @@ test_that("追加删除：补充删除记录，读时过滤", {
 
 ## 很容易实现多次追加更新，但删除只允许一次
 test_that("追加更新：补充更新记录，读时过滤", {
-  ds_remove_path("车数据")
+  ds_drop("车数据")
   d <- mtcars |> as_tibble() |>
     rownames_to_column()
   d |> slice(1:10) |>
@@ -331,7 +331,7 @@ test_that("追加更新：补充更新记录，读时过滤", {
 
 ## schema
 test_that("使用schema：控制返回结果的列结构", {
-  ds_remove_path("车数据")
+  ds_drop("车数据")
   d <- mtcars |> as_tibble() |>
     slice(1:10) |>
     select(cyl, 1:10) |>
