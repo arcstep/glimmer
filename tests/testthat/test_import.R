@@ -73,6 +73,7 @@ test_that("<import_scan> 过滤要导入的文件", {
 test_that("<import_run> 导入流程", {
   sample_config_init()
   import_init()
+  task_queue_init()
   sample_import_files()
   sample_dataset_init()
 

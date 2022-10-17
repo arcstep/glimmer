@@ -59,6 +59,8 @@ sample_task_define <- function() {
 
 sample_config_init <- function() {
   config_init(rootPath)
+  import_init()
+  task_queue_init()
 }
 
 sample_import_files <- function() {

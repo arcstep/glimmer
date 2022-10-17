@@ -46,7 +46,7 @@ test_that("定义任务：dir类型", {
   temp_remove()
 })
 
-test_that("运行任务：成功运行", {
+test_that("<task_run>: 成功运行", {
   sample_config_init()
   sample_import_files()
   
@@ -61,6 +61,32 @@ test_that("运行任务：成功运行", {
   
   task_run("task_sample_runtime_param", myage = 6) |> nrow() |>
     testthat::expect_equal(1)
+  
+  temp_remove()
+})
+
+test_that("<task_run_***>: 成功运行", {
+  sample_config_init()
+  sample_import_files()
+
+  task_run_expr(expression({mtcars})) |> nrow() |>
+    testthat::expect_equal(32)
+  
+  task_run_expr(expression({mtcars |> filter(cyl == a)}), a = 6) |> nrow() |>
+    testthat::expect_equal(7)
+
+  x <- 6
+  task_run_expr(expression({mtcars |> filter(cyl == a)}), a = x) |> nrow() |>
+    testthat::expect_equal(7)
+  
+  task_run_string("mtcars") |> nrow() |>
+    testthat::expect_equal(32)
+  
+  task_run_file("SIMPLE/a.R") |> nrow() |>
+    testthat::expect_equal(5)
+
+  task_run_dir("SIMPLE")$id[[1]] |>
+    testthat::expect_equal("liyihan-5")
   
   temp_remove()
 })

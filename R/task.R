@@ -148,10 +148,52 @@ task_search <- function(taskMatch = ".*", typeMatch = ".*", taskTopic = "TASK_DE
 #' @param runMode 运行模式（默认为进程内执行，改为r或r_bg为子进程执行）
 #' @family task-define function
 #' @export
-task_run <- function(taskId, taskTopic = "TASK_DEFINE", runMode = "in-process", ...) {
+task_run <- function(taskId,
+                     taskTopic = "TASK_DEFINE",
+                     scriptsTopic = "TASK_SCRIPTS",
+                     cacheTopic = "CACHE",
+                     queueName = "__TASK_QUEUE__",
+                     runMode = "in-process", ...) {
   paramInfo <- list(...)
   ## 提取任务信息
-  items <- task_read(taskId, taskTopic)$items
+  batchId <- gen_batchNum()
+  item_run <- tibble(
+    "scriptsTopic" = scriptsTopic,
+    "taskScript" = expression({
+      item <- task_queue_item(
+        taskId = taskId,
+        id = batchId,
+        yamlParams = yamlParams,
+        taskTopic = taskTopic,
+        cacheTopic = cacheTopic)
+      item |> ds_append(queueName, cacheTopic)
+    }),
+    "params" = list(list("taskId" = taskId,
+                    "batchId" = batchId,
+                    "queueName" = queueName,
+                    "yamlParams" = paramInfo |> task_queue_param_to_yaml(),
+                    "taskTopic" = taskTopic,
+                    "cacheTopic" = cacheTopic)),
+    "scriptType" = "queue"
+  )
+  item_done <- tibble(
+    "scriptsTopic" = scriptsTopic,
+    "taskScript" = expression({
+      item <- task_queue_search(dsName = queueName, cacheTopic = cacheTopic) |>
+        filter(id == batchId) |>
+        mutate(doneAt = now(tzone = "Asia/Shanghai"))
+      item |> ds_append(queueName, cacheTopic)
+    }),
+    "params" = list(list("taskId" = taskId, "batchId" = batchId, "queueName" = queueName,
+                    "yamlParams" = paramInfo |> task_queue_param_to_yaml(),
+                    "taskTopic" = taskTopic, "cacheTopic" = cacheTopic)),
+    "scriptType" = "queue"
+  )
+  items <- rbind(
+    item_run,
+    task_read(taskId, taskTopic)$items,
+    item_done
+  )
   tryCatch({
     task_run0(items, runMode, ...)
   }, error = function(e) {
@@ -181,7 +223,7 @@ task_run_file <- function(taskFile, params = list(NULL), scriptsTopic = "TASK_SC
     stop(
       e,
       "task_run_file Failed: ",
-      "<", taskId, "> ",
+      "<", taskFile, "> ",
       paramInfo |> unlist() |> paste(collapse = ","))
   })
 }
@@ -203,7 +245,7 @@ task_run_dir <- function(taskDir, params = list(NULL), scriptsTopic = "TASK_SCRI
     stop(
       e,
       "task_run_dir Failed: ",
-      "<", taskId, "> ",
+      "<", taskDir, "> ",
       paramInfo |> unlist() |> paste(collapse = ","))
   })
 }
@@ -224,7 +266,28 @@ task_run_string <- function(taskString, params = list(NULL), runMode = "in-proce
     stop(
       e,
       "task_run_string Failed: ",
-      "<", taskId, "> ",
+      "<", taskString, "> ",
+      paramInfo |> unlist() |> paste(collapse = ","))
+  })
+}
+
+#' @title 运行任务
+#' @param taskFile 任务文件
+#' @family task-define function
+#' @export
+task_run_expr <- function(taskExpr, params = list(NULL), runMode = "in-process", ...) {
+  ## 提取任务信息
+  items <- tibble(
+    "taskScript" = taskExpr,
+    "params" = list(params %empty% NULL),
+    "scriptType" = "expr")
+  tryCatch({
+    task_run0(items, runMode, ...)
+  }, error = function(e) {
+    stop(
+      e,
+      "task_run_expr Failed: ",
+      "<", taskExpr, "> ",
       paramInfo |> unlist() |> paste(collapse = ","))
   })
 }
@@ -252,6 +315,12 @@ task_run0 <- function(taskItems, runMode = "in-process", ...) {
       if(scriptType == "string") {
         assign("output",
                parse(text = taskScripts) |> eval(envir = TaskRun.ENV),
+               envir = TaskRun.ENV)
+      } else if(scriptType == "queue") {
+        eval(taskScripts, envir = TaskRun.ENV)
+      } else if(scriptType == "expr") {
+        assign("output",
+               eval(taskScripts, envir = TaskRun.ENV),
                envir = TaskRun.ENV)
       } else if(scriptType == "file") {
         pathScripts <- get_path(scriptsTopic, taskScripts)

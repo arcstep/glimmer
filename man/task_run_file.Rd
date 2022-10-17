@@ -25,6 +25,7 @@ Other task-define function:
 \code{\link{task_read}()},
 \code{\link{task_run0}()},
 \code{\link{task_run_dir}()},
+\code{\link{task_run_expr}()},
 \code{\link{task_run_string}()},
 \code{\link{task_run}()},
 \code{\link{task_script_dir_create}()},

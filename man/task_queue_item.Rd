@@ -6,11 +6,10 @@
 \usage{
 task_queue_item(
   taskId,
-  params,
-  taskType = "__TYPE_UNKNOWN__",
-  taskTopic = "CACHE",
+  yamlParams = "[]\\n",
   id = gen_batchNum(),
-  runLevel = 500L
+  taskTopic = "TASK_DEFINE",
+  cacheTopic = "CACHE"
 )
 }
 \description{
@@ -18,11 +17,9 @@ task_queue_item(
 }
 \seealso{
 Other queue function: 
-\code{\link{task_queue_all}()},
 \code{\link{task_queue_init}()},
 \code{\link{task_queue_param_from_yaml}()},
 \code{\link{task_queue_param_to_yaml}()},
-\code{\link{task_queue_run}()},
-\code{\link{task_queue_todo}()}
+\code{\link{task_queue_search}()}
 }
 \concept{queue function}
