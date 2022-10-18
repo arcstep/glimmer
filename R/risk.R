@@ -170,6 +170,13 @@ risk_data_build <- function(modelId,
                 scriptsTopic = scriptsTopic)
 }
 
+#' @title 读取疑点数据
+#' @family risk function
+#' @export
+risk_data_read <- function(riskDataName = "__RISK_DATA__", cacheTopic = "CACHE") {
+  ds_read0(riskDataName, cacheTopic) |> collect()
+}
+
 #' @title 清理未处理的疑点数据
 #' @description
 #' 重新生成模型时，一般需要清理未处理的疑点数据

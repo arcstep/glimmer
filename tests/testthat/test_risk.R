@@ -20,7 +20,7 @@ test_that("创建模型：一般情况", {
     risk_data_build()
   
   "cyl-middle#V1#L" |> task_run()
-  ("__RISK_DATA__" |> ds_read0() |> collect() |> distinct(dataTitle))$dataTitle |>
+  (risk_data_read() |> distinct(dataTitle))$dataTitle |>
     testthat::expect_equal("6")
 
   temp_remove()  

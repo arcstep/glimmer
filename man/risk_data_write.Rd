@@ -6,7 +6,7 @@
 \usage{
 risk_data_write(
   d,
-  dsName,
+  datasetName,
   modelId,
   riskDataName = "__RISK_DATA__",
   cacheTopic = "CACHE",
