@@ -2,6 +2,7 @@ library(tibble, warn.conflicts = FALSE)
 library(tidyr, warn.conflicts = FALSE)
 library(dplyr, warn.conflicts = FALSE)
 library(glimmer, warn.conflicts = FALSE)
+library(lubridate, warn.conflicts = FALSE)
 
 rootPath <- tempdir()
 

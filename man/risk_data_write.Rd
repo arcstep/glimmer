@@ -8,7 +8,7 @@ risk_data_write(
   d,
   dsName,
   modelId,
-  riskName = "__RISK_DATA__",
+  riskDataName = "__RISK_DATA__",
   cacheTopic = "CACHE",
   taskTopic = "TASK_DEFINE"
 )

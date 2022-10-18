@@ -1,32 +1,29 @@
-library(dplyr, warn.conflicts = F)
-library(tidyr, warn.conflicts = F)
-library(tibble, warn.conflicts = F)
-
-set_topic("RISKMODEL", "/tmp/glimmer/RISKMODEL")
-set_topic("CACHE", "/tmp/glimmer/CACHE")
-set_topic("STATE", "/tmp/glimmer/STATE")
-
-clear_dir <- function() {
-  get_path("RISKMODEL") |> remove_dir()
-  get_path("CACHE") |> remove_dir()
-  get_path("STATE") |> remove_dir()
-}
-
-test_that("创建模型：支持覆盖", {
-  risk_model_create("问题车辆", "车辆数据")
-  fs::file_exists("/tmp/glimmer/RISKMODEL/问题车辆.yml") |>
-    as.logical() |>
-    testthat::expect_equal(TRUE)
-
-  risk_model_create("问题车辆/耗油车型", "车辆数据")
-  fs::file_exists("/tmp/glimmer/RISKMODEL/问题车辆/耗油车型.yml") |>
-    as.logical() |>
-    testthat::expect_equal(TRUE)
-
-  risk_model_create("问题车辆/耗油车型", "车辆数据") |>
-    testthat::expect_warning("Existing")
+test_that("创建模型：一般情况", {
+  sample_config_init()
+  import_init()
+  task_queue_init()
+  risk_data_init()
+  m <- mtcars |> as_tibble() |> rowid_to_column()
+  ds_init("cars", data = m, type = "__BUILD__", keyColumns = "rowid", titleColumn = "cyl")
+  m |> ds_write("cars")
   
-  clear_dir()
+  ## 构造风险模型
+  risk_model_create("cars", modelName = "cyl-too-big") |>
+    dp_filter("cyl", ">=", 8)
+  ("cyl-too-big#V1#L" |> task_run())$cyl |> unique() |>
+    testthat::expect_equal(8)
+
+  ## 写入风险疑点数据
+  risk_model_create("cars", modelName = "cyl-middle") |>
+    dp_filter("cyl", ">=", 6) |>
+    dp_filter("cyl", "<", 8) |>
+    risk_data_build()
+  
+  "cyl-middle#V1#L" |> task_run()
+  ("__RISK_DATA__" |> ds_read0() |> collect() |> distinct(dataTitle))$dataTitle |>
+    testthat::expect_equal("6")
+
+  temp_remove()  
 })
 
 test_that("运行模型：要求数据集具有关键列", {

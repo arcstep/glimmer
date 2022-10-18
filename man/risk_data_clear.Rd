@@ -6,7 +6,7 @@
 \usage{
 risk_data_clear(
   modelId,
-  riskName = "__RISK_DATA__",
+  riskDataName = "__RISK_DATA__",
   cacheTopic = "CACHE",
   taskTopic = "TASK_DEFINE"
 )
@@ -16,9 +16,8 @@ risk_data_clear(
 }
 \seealso{
 Other risk function: 
+\code{\link{risk_data_build}()},
 \code{\link{risk_data_init}()},
-\code{\link{risk_filter_add}()},
-\code{\link{risk_generater_add}()},
 \code{\link{risk_model_create}()}
 }
 \concept{risk function}

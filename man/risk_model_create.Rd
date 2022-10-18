@@ -25,9 +25,8 @@ risk_model_create(
 }
 \seealso{
 Other risk function: 
+\code{\link{risk_data_build}()},
 \code{\link{risk_data_clear}()},
-\code{\link{risk_data_init}()},
-\code{\link{risk_filter_add}()},
-\code{\link{risk_generater_add}()}
+\code{\link{risk_data_init}()}
 }
 \concept{risk function}

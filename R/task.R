@@ -11,7 +11,6 @@ task_create <- function(taskId, runLevel = 500L, online = TRUE,
                         taskType = "__UNKNOWN__", desc = "-", taskTopic = "TASK_DEFINE", extention = list()) {
   path <- get_path(taskTopic, paste0(taskId, ".yml"))
   fs::path_dir(path) |> fs::dir_create()
-  params <- list(...)
   yml <- list(
     "taskId" = taskId,
     "runLevel" = runLevel,
@@ -22,7 +21,6 @@ task_create <- function(taskId, runLevel = 500L, online = TRUE,
     "taskTopic" = taskTopic,
     "createdAt" = as_datetime(lubridate::now(), tz = "Asia/Shanghai") |> as.character()
   )
-  names(params) |> purrr::walk(function(n) yml[[n]] <<- params[[n]])
   yml |> yaml::write_yaml(path)
   taskId
 }
@@ -167,12 +165,13 @@ task_run <- function(taskId,
         cacheTopic = cacheTopic)
       item |> ds_append(queueName, cacheTopic)
     }),
-    "params" = list(list("taskId" = taskId,
-                    "batchId" = batchId,
-                    "queueName" = queueName,
-                    "yamlParams" = paramInfo |> task_queue_param_to_yaml(),
-                    "taskTopic" = taskTopic,
-                    "cacheTopic" = cacheTopic)),
+    "params" = list(list(
+      "taskId" = taskId,
+      "batchId" = batchId,
+      "queueName" = queueName,
+      "yamlParams" = paramInfo |> task_queue_param_to_yaml(),
+      "taskTopic" = taskTopic,
+      "cacheTopic" = cacheTopic)),
     "scriptType" = "queue"
   )
   item_done <- tibble(
@@ -311,13 +310,13 @@ task_run0 <- function(taskItems, runMode = "in-process", ...) {
       names(params) |> purrr::walk(function(i) {
         assign(i, params[[i]], envir = TaskRun.ENV)
       })
-      if(scriptType == "string") {
+      if(scriptType %in% c("string", "filter")) {
         assign("output",
                parse(text = taskScripts) |> eval(envir = TaskRun.ENV),
                envir = TaskRun.ENV)
       } else if(scriptType == "queue") {
         eval(taskScripts, envir = TaskRun.ENV)
-      } else if(scriptType %in% c("expr", "filter")) {
+      } else if(scriptType == "expr") {
         assign("output",
                eval(taskScripts, envir = TaskRun.ENV),
                envir = TaskRun.ENV)
