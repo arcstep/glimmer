@@ -2,7 +2,7 @@
 % Please edit documentation in R/task.R
 \name{task_run_dir}
 \alias{task_run_dir}
-\title{运行任务文件夹}
+\title{快速运行脚本文件夹}
 \usage{
 task_run_dir(
   taskDir,
@@ -16,7 +16,7 @@ task_run_dir(
 \item{taskDir}{任务文件夹路径}
 }
 \description{
-运行任务文件夹
+快速运行脚本文件夹
 }
 \seealso{
 Other task-define function: 
@@ -28,8 +28,6 @@ Other task-define function:
 \code{\link{task_run_file}()},
 \code{\link{task_run_string}()},
 \code{\link{task_run}()},
-\code{\link{task_script_dir_create}()},
-\code{\link{task_script_file_create}()},
 \code{\link{task_search}()}
 }
 \concept{task-define function}

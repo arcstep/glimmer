@@ -2,24 +2,23 @@
 % Please edit documentation in R/risk.R
 \name{risk_data_clear}
 \alias{risk_data_clear}
-\title{清理模型遗留数据}
+\title{清理未处理的疑点数据}
 \usage{
 risk_data_clear(
-  modelName,
-  modelGroup,
-  dsName = "疑点数据",
-  targetTopic = "CACHE"
+  modelId,
+  riskName = "__RISK_DATA__",
+  cacheTopic = "CACHE",
+  taskTopic = "TASK_DEFINE"
 )
 }
-\arguments{
-\item{modelName}{模型名称}
-
-\item{modelGroup}{模型组名称}
-
-\item{dsName}{疑点数据集名称}
-
-\item{targetTopic}{疑点数据集主题域}
-}
 \description{
-清理模型遗留数据
+重新生成模型时，一般需要清理未处理的疑点数据
 }
+\seealso{
+Other risk function: 
+\code{\link{risk_data_init}()},
+\code{\link{risk_filter_add}()},
+\code{\link{risk_generater_add}()},
+\code{\link{risk_model_create}()}
+}
+\concept{risk function}

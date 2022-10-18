@@ -2,15 +2,15 @@
 % Please edit documentation in R/task.R
 \name{task_run_string}
 \alias{task_run_string}
-\title{运行任务}
+\title{快速运行脚本字符串}
 \usage{
 task_run_string(taskString, params = list(NULL), runMode = "in-process", ...)
 }
 \arguments{
-\item{taskFile}{任务文件}
+\item{taskString}{脚本字符串}
 }
 \description{
-运行任务
+快速运行脚本字符串
 }
 \seealso{
 Other task-define function: 
@@ -22,8 +22,6 @@ Other task-define function:
 \code{\link{task_run_expr}()},
 \code{\link{task_run_file}()},
 \code{\link{task_run}()},
-\code{\link{task_script_dir_create}()},
-\code{\link{task_script_file_create}()},
 \code{\link{task_search}()}
 }
 \concept{task-define function}

@@ -8,19 +8,22 @@
 #' @family task-define function
 #' @export
 task_create <- function(taskId, runLevel = 500L, online = TRUE,
-                        taskType = "__UNKNOWN__", desc = "-", taskTopic = "TASK_DEFINE") {
+                        taskType = "__UNKNOWN__", desc = "-", taskTopic = "TASK_DEFINE", extention = list()) {
   path <- get_path(taskTopic, paste0(taskId, ".yml"))
   fs::path_dir(path) |> fs::dir_create()
-  list(
+  params <- list(...)
+  yml <- list(
     "taskId" = taskId,
     "runLevel" = runLevel,
     "online" = online,
     "taskType" = taskType,
     "desc" = desc,
+    "extention" = extention,
     "taskTopic" = taskTopic,
     "createdAt" = as_datetime(lubridate::now(), tz = "Asia/Shanghai") |> as.character()
-  ) |>
-    yaml::write_yaml(path)
+  )
+  names(params) |> purrr::walk(function(n) yml[[n]] <<- params[[n]])
+  yml |> yaml::write_yaml(path)
   taskId
 }
 
@@ -66,8 +69,6 @@ task_item_add <- function(
 }
 
 #' @title 创建脚本文件
-#' @family task-define function
-#' @export
 task_script_file_create <- function(scriptFile, scriptsTopic = "TASK_SCRIPTS") {
   path <- get_path(scriptsTopic, scriptFile)
   if(!fs::file_exists(fs::path_dir(path))) {
@@ -79,8 +80,6 @@ task_script_file_create <- function(scriptFile, scriptsTopic = "TASK_SCRIPTS") {
 }
 
 #' @title 创建脚本目录
-#' @family task-define function
-#' @export
 task_script_dir_create <- function(scriptDir, scriptsTopic = "TASK_SCRIPTS") {
   path <- get_path(scriptsTopic, scriptDir)
   if(!fs::dir_exists(path)) {
@@ -206,7 +205,7 @@ task_run <- function(taskId,
 }
 
 
-#' @title 运行任务文件
+#' @title 快速运行脚本文件
 #' @param taskFile 任务文件路径
 #' @family task-define function
 #' @export
@@ -228,7 +227,7 @@ task_run_file <- function(taskFile, params = list(NULL), scriptsTopic = "TASK_SC
   })
 }
 
-#' @title 运行任务文件夹
+#' @title 快速运行脚本文件夹
 #' @param taskDir 任务文件夹路径
 #' @family task-define function
 #' @export
@@ -250,8 +249,8 @@ task_run_dir <- function(taskDir, params = list(NULL), scriptsTopic = "TASK_SCRI
   })
 }
 
-#' @title 运行任务
-#' @param taskFile 任务文件
+#' @title 快速运行脚本字符串
+#' @param taskString 脚本字符串
 #' @family task-define function
 #' @export
 task_run_string <- function(taskString, params = list(NULL), runMode = "in-process", ...) {
@@ -271,8 +270,8 @@ task_run_string <- function(taskString, params = list(NULL), runMode = "in-proce
   })
 }
 
-#' @title 运行任务
-#' @param taskFile 任务文件
+#' @title 快速运行表达式
+#' @param taskExpr 脚本表达式
 #' @family task-define function
 #' @export
 task_run_expr <- function(taskExpr, params = list(NULL), runMode = "in-process", ...) {
@@ -318,7 +317,7 @@ task_run0 <- function(taskItems, runMode = "in-process", ...) {
                envir = TaskRun.ENV)
       } else if(scriptType == "queue") {
         eval(taskScripts, envir = TaskRun.ENV)
-      } else if(scriptType == "expr") {
+      } else if(scriptType %in% c("expr", "filter")) {
         assign("output",
                eval(taskScripts, envir = TaskRun.ENV),
                envir = TaskRun.ENV)

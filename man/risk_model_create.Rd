@@ -2,60 +2,32 @@
 % Please edit documentation in R/risk.R
 \name{risk_model_create}
 \alias{risk_model_create}
-\title{初始化风险模型}
+\title{定义风险模型}
 \usage{
 risk_model_create(
+  dsName,
   modelName,
-  dataset,
+  tagName = "V1",
   riskTip = "-",
-  level = "L",
-  filter = list(list(column = "col_name1", op = ">", value = 0:1)),
-  modelGroup = modelName,
+  riskLevel = "L",
   modelDesc = "-",
   author = "-",
-  online = TRUE,
-  overwrite = FALSE,
-  topic = "RISKMODEL"
+  riskDataName = "__RISK_DATA__",
+  cacheTopic = "CACHE",
+  taskTopic = "TASK_DEFINE",
+  scriptsTopic = "TASK_SCRIPTS"
 )
 }
-\arguments{
-\item{modelName}{模型名称}
-
-\item{dataset}{筛查目标数据集（该数据集必须存在yml配置文件，且设置了关键列）}
-
-\item{riskTip}{风险提示说明}
-
-\item{level}{风险级别，L为低风险，M为中风险，H为高风险}
-
-\item{filter}{筛查条件}
-
-\item{modelGroup}{模型组}
-
-\item{modelDesc}{模型描述}
-
-\item{author}{模型作者}
-
-\item{online}{是否启用}
-
-\item{overwrite}{覆盖旧有模型}
-
-\item{topic}{风险模型的主题域}
-}
 \description{
-按照指定列的阈值条件过滤风险数据
-}
-\details{
-1、风险模型应以模型名为关键列，模型名中可携带版本号
-2、已生成数据的过期风险模型不应直接删除，而应注意停用，停用时应清理过期数据
-3、要支持不同级别的风险数据，应设置多个风险模型，但可设置为同一模型组
-4、同一个风险模型的多个分支也可以设置为同一组
+风险模型属于任务的一种。
+
+风险模型定义后，主要支持对数据集做过滤查询。
 }
 \seealso{
 Other risk function: 
-\code{\link{risk_data_read}()},
-\code{\link{risk_model_all}()},
-\code{\link{risk_model_read}()},
-\code{\link{risk_model_run_all}()},
-\code{\link{risk_model_run}()}
+\code{\link{risk_data_clear}()},
+\code{\link{risk_data_init}()},
+\code{\link{risk_filter_add}()},
+\code{\link{risk_generater_add}()}
 }
 \concept{risk function}

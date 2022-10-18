@@ -1,308 +1,182 @@
-
-#' @title 初始化风险模型
-#' @description 按照指定列的阈值条件过滤风险数据
-#' @details 
-#' 1、风险模型应以模型名为关键列，模型名中可携带版本号
-#' 2、已生成数据的过期风险模型不应直接删除，而应注意停用，停用时应清理过期数据
-#' 3、要支持不同级别的风险数据，应设置多个风险模型，但可设置为同一模型组
-#' 4、同一个风险模型的多个分支也可以设置为同一组
-#' 
-#' @param modelName 模型名称
-#' @param dataset 筛查目标数据集（该数据集必须存在yml配置文件，且设置了关键列）
-#' @param riskTip 风险提示说明
-#' @param level 风险级别，L为低风险，M为中风险，H为高风险
-#' @param filter 筛查条件
-#' @param modelGroup 模型组
-#' @param modelDesc 模型描述
-#' @param author 模型作者
-#' @param online 是否启用
-#' @param overwrite 覆盖旧有模型
-#' @param topic 风险模型的主题域
+#' @title 初始化风险筛查数据集
+#' @description  通过风险模型筛查疑点数据
 #' @family risk function
 #' @export
-risk_model_create <- function(
-    modelName,
-    dataset,
-    riskTip = "-",
-    level = "L",
-    filter = list(list(
-      "column" = "col_name1",
-      "op" = ">",
-      "value" = 0:1)),
-    modelGroup = modelName,
-    modelDesc = "-",
-    author = "-",
-    online = TRUE,
-    overwrite = FALSE,
-    topic = "RISKMODEL") {
-  createdAt <- lubridate::now(tz = "Asia/Shanghai")
-  lastModified <- lubridate::now(tz = "Asia/Shanghai")
-
-  confirm_RISKMODEL(topic)
-  
-  path <- get_path(topic, paste0(modelName, ".yml"))
-  path_dir <- fs::path_dir(path)
-  if(!fs::dir_exists(path_dir)) {
-    fs::dir_create(path_dir)
-  }
-  
-  if(!fs::file_exists(path) || overwrite) {
-    yml <- list(
-      "modelName" = modelName,
-      "dataset" = dataset,
-      "riskTip" = riskTip,
-      "level" = level,
-      "filter" = filter,
-      "modelGroup" = modelGroup,
-      "modelDesc" = modelDesc,
-      "author" = author,
-      "online" = online,
-      "createdAt" = createdAt |> as.character.Date(),
-      "lastModified" = lastModified |> as.character.Date()
-    )
-    yml |> yaml::write_yaml(path)
-    message("Risk Model Created: ", modelName)
-  } else {
-    warning("Risk Model Existing: ", modelName)
-  }
-}
-
-#' @title 读取风险模型
-#' @param topic 主题名称
-#' @family risk function
-#' @export
-risk_model_all <- function(topic = "RISKMODEL") {
-  confirm_RISKMODEL(topic)
-  path <- get_path(topic)
-  if(fs::dir_exists(path)) {
-    fs::dir_ls(path, type = "file", all = T, glob = "*.yml", recurse = T) |>
-      purrr::map_df(function(path) {
-        yaml::read_yaml(path)
-      })
-  } else {
-    tibble()
-  }
-}
-
-#' @title 读取风险模型
-#' @param modelName 模型名称
-#' @param topic 主题名称
-#' @family risk function
-#' @export
-risk_model_read <- function(modelName, topic = "RISKMODEL") {
-  confirm_RISKMODEL(topic)
-  path <- get_path(topic, modelName)
-  if(fs::file_exists(paste0(path, ".yml"))) {
-    yaml::read_yaml(paste0(path, ".yml"))
-  } else {
-    list()
-  }
-}
-
-##
-confirm_RISKMODEL <- function(topic = "RISKMODEL") {
-  if(!(topic %in% get_topics()))
-    stop("需要先使用'set_topic()'函数设置RISKMODEL文件夹")
-}
-
-#' @title 执行模型
-#' @description 输出风险疑点数据到CACHE目录中
-#' @param modelName 模型名称
-#' @param batchNumber 批次号
-#' @param dsName 疑点数据集名称
-#' @param targetTopic 疑点数据集主题域
-#' @param topic 主题名称
-#' @param verify 启用验证模式（不写入模型数据）
-#' @family risk function
-#' @export
-risk_model_run <- function(
-    modelName,
-    batchNumber = gen_batchNum(),
-    dsName = "疑点数据",
-    targetTopic = "CACHE", topic = "RISKMODEL", veryfy = FALSE) {
-  item <- risk_model_read(modelName = modelName, topic = topic)
-  if(rlang::is_empty(item)) {
-    stop("Risk Model Not Existing: ", modelName)
-  }
-  
-  if(!item$online) {
-    message("Risk Model Offline: ", modelName)
-    
-  } else {
-    yml <- ds_yaml(item$dataset)
-    if(rlang::is_empty(yml$keyColumns)) {
-      stop("Risk Model Config Invalid: ", modelName, " / ", "No KeyColumns in dataset ", item$dataset)
-    }
-    if(rlang::is_empty(yml$titleColumn)) {
-      stop("Risk Model Config Invalid: ", modelName, " / ", "No TitleColumn in dataset ", item$dataset)
-    }
-    
-    keyColumns <- yml$keyColumns |> stringr::str_split(",")
-    
-    d <- item$dataset |> ds_read(topic = targetTopic)
-    if(length(item$filter) > 0) {
-      seq(1:length(item$filter)) |> purrr::walk(function(j) {
-        message("Risk Model Runing: ", modelName)
-        column <- item$filter[[j]]$column
-        op <- item$filter[[j]]$op
-        value <- item$filter[[j]]$value
-        if(op %in% c(">", "<", ">=", "<=", "==", "!=", "%in%")) {
-          d <<- d |>
-            filter(do.call(
-              !!sym(op),
-              args = list(!!sym(column), unlist(value)))) |>
-            collect()
-        } else if(stringr::str_detect(op, "%time%")) {
-          myop <- stringr::str_replace(op, "%time%", "")
-          d <<- d |>
-            filter(do.call(
-              !!sym(myop),
-              args = list(!!sym(column), unlist(value) |> lubridate::as_datetime(tz = "Asia/Shanghai")))) |>
-            collect()
-        } else if(stringr::str_detect(op, "%date%")) {
-          myop <- stringr::str_replace(op, "%date%", "")
-          d <<- d |>
-            filter(do.call(
-              !!sym(myop),
-              args = list(!!sym(column), unlist(value) |> lubridate::as_date()))) |>
-            collect()
-        } else if(op %in% c("%nin%")) {
-          ## 将 %nin% 转换为可以惰性执行的 %in%
-          d <<- d |>
-            filter(!do.call(
-              "%in%",
-              args = list(!!sym(column), unlist(value)))) |>
-            collect()
-        } else if(op %in% c("%regex%", "%not-regex%")) {
-          ## 正则表达式需要不能惰性执行，需要提前collect数据
-          d <<- d |>
-            collect() |>
-            filter(do.call(
-              !!sym(op),
-              args = list(!!sym(column), unlist(value))))
-        } else {
-          stop("Risk Model: ", item$modelName, " >> Unknown OP: ", op)
-        }
-      })
-      
-      if(!veryfy && nrow(d) > 0) {
-        ## 执行模型并生成疑点数据
-        runAt <- lubridate::now(tz = "Asia/Shanghai")
-        columns <- item$filte |> lapply(function(item) item$column) |> unlist()
-        d |>
-          unite("@dataId", !!!syms(keyColumns), sep = "#", remove = FALSE) |>
-          unite("@dataTitle", !!!syms(yml$titleColumn), sep = "#", remove = FALSE) |>
-          unite("@value", !!!syms(columns), sep = ",", remove = FALSE) |>
-          select(`@dataId`, `@dataTitle`, `@value`) |>
-          rename(
-            dataId = `@dataId`,
-            dataTitle = `@dataTitle`,
-            value = `@value`) |>
-          mutate(
-            riskLevel =  item$level,
-            riskTip = item$riskTip,
-            modelName = modelName,
-            batchNumber = batchNumber,
-            createdAt = runAt,
-            flagModifiedAt = runAt,
-            flag = "__NEW__",
-            dataset = item$dataset,
-            modelGroup = item$modelGroup) |>
-          write_risk_data(dsName, targetTopic, mode = "append")
-      } else {
-        ## 启用验证模式
-        message("Risk Model ", item$modelName, " OK !!")
-      }
-    }
-  }
-}
-
-#' @title 运行所有模型
-#' @param dsName 疑点数据集名称
-#' @param targetTopic 疑点数据集主题域
-#' @param topic 主题名称
-#' @family risk function
-#' @export
-risk_model_run_all <- function(dsName = "疑点数据", targetTopic = "CACHE", topic = "RISKMODEL") {
-  batchNumber = gen_batchNum()
-  all <- risk_model_all(topic)
-  if(nrow(all) > 0) {
-    all |>
-      filter(online) |>
-      select(modelName) |>
-      arrange(modelName) |>
-      purrr::pwalk(function(modelName) {
-        risk_model_run(
-          modelName = modelName,
-          batchNumber = batchNumber,
-          dsName = dsName,
-          targetTopic = targetTopic,
-          topic = topic)
-      })
-  } else {
-    warning("No Risk Models to RUN!")
-  }
-}
-
-
-#' @title 查看疑点数据
-#' @param dsName 疑点数据集名称
-#' @param targetTopic 疑点数据集主题域
-#' @family risk function
-#' @export
-risk_data_read <- function(dsName = "疑点数据", targetTopic = "CACHE") {
-  if(fs::dir_exists(get_path(targetTopic, dsName))) {
-    ds_read(dsName = dsName, topic = targetTopic)
-  } else {
-    tibble()
-  }
-}
-
-#' @title 设置疑点标记
-#' @param dataId 数据ID
-#' @param modelGroup 模型组名称
-#' @param dsName 疑点数据集名称
-#' @param targetTopic 疑点数据集主题域
-#' @export
-risk_data_set <- function(dataId, modelGroup, flag_new = "__NEW__", dsName = "疑点数据", targetTopic = "CACHE") {
-  ds_read(dsName = dsName, topic = targetTopic) |>
-    semi_join(tibble("dataId" = dataId, "modelGroup" = modelGroup), by = c("dataId", "modelGroup")) |>
-    collect() |>
-    mutate(flag = flag_new) |>
-    write_risk_data(dsName, targetTopic)
-}
-
-#' @title 清理模型遗留数据
-#' @param modelName 模型名称
-#' @param modelGroup 模型组名称
-#' @param dsName 疑点数据集名称
-#' @param targetTopic 疑点数据集主题域
-#' @export
-risk_data_clear <- function(modelName, modelGroup, dsName = "疑点数据", targetTopic = "CACHE") {
-  ## 提取需要排除的数据
-  partReserve <-  ds_read(dsName = dsName, topic = targetTopic) |>
-    semi_join(tibble("modelName" = modelName, "modelGroup" = modelGroup), by = c("modelName", "modelGroup")) |>
-    filter(flag != "__NEW__") |>
-    collect()
-  path <- get_path(topic = targetTopic, dsName, paste0("modelGroup=", modelGroup)) |>
-    fs::dir_ls(type = "file")
-  if(rlang::is_empty(partReserve)) {
-    ## 删除该组分区文件
-    fs::dir_delete(path)
-  } else {
-    ## 回写保留的数据到指定分区文件
-    partReserve |>
-      arrow::write_parquet(path, version = "2.0")
-  }
-}
-
-# 
-write_risk_data <- function(d, dsName, targetTopic, mode = "update") {
-  ds_write(
-    d,
+risk_data_init <- function(dsName = "__RISK_DATA__", cacheTopic = "CACHE") {
+  ## 任务数据样本
+  sampleData <- tibble(
+    "modelName" = dt_string(),
+    "tagName" = dt_string(), # 可使用版本号或多段阈值形成同类风险
+    "batchNumber" = dt_string(),
+    "dataId" = dt_string(), # 转换为字符串显示，多个ID使用#间隔
+    "dataTitle" = dt_string(),
+    "riskLevel" =  dt_int(),
+    "riskTip" = dt_string(),
+    "submitAt" = dt_datetime(),
+    "doneAt" = dt_datetime(),
+    "year" = dt_int(),    # submitAt year
+    "month" = dt_int())   # submitAt month
+  ds_init(
     dsName = dsName,
-    topic = targetTopic,
-    partColumns = c("modelGroup"),
-    keyColumns = c("modelGroup", "dataId"),
-    mode = mode)
+    topic = cacheTopic,
+    data = sampleData,
+    keyColumns = c("dataId", "modelName", "@from"), # 针对同一份数据集，相同模型名称仅生成一条数据
+    partColumns = c("year", "month"),
+    type = "__STATE__")
+}
+
+#' @title 定义风险模型
+#' @description
+#' 风险模型属于任务的一种。
+#' 
+#' 风险模型定义后，主要支持对数据集做过滤查询。
+#' @family risk function
+#' @export
+risk_model_create <- function(dsName,
+                           modelName,
+                           tagName = "V1",
+                           riskTip = "-",
+                           riskLevel = "L",
+                           modelDesc = "-",
+                           author = "-",
+                           riskDataName = "__RISK_DATA__",
+                           cacheTopic = "CACHE",
+                           taskTopic = "TASK_DEFINE",
+                           scriptsTopic = "TASK_SCRIPTS") {
+  modelId = paste(modelName, tagName, riskLevel, sep = "@")
+  ## 校验筛查目标的数据集配置
+  yml <- ds_yaml_schema(dsName, topic = cacheTopic)
+  if(rlang::is_empty(yml$keyColumns)) {
+    stop("Risk Model Config Invalid: ", modelId, " / ", "No KeyColumns in dataset ", item$dataset)
+  }
+  if(rlang::is_empty(yml$titleColumn)) {
+    stop("Risk Model Config Invalid: ", modelId, " / ", "No TitleColumn in dataset ", item$dataset)
+  }
+
+  ## 创建针对数据集的风险筛查任务  
+  task_create(taskId = modelId,
+              taskType = "__RISK__",
+              taskTopic = taskTopic,
+              desc = modelDesc,
+              extention = list(
+                modelName = modelName,
+                tagName = tagName,
+                author = author,
+                riskDataName = riskDataName,
+                riskTip = riskTip,
+                riskLevel = riskLevel)) |>
+    task_item_add(expression({dsName |> ds_read(topic = cacheTopic)}),
+                  params = list(list("dsName" = dsName, "cacheTopic" = cacheTopic)),
+                  scriptType = "expr",
+                  taskTopic = taskTopic,
+                  scriptsTopic = scriptsTopic)
+}
+
+#' @title 为风险模型增加阈值条件
+#' @description
+#' 允许为数据集增加多个阈值查询条件，缩小筛查范围。
+#' 
+#' @family risk function
+#' @export
+risk_filter_add <- function(modelId, column, op, value) {
+  ## 校验参数合法性
+  if(stringr::str_detect(op, "(>|<|>=|<=|==|!=|%in%|%nin%|%regex%|%not-regex%)", negate = TRUE)) {
+    stop("Risk Model: ", modelId, " >> Unknown OP: ", op)
+  }
+  ## 创建任务表达式
+  task_item_add(modelId, expression({
+    if(op %in% c(">", "<", ">=", "<=", "==", "!=", "%in%")) {
+      output |>
+        filter(do.call(!!sym(op), args = list(!!sym(column), unlist(value)))) |>
+        collect()
+    } else if(stringr::str_detect(op, "^[@#% ]*time[@#% ]+(>|<|>=|<=|==)[ ]*$")) {
+      myop <- stringr::str_replace(op, "[@#%]?time[@#% ]+", "") |> stringr::str_trim()
+      output |>
+        filter(do.call(!!sym(myop), args = list(!!sym(column) |> lubridate::as_datetime(tz = "Asia/Shanghai"),
+                                                unlist(value) |> lubridate::as_datetime(tz = "Asia/Shanghai")))) |>
+        collect()
+    } else if(stringr::str_detect(op, "^[@#% ]*date[@#% ]+(>|<|>=|<=|==)[ ]*$")) {
+      myop <- stringr::str_replace(op, "[@#%]?date[@#% ]+", "") |> stringr::str_trim()
+      output |>
+        filter(do.call(!!sym(myop), args = list(!!sym(column) |> lubridate::as_date(tz = "Asia/Shanghai"),
+                                                unlist(value) |> lubridate::as_date(tz = "Asia/Shanghai")))) |>
+        collect()
+    } else if(op %in% c("%nin%")) {
+      ## 将 %nin% 转换为可以惰性执行的 %in%
+      output |>
+        filter(!do.call("%in%", args = list(!!sym(column), unlist(value)))) |>
+        collect()
+    } else if(op %in% c("%regex%", "%not-regex%")) {
+      ## 正则表达式需要不能惰性执行，需要提前collect数据
+      output |> collect() |> filter(do.call(!!sym(op), args = list(!!sym(column), unlist(value))))
+    } else {
+      stop("Risk Model: ", modelId, " >> Unknown OP: ", op)
+    }}),
+    params = list(list("modelId" = modelId,
+                     "column" = column,
+                     "op" = op,
+                     "value" = value)),
+    scriptType = "filter",
+    taskTopic = taskTopic,
+    scriptsTopic = scriptsTopic)
+}
+
+#' @title 生成疑点数据
+#' @description
+#' 将筛查后的疑点数据写入数据集
+#' 
+#' @family risk function
+#' @export
+risk_generater_add <- function(modelId) {
+  task_item_add(modelId, expression({output |> risk_data_write(dsName, modelId)}),
+                params = list(list("modelId" = modelId,
+                       "column" = column,
+                       "op" = op,
+                       "value" = value)),
+                scriptType = "expr",
+                taskTopic = taskTopic,
+                scriptsTopic = scriptsTopic)
+}
+
+#' @title 清理未处理的疑点数据
+#' @description
+#' 重新生成模型时，一般需要清理未处理的疑点数据
+#' 
+#' @family risk function
+#' @export
+risk_data_clear <- function(modelId,
+                            riskName = "__RISK_DATA__",
+                            cacheTopic = "CACHE",
+                            taskTopic = "TASK_DEFINE") {
+  task <- task_read(modelId, taskTopic = taskTopic)
+  ds_read(riskName, topic = cacheTopic) |>
+    filter(is.na(doneAt)) |>
+    collect() |>
+    ds_as_deleted() |>
+    ds_append(dsName = riskName, topic = cacheTopic)
+}
+
+#' @title 写入疑点数据
+risk_data_write <- function(d,
+                            dsName,
+                            modelId,
+                            riskName = "__RISK_DATA__",
+                            cacheTopic = "CACHE",
+                            taskTopic = "TASK_DEFINE") {
+  task <- task_read(modelId, taskTopic = taskTopic)
+  dsYaml <- ds_yaml_schema(dsName)
+  submitTime <- now(tzone = "Asia/Shanghai")
+  d |>
+    select(dsYaml$keyColumns, dsYaml$titleColumn) |>
+    collect() |>
+    unite("dataId", dsYaml$keyColumns) |>
+    unite("dataTitle", dsYaml$titleColumn) |>
+    mutate(modelName = task$extention$modelName) |>
+    mutate(tagName = task$extention$tagName) |>
+    mutate(batchName = gen_batchNum()) |>
+    mutate(riskLevel = task$extention$riskLevel) |>
+    mutate(riskTip = task$extention$riskTip) |>
+    mutate(submitAt = submitTime) |>
+    mutate(year = year(submitTime), month = month(submitTime)) |>
+    ds_write(riskName, cacheTopic)
 }

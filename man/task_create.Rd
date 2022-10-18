@@ -10,7 +10,8 @@ task_create(
   online = TRUE,
   taskType = "__UNKNOWN__",
   desc = "-",
-  taskTopic = "TASK_DEFINE"
+  taskTopic = "TASK_DEFINE",
+  extention = list()
 )
 }
 \arguments{
@@ -39,8 +40,6 @@ Other task-define function:
 \code{\link{task_run_file}()},
 \code{\link{task_run_string}()},
 \code{\link{task_run}()},
-\code{\link{task_script_dir_create}()},
-\code{\link{task_script_file_create}()},
 \code{\link{task_search}()}
 }
 \concept{task-define function}
