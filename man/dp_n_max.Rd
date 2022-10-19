@@ -11,6 +11,7 @@ dp_n_max(orderColumn, n = 10, with_ties = FALSE, dataName = "@result")
 }
 \seealso{
 Other data-plyr function: 
+\code{\link{dp_arrange}()},
 \code{\link{dp_collect}()},
 \code{\link{dp_filter}()},
 \code{\link{dp_head}()},

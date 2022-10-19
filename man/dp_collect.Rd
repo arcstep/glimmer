@@ -11,6 +11,7 @@ dp_collect(dataName = "@result")
 }
 \seealso{
 Other data-plyr function: 
+\code{\link{dp_arrange}()},
 \code{\link{dp_filter}()},
 \code{\link{dp_head}()},
 \code{\link{dp_n_max}()},

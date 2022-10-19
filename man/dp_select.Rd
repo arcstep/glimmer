@@ -2,7 +2,7 @@
 % Please edit documentation in R/data-plyr.R
 \name{dp_select}
 \alias{dp_select}
-\title{按最小值取N条记录}
+\title{选择列，支持惰性计算}
 \usage{
 dp_select(
   columns = list(),
@@ -12,10 +12,11 @@ dp_select(
 )
 }
 \description{
-按最小值取N条记录
+选择列，支持惰性计算
 }
 \seealso{
 Other data-plyr function: 
+\code{\link{dp_arrange}()},
 \code{\link{dp_collect}()},
 \code{\link{dp_filter}()},
 \code{\link{dp_head}()},

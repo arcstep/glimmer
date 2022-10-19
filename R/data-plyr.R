@@ -188,9 +188,35 @@ dp_n_min <- function(orderColumn, n = 10, with_ties = FALSE, dataName = "@result
   )
 }
 
+## 行排序----
+
+#' @title 行排序
+#' @family data-plyr function
+#' @export
+dp_arrange <- function(columns = list(),
+                       desc = FALSE, by_group = FALSE, dataName = "@result") {
+  ex <- expression({
+    mydata <- get(dataName)
+    if(desc) {
+      mydata |> arrange(desc(!!!syms(columns)), .by_group = by_group)
+    } else {
+      mydata |> arrange(!!!syms(columns), .by_group = by_group)
+    }
+  })
+  list(
+    "scriptType" = "dp_n_min",
+    "taskScript" = ex |> as.character(),
+    "params" = list(
+      "dataName" = dataName,
+      "columns" = columns,
+      "desc" = desc,
+      "by_group" = by_group)
+  )
+}
+
 ## 列操作----
 
-#' @title 按最小值取N条记录
+#' @title 选择列，支持惰性计算
 #' @family data-plyr function
 #' @export
 dp_select <- function(columns = list(), everything = FALSE,

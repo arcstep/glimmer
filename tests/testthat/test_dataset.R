@@ -120,6 +120,8 @@ test_that("追加数据：修改旧数据", {
 
 test_that("存取数据：因子类型", {
   sample_config_init()
+  
+  ## 按照因子类型存取
   m <- mtcars |>
     as_tibble() |>
     rownames_to_column() |>
@@ -132,7 +134,30 @@ test_that("存取数据：因子类型", {
     testthat::expect_equal("dictionary<values=string, indices=int32>")
   (ds_read("车数据") |> collect())$cyl |> class() |>
     testthat::expect_equal("factor")
-
+  
+  ## 无法读取：存储为字符串，读取时转换为因子类型
+  ds_drop("车数据")
+  ds_init("车数据", keyColumns = "rowname", data = m |> head())
+  
+  m |> slice(1:10) |> as_tibble() |>
+    mutate(cyl = as.character(cyl)) |>
+    ds_append("车数据")
+  (ds_yaml_schema("车数据") |> filter(fieldName == "cyl"))$fieldType |>
+    testthat::expect_equal("dictionary<values=string, indices=int32>")
+  (ds_read("车数据") |> collect())$cyl |> class() |>
+    testthat::expect_error("Unsupported cast from string to dictionary")
+  
+  ## 可以兼容：存储为因子类型，读取时转为字符串
+  ds_drop("车数据")
+  ds_init("车数据", keyColumns = "rowname", data = m |> mutate(cyl = as.character(cyl)))
+  
+  m |> slice(1:10) |> as_tibble() |>
+    ds_append("车数据")
+  (ds_yaml_schema("车数据") |> filter(fieldName == "cyl"))$fieldType |>
+    testthat::expect_equal("string")
+  (ds_read("车数据") |> collect())$cyl |> class() |>
+    testthat::expect_equal("character")
+  
   temp_remove()
 })
 
