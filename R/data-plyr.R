@@ -1,10 +1,27 @@
-#' @title 数据过滤器
+#' @title 定义数据过滤任务
 #' @description
+#' 这个任务的目标是通过配置项实现函数[dplyr::filter()]的大部分功能。
+#' 
 #' 允许为数据集增加多个阈值查询条件，缩小筛查范围。
 #' 
 #' taskId、column、op、value等参数构造唯一的dp_filter表达式，
 #' 这将允许从UI生成或还原该操作。
 #' 
+#' 只要包括以下逻辑判断：
+#' \itemize{
+#'  \item >, <, >=, <=, ==, !=
+#'  \item %in%, %nin%
+#'  \item %regex%, %not-regex%
+#'  \item #time# >, #time# <
+#'  \item #date# >, #date# <
+#' }
+#' 
+#' @param taskId 任务ID
+#' @param column 列名
+#' @param op 阈值范围判断符号
+#' @param value 阈值
+#' @param dataName 内存中的数据框名称，默认为output
+#' @param taskTopic 任务定义的主题文件夹
 #' @family data-plyr function
 #' @export
 dp_filter <- function(taskId,
