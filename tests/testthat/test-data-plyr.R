@@ -178,3 +178,47 @@ test_that("<dp_slice_max/ dp_slice_min>", {
   temp_remove()
 })
 
+test_that("<dp_select>", {
+  sample_config_init()
+  
+  m <- mtcars |> as_tibble() |> rownames_to_column()
+  ds_drop("车数据")
+  ds_init("车数据", keyColumns = "rowname", data = m |> head())
+  
+  m |> as_tibble() |> ds_append("车数据")
+  
+  task_create("cars/dp_read") |>
+    task_item_dp_add(dp_read("车数据")) |>
+    task_item_dp_add(dp_select("cyl")) |>
+    task_item_dp_add(dp_collect()) |>
+    task_run() |>
+    ncol() |>
+    testthat::expect_equal(1)
+  
+  task_create("cars/dp_read") |>
+    task_item_dp_add(dp_read("车数据")) |>
+    task_item_dp_add(dp_select(c("cyl", "disp"))) |>
+    task_item_dp_add(dp_collect()) |>
+    task_run() |>
+    ncol() |>
+    testthat::expect_equal(2)
+  
+  task_create("cars/dp_read") |>
+    task_item_dp_add(dp_read("车数据")) |>
+    task_item_dp_add(dp_select(c("cyl", "disp"), everything = T)) |>
+    task_item_dp_add(dp_collect()) |>
+    task_run() |>
+    ncol() |>
+    testthat::expect_equal(17)
+
+  task_create("cars/dp_read") |>
+    task_item_dp_add(dp_read("车数据")) |>
+    task_item_dp_add(dp_select(c("cyl", "disp"), regex = "^@")) |>
+    task_item_dp_add(dp_collect()) |>
+    task_run() |>
+    ncol() |>
+    testthat::expect_equal(7)
+  
+  temp_remove()
+})
+

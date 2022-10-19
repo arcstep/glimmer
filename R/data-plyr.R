@@ -188,3 +188,28 @@ dp_n_min <- function(orderColumn, n = 10, with_ties = FALSE, dataName = "@result
   )
 }
 
+## 列操作----
+
+#' @title 按最小值取N条记录
+#' @family data-plyr function
+#' @export
+dp_select <- function(columns = list(), everything = FALSE,
+                      regex = NULL, dataName = "@result") {
+  ex <- expression({
+    mydata <- get(dataName)
+    if(everything) {
+      mydata |> select(contains(columns), matches(regex), everything())
+    } else {
+      mydata |> select(contains(columns), matches(regex))
+    }
+  })
+  list(
+    "scriptType" = "dp_n_min",
+    "taskScript" = ex |> as.character(),
+    "params" = list(
+      "dataName" = dataName,
+      "columns" = columns |> unlist(),
+      "regex" = regex %empty% "^mamahannihuijiachifan$",
+      "everything" = everything)
+  )
+}

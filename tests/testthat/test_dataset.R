@@ -118,6 +118,25 @@ test_that("追加数据：修改旧数据", {
   temp_remove()
 })
 
+test_that("存取数据：因子类型", {
+  sample_config_init()
+  m <- mtcars |>
+    as_tibble() |>
+    rownames_to_column() |>
+    mutate(cyl = forcats::fct_reorder(as.character(cyl), disp))
+  ds_drop("车数据")
+  ds_init("车数据", keyColumns = "rowname", data = m |> head())
+  
+  m |> slice(1:10) |> as_tibble() |> ds_append("车数据")
+  (ds_yaml_schema("车数据") |> filter(fieldName == "cyl"))$fieldType |>
+    testthat::expect_equal("dictionary<values=string, indices=int32>")
+  (ds_read("车数据") |> collect())$cyl |> class() |>
+    testthat::expect_equal("factor")
+
+  temp_remove()
+})
+
+
 
 test_that("删除数据：没有设置主键时不允许删除", {
   sample_config_init()
@@ -181,6 +200,8 @@ test_that("归档数据操作：有分区", {
   
   temp_remove()
 })
+
+
 
 test_that("内存中对数据去重", {
   sample_config_init()
