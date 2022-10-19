@@ -39,17 +39,23 @@ dp_filter <- function(column, op, value = list(NULL), dataName = "@result") {
   } else if(stringr::str_detect(op, "^[@#% ]*time[@#% ]+(>|<|>=|<=|==)[ ]*$")) {
     ex <- expression({
       myop <- stringr::str_replace(op, "[@#%]?time[@#% ]+", "") |> stringr::str_trim()
-      get(dataName) |>
-        filter(do.call(!!sym(myop), args = list(!!sym(column) |> lubridate::as_datetime(tz = "Asia/Shanghai"),
-                                                unlist(value) |> lubridate::as_datetime(tz = "Asia/Shanghai")))) |>
+      data <- get(dataName)
+      param <- list()
+      x1 <- data[[column]] |> as_datetime(tz = "Asia/Shanghai")
+      x2 <- unlist(value) |> as_datetime(tz = "Asia/Shanghai")
+      data |>
+        filter(do.call(myop, args = list(x1, x2))) |>
         collect()
     })
   } else if(stringr::str_detect(op, "^[@#% ]*date[@#% ]+(>|<|>=|<=|==)[ ]*$")) {
     ex <- expression({
       myop <- stringr::str_replace(op, "[@#%]?date[@#% ]+", "") |> stringr::str_trim()
-      get(dataName) |>
-        filter(do.call(!!sym(myop), args = list(!!sym(column) |> lubridate::as_date(tz = "Asia/Shanghai"),
-                                                unlist(value) |> lubridate::as_date(tz = "Asia/Shanghai")))) |>
+      data <- get(dataName)
+      param <- list()
+      x1 <- data[[column]] |> as_date()
+      x2 <- unlist(value) |> as_date()
+      data |>
+        filter(do.call(myop, args = list(x1, x2))) |>
         collect()
     })
   } else if(op %in% c("%nin%")) {
