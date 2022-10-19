@@ -92,7 +92,7 @@ risk_data_build <- function(modelId,
                             scriptsTopic = "TASK_SCRIPTS") {
   task_item_add(modelId,
                 expression({
-                  output |>
+                  `@result` |>
                     risk_data_write(dsName,
                                     modelId = modelId,
                                     riskDataName = riskDataName,

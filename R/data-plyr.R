@@ -20,14 +20,11 @@
 #' @param column 列名
 #' @param op 阈值范围判断符号
 #' @param value 阈值
-#' @param dataName 内存中的数据框名称，默认为output
+#' @param dataName 内存中的数据框名称，默认为 @result
 #' @param taskTopic 任务定义的主题文件夹
 #' @family data-plyr function
 #' @export
-dp_filter <- function(taskId,
-                      column, op, value,
-                      dataName = "output",
-                      taskTopic = "TASK_DEFINE") {
+dp_filter <- function(column, op, value = list(NULL), dataName = "@result") {
   ## 校验参数合法性
   if(stringr::str_detect(op, "(>|<|>=|<=|==|!=|%in%|%nin%|%regex%|%not-regex%)", negate = TRUE)) {
     stop("Invalid filter OP: ", op)
@@ -68,15 +65,14 @@ dp_filter <- function(taskId,
       get(dataName) |> collect() |> filter(do.call(!!sym(op), args = list(!!sym(column), unlist(value))))
     })
   } else {
-    stop("Task Error: ", taskId, " >> Unknown OP: ", op)
+    stop("<dp_filter> Unknown OP: ", op)
   }
-  task_item_add(taskId,
-                ex |> as.character(),
-                params = list(
-                  "dataName" = dataName,
-                  "column" = column,
-                  "op" = op,
-                  "value" = value),
-                scriptType = "dp_filter",
-                taskTopic = taskTopic)
+  list(
+    "taskScript" = ex |> as.character(),
+    "params" = list(
+       "dataName" = dataName,
+       "column" = column,
+       "op" = op,
+       "value" = value),
+    "scriptType" = "dp_filter")
 }

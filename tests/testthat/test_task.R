@@ -46,7 +46,7 @@ test_that("定义任务：dir类型", {
   temp_remove()
 })
 
-test_that("<task_run>: 成功运行", {
+test_that("<task_run>", {
   sample_config_init()
   sample_import_files()
   
@@ -65,11 +65,11 @@ test_that("<task_run>: 成功运行", {
   temp_remove()
 })
 
-test_that("<task_run_***>: 成功运行", {
+test_that("<task_run_[string|file|dir|expr]>", {
   sample_config_init()
   sample_import_files()
 
-  task_run_expr(expression({mtcars})) |> nrow() |>
+  task_run_expr(expression({mtcars |> as_tibble()})) |> nrow() |>
     testthat::expect_equal(32)
   
   task_run_expr(expression({mtcars |> filter(cyl == a)}), a = 6) |> nrow() |>

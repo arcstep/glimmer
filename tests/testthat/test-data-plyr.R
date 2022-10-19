@@ -1,3 +1,22 @@
+test_that("<task_run_dp>", {
+  sample_config_init()
+  sample_import_files()
+
+  ## 使用默认的 @result 获得返回值
+  dp_filter("cyl", ">", 6) |>
+    task_run_dp(`@result` = mtcars) |> nrow() |>
+    testthat::expect_equal(mtcars |> filter(cyl > 6) |> nrow())
+
+  ## 使用新的变量名
+  dp_filter("cyl", ">", 6, dataName = "mydata") |>
+    task_run_dp(`mydata` = mtcars) |> nrow() |>
+    testthat::expect_equal(mtcars |> filter(cyl > 6) |> nrow())
+  
+  temp_remove()
+})
+
+
+
 test_that("运行模型：支持一元操作过滤条件", {
   d <- iris |> as_tibble()
   d |> as_tibble() |>
