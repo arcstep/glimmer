@@ -20,6 +20,7 @@ Other risk function:
 \code{\link{risk_data_clear}()},
 \code{\link{risk_data_init}()},
 \code{\link{risk_data_read}()},
-\code{\link{risk_model_create}()}
+\code{\link{risk_model_create}()},
+\code{\link{risk_model_search}()}
 }
 \concept{risk function}

@@ -8,18 +8,18 @@ test_that("创建模型：一般情况", {
   m |> ds_write("cars")
   
   ## 构造风险模型
-  risk_model_create("cars", modelName = "cyl-too-big") |>
+  risk_model_create("cars", modelName = "risk/cyl-too-big") |>
     dp_filter("cyl", ">=", 8)
-  ("cyl-too-big#V1#L" |> task_run())$cyl |> unique() |>
+  ("risk/cyl-too-big/main" |> task_run())$cyl |> unique() |>
     testthat::expect_equal(8)
 
   ## 写入风险疑点数据
-  risk_model_create("cars", modelName = "cyl-middle") |>
+  risk_model_create("cars", modelName = "risk/cyl-middle") |>
     dp_filter("cyl", ">=", 6) |>
     dp_filter("cyl", "<", 8) |>
     risk_data_build()
   
-  "cyl-middle#V1#L" |> task_run()
+  "risk/cyl-middle/main" |> task_run()
   (risk_data_read() |> distinct(dataTitle))$dataTitle |>
     testthat::expect_equal("6")
 

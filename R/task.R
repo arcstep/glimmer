@@ -94,6 +94,9 @@ task_script_dir_create <- function(scriptDir, scriptsTopic = "TASK_SCRIPTS") {
 #' @family task-define function
 #' @export
 task_read <- function(taskId, taskTopic = "TASK_DEFINE") {
+  if(length(taskId) != 1) {
+    stop("taskId length MUST be 1 >> ", taskId |> paste(collapse = ","))
+  }
   path <- get_path(taskTopic, paste0(taskId, ".yml"))
   if(fs::file_exists(path)) {
     x <- yaml::read_yaml(path)
@@ -118,24 +121,38 @@ task_search <- function(taskMatch = ".*", typeMatch = ".*", taskTopic = "TASK_DE
       tasks |>
         purrr::map_df(function(path) {
           x <- yaml::read_yaml(path)
-          list(
-            "taskTopic" = x$taskTopic,
-            "taskId" = x$taskId,
-            "itemsCount" = x$items |> as_tibble() |> nrow(),
-            "runLevel" = x$runLevel,
-            "online" = x$online %empty% TRUE,
-            "taskType" = x$taskType,
-            "desc" = x$desc,
-            "createdAt" = x$createdAt
-          )
+          x$itemsCount <- length(x$items[1])
+          x$items <- list(as_tibble(x$items))
+          x$extention <- list(x$extention)
+          x$online <- x$online %empty% TRUE
+          x
         }) |>
         filter(stringr::str_detect(taskId, taskMatch)) |>
-        filter(stringr::str_detect(taskType, typeMatch))
+        filter(stringr::str_detect(taskType, typeMatch)) |>
+        select(taskId, online, taskType, itemsCount, extention, everything())
     } else {
       tibble()
     }
   } else {
     tibble()
+  }
+}
+
+#' @title 查询任务ID
+#' @family task-define function
+#' @export
+task_id <- function(taskMatch = ".*", taskTopic = "TASK_DEFINE") {
+  root_path <- get_path(taskTopic)
+  if(fs::dir_exists(root_path)) {
+    tasks <- fs::dir_ls(root_path, type = "file", all = T, regexp = paste0(taskMatch, ".*\\.yml$"), recurse = T)
+    if(length(tasks) > 0) {
+      tasks |> stringr::str_remove(root_path) |>
+        stringr::str_sub(2, -5)
+    } else {
+      character(0)
+    }
+  } else {
+    character(0)
   }
 }
 

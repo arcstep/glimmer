@@ -32,6 +32,7 @@ task_create(
 }
 \seealso{
 Other task-define function: 
+\code{\link{task_id}()},
 \code{\link{task_item_add}()},
 \code{\link{task_read}()},
 \code{\link{task_run0}()},

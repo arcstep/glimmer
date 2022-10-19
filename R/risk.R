@@ -35,7 +35,7 @@ risk_data_init <- function(dsName = "__RISK_DATA__", cacheTopic = "CACHE") {
 #' @export
 risk_model_create <- function(dsName,
                            modelName,
-                           tagName = "V1",
+                           tagName = "main",
                            riskTip = "-",
                            riskLevel = "L",
                            modelDesc = "-",
@@ -44,7 +44,7 @@ risk_model_create <- function(dsName,
                            cacheTopic = "CACHE",
                            taskTopic = "TASK_DEFINE",
                            scriptsTopic = "TASK_SCRIPTS") {
-  modelId = paste(modelName, tagName, riskLevel, sep = "#")
+  modelId = paste(modelName, tagName, sep = "/")
   ## 校验筛查目标的数据集配置
   yml <- ds_yaml(dsName, topic = cacheTopic)
   if(rlang::is_empty(yml$keyColumns)) {
@@ -63,6 +63,7 @@ risk_model_create <- function(dsName,
                 modelName = modelName,
                 tagName = tagName,
                 author = author,
+                dsName = dsName,
                 riskDataName = riskDataName,
                 riskTip = riskTip,
                 riskLevel = riskLevel)) |>
@@ -175,6 +176,36 @@ risk_data_build <- function(modelId,
 #' @export
 risk_data_read <- function(riskDataName = "__RISK_DATA__", cacheTopic = "CACHE") {
   ds_read0(riskDataName, cacheTopic) |> collect()
+}
+
+#' @title 查找风险模型
+#' @family risk function
+#' @export
+risk_model_search <- function(modelMatch = ".*", taskTopic = "TASK_DEFINE") {
+  root_path <- get_path(taskTopic)
+  if(fs::dir_exists(root_path)) {
+    tasks <- fs::dir_ls(root_path, type = "file", all = T, glob = "*.yml", recurse = T)
+    if(length(tasks) > 0) {
+      tasks |>
+        purrr::map_df(function(path) {
+          x <- yaml::read_yaml(path)
+          x$itemsCount <- length(x$items[1])
+          x$items <- list(as_tibble(x$items))
+          names(x$extention) |> purrr::walk(function(item) x[[item]] <<- x$extention[[item]])
+          x$online <- x$online %empty% TRUE
+          x$extention <- list(x$extention)
+          x
+        }) |>
+        filter(stringr::str_detect(taskId, modelMatch)) |>
+        filter(stringr::str_detect(taskType, "__RISK__")) |>
+        select(-taskType, -extention) |>
+        select(taskId, online, modelName, tagName, dsName, riskLevel, riskTip, itemsCount, everything())
+    } else {
+      tibble()
+    }
+  } else {
+    tibble()
+  }
 }
 
 #' @title 清理未处理的疑点数据
