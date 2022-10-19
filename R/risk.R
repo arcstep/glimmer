@@ -76,8 +76,7 @@ risk_model_create <- function(dsName,
                     "taskTopic" = taskTopic,
                     "scriptsTopic" = scriptsTopic),
                   scriptType = "string",
-                  taskTopic = taskTopic,
-                  scriptsTopic = scriptsTopic)
+                  taskTopic = taskTopic)
 }
 
 #' @title 生成疑点数据
@@ -101,8 +100,7 @@ risk_data_build <- function(modelId,
                                     taskTopic = taskTopic)
                   }) |> as.character(),
                 scriptType = "string",
-                taskTopic = taskTopic,
-                scriptsTopic = scriptsTopic)
+                taskTopic = taskTopic)
 }
 
 #' @title 读取疑点数据

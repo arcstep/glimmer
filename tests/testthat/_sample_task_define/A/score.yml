@@ -4,9 +4,9 @@ online: yes
 taskType: __IMPORT__
 desc: '-'
 taskTopic: TASK_DEFINE
+scriptsTopic: TASK_SCRIPTS
 createdAt: 2022-10-10 11:15:41
 items:
-  scriptsTopic: TASK_SCRIPTS
   taskScript: IMPORT/score.R
   params:
   - - ~

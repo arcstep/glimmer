@@ -11,6 +11,7 @@ task_create(
   taskType = "__UNKNOWN__",
   desc = "-",
   taskTopic = "TASK_DEFINE",
+  scriptsTopic = "TASK_SCRIPTS",
   extention = list()
 )
 }

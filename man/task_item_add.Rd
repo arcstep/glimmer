@@ -9,8 +9,7 @@ task_item_add(
   taskScript,
   params = list(NULL),
   scriptType = "string",
-  taskTopic = "TASK_DEFINE",
-  scriptsTopic = "TASK_SCRIPTS"
+  taskTopic = "TASK_DEFINE"
 )
 }
 \arguments{
@@ -20,11 +19,9 @@ task_item_add(
 
 \item{params}{子任务的参数设置}
 
-\item{scriptType}{可以是string,file或folder}
+\item{scriptType}{可以是string,file,dir, 或其他系统内置函数}
 
 \item{taskTopic}{保存任务定义的存储主题文件夹}
-
-\item{scriptsTopic}{保存R脚本定义的存储主题文件夹}
 }
 \description{
 增加子任务

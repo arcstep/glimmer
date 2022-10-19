@@ -4,11 +4,9 @@ online: yes
 taskType: __UNKNOWN__
 desc: '-'
 taskTopic: TASK_DEFINE
+scriptsTopic: TASK_SCRIPTS
 createdAt: 2022-10-09 15:49:00
 items:
-  scriptsTopic:
-  - TASK_SCRIPTS
-  - TASK_SCRIPTS
   taskScript:
   - SIMPLE/a.R
   - result <- (x |> filter(age > myage))
