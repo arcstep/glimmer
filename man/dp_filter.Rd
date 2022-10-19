@@ -2,13 +2,14 @@
 % Please edit documentation in R/data-plyr.R
 \name{dp_filter}
 \alias{dp_filter}
-\title{为风险模型增加阈值条件}
+\title{数据过滤器}
 \usage{
 dp_filter(
-  modelId,
+  taskId,
   column,
   op,
   value,
+  dataName = "output",
   taskTopic = "TASK_DEFINE",
   scriptsTopic = "TASK_SCRIPTS"
 )
@@ -16,7 +17,7 @@ dp_filter(
 \description{
 允许为数据集增加多个阈值查询条件，缩小筛查范围。
 
-由modelId、column、op、value等参数构造唯一的dp_filter表达式，
+taskId、column、op、value等参数构造唯一的dp_filter表达式，
 这将允许从UI生成或还原该操作。
 }
 \concept{data-plyr function}

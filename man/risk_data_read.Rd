@@ -4,7 +4,11 @@
 \alias{risk_data_read}
 \title{读取疑点数据}
 \usage{
-risk_data_read(riskDataName = "__RISK_DATA__", cacheTopic = "CACHE")
+risk_data_read(
+  todoFlag = TRUE,
+  riskDataName = "__RISK_DATA__",
+  cacheTopic = "CACHE"
+)
 }
 \description{
 读取疑点数据

@@ -48,10 +48,10 @@ risk_model_create <- function(dsName,
   ## 校验筛查目标的数据集配置
   yml <- ds_yaml(dsName, topic = cacheTopic)
   if(rlang::is_empty(yml$keyColumns)) {
-    stop("Risk Model Config Invalid: ", modelId, " / ", "No KeyColumns in dataset ", item$dataset)
+    stop("Risk Model Config Invalid: ", modelId, " / ", "No KeyColumns in dataset ", dsName)
   }
   if(rlang::is_empty(yml$titleColumn)) {
-    stop("Risk Model Config Invalid: ", modelId, " / ", "No TitleColumn in dataset ", item$dataset)
+    stop("Risk Model Config Invalid: ", modelId, " / ", "No TitleColumn in dataset ", dsName)
   }
 
   ## 创建针对数据集的风险筛查任务  
@@ -108,8 +108,13 @@ risk_data_build <- function(modelId,
 #' @title 读取疑点数据
 #' @family risk function
 #' @export
-risk_data_read <- function(riskDataName = "__RISK_DATA__", cacheTopic = "CACHE") {
-  ds_read0(riskDataName, cacheTopic) |> collect()
+risk_data_read <- function(todoFlag = TRUE, riskDataName = "__RISK_DATA__", cacheTopic = "CACHE") {
+  x <- ds_read0(riskDataName, cacheTopic)
+  if(rlang::is_empty(x)) {
+    tibble()
+  } else {
+    x |> collect() |> filter(is.na(doneAt) %in% todoFlag)
+  }
 }
 
 #' @title 查找风险模型
