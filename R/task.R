@@ -313,7 +313,7 @@ task_run_expr <- function(taskExpr, params = list(NULL), runMode = "in-process",
 #' @family task-define function
 #' @export
 task_run0 <- function(taskItems, runMode = "in-process", ...) {
-  toRun <- function(..., taskItems) {
+  taskToRun <- function(..., taskItems) {
     ## 子函数内定义一个设置返回值的函数，供内部使用
     TaskRun.ENV <- new.env(hash = TRUE)
     taskParams <- list(...)
@@ -367,10 +367,10 @@ task_run0 <- function(taskItems, runMode = "in-process", ...) {
   }
   
   if(runMode == "r") {
-    callr::r(toRun, args = list(..., "taskItems" = taskItems))
+    callr::r(taskToRun, args = list(..., "taskItems" = taskItems))
   } else if(runMode == "r_bg"){
-    callr::r_bg(toRun, args = list(..., "taskItems" = taskItems))
+    callr::r_bg(taskToRun, args = list(..., "taskItems" = taskItems))
   } else {
-    do.call("toRun", args = list(..., "taskItems" = taskItems))
+    do.call("taskToRun", args = list(..., "taskItems" = taskItems))
   }
 }

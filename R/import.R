@@ -143,7 +143,7 @@ import_search <- function(fileMatch = ".*",
 #' @export
 import_run <- function(files = tibble(),
                        tasks = tibble(),
-                       toRun = TRUE,
+                       toImport = TRUE,
                        taskTopic = "TASK_DEFINE",
                        importTopic = "IMPORT",
                        importDataset = "__IMPORT_FILES__",
@@ -167,7 +167,7 @@ import_run <- function(files = tibble(),
           message("Task Define", " <", taskTopic, ": ", taskId, "> matched ",  nrow(matched), " files !!")
           ## 如果任务可以匹配到导入素材，则执行该任务
           if(nrow(matched) > 0) {
-            if(toRun) {
+            if(toImport) {
               task_run(taskId = taskId, taskTopic = taskTopic, importTopic = importTopic, files = matched$path)
               filesToRead |>
                 mutate(doneAt = now(tzone = "Asia/Shanghai")) |>

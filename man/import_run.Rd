@@ -7,7 +7,7 @@
 import_run(
   files = tibble(),
   tasks = tibble(),
-  toRun = TRUE,
+  toImport = TRUE,
   taskTopic = "TASK_DEFINE",
   importTopic = "IMPORT",
   importDataset = "__IMPORT_FILES__",
