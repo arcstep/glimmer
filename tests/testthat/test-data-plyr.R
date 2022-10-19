@@ -1,3 +1,25 @@
+test_that("<dp_read / dp_collect>", {
+  sample_config_init()
+  
+  m <- mtcars |> as_tibble() |> rownames_to_column()
+  ds_drop("车数据")
+  ds_init("车数据", keyColumns = "rowname", data = m |> head())
+  
+  m |> slice(1:10) |> as_tibble() |> ds_append("车数据")
+  dp_read("车数据") |>
+    task_run_dp(cacheTopic = "CACHE") |> collect() |> nrow() |>
+    testthat::expect_equal(10)
+  
+  task_create("cars/dp_read") |>
+    task_item_dp_add(dp_read("车数据")) |>
+    task_item_dp_add(dp_collect()) |>
+    task_run() |>
+    nrow() |>
+    testthat::expect_equal(10)
+  
+  temp_remove()
+})
+
 test_that("<dp_filter>：一般流程", {
   sample_config_init()
   sample_import_files()
@@ -93,3 +115,66 @@ test_that("<dp_filter>：比较时间和日期", {
       d |> filter(dt > as_datetime("2020-05-30")) |> nrow()
     )
 })
+
+test_that("<dp_head/ dp_tail>", {
+  sample_config_init()
+  
+  m <- mtcars |> as_tibble() |> rownames_to_column()
+  ds_drop("车数据")
+  ds_init("车数据", keyColumns = "rowname", data = m |> head())
+  
+  m |> as_tibble() |> ds_append("车数据")
+
+  task_create("cars/dp_read") |>
+    task_item_dp_add(dp_read("车数据")) |>
+    task_item_dp_add(dp_head()) |>
+    task_item_dp_add(dp_collect()) |>
+    task_run() |>
+    nrow() |>
+    testthat::expect_equal(10)
+
+  task_create("cars/dp_read") |>
+    task_item_dp_add(dp_read("车数据")) |>
+    task_item_dp_add(dp_head(5)) |>
+    task_item_dp_add(dp_collect()) |>
+    task_run() |>
+    nrow() |>
+    testthat::expect_equal(5)
+  
+  task_create("cars/dp_read") |>
+    task_item_dp_add(dp_read("车数据")) |>
+    task_item_dp_add(dp_tail(6)) |>
+    task_item_dp_add(dp_collect()) |>
+    task_run() |>
+    nrow() |>
+    testthat::expect_equal(6)
+  
+  temp_remove()
+})
+
+test_that("<dp_slice_max/ dp_slice_min>", {
+  sample_config_init()
+  
+  m <- mtcars |> as_tibble() |> rownames_to_column()
+  ds_drop("车数据")
+  ds_init("车数据", keyColumns = "rowname", data = m |> head())
+  
+  m |> as_tibble() |> ds_append("车数据")
+  
+  task_create("cars/dp_read") |>
+    task_item_dp_add(dp_read("车数据")) |>
+    task_item_dp_add(dp_n_max("cyl", 3)) |>
+    task_run() |>
+    nrow() |>
+    testthat::expect_equal(3)
+  
+  task_create("cars/dp_read") |>
+    task_item_dp_add(dp_read("车数据")) |>
+    task_item_dp_add(dp_n_min("disp", 3)) |>
+    task_run() |>
+    nrow() |>
+    testthat::expect_equal(3)
+  
+  temp_remove()
+})
+

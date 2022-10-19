@@ -1,3 +1,38 @@
+## 打开数据集 ----
+
+#' @title 读取数据集
+#' @family data-plyr function
+#' @export
+dp_read <- function(dsName, dataName = "@result") {
+  ex <- expression({
+    ds_read0(dsName, cacheTopic)
+  })
+  list(
+    "scriptType" = "dp_read",
+    "taskScript" = ex |> as.character(),
+    "params" = list(
+      "dataName" = dataName,
+      "dsName" = dsName)
+    )
+}
+
+#' @title 立即执行数据收集（结束惰性计算）
+#' @family data-plyr function
+#' @export
+dp_collect <- function(dataName = "@result") {
+  ex <- expression({
+    get(dataName) |> collect()
+  })
+  list(
+    "scriptType" = "dp_collect",
+    "taskScript" = ex |> as.character(),
+    "params" = list(
+      "dataName" = dataName)
+  )
+}
+
+## 行操作 ----
+
 #' @title 定义数据过滤任务
 #' @description
 #' 这个任务的目标是通过配置项实现函数[dplyr::filter()]的大部分功能。
@@ -74,11 +109,82 @@ dp_filter <- function(column, op, value = list(NULL), dataName = "@result") {
     stop("<dp_filter> Unknown OP: ", op)
   }
   list(
+    "scriptType" = "dp_filter",
     "taskScript" = ex |> as.character(),
     "params" = list(
-       "dataName" = dataName,
-       "column" = column,
-       "op" = op,
-       "value" = value),
-    "scriptType" = "dp_filter")
+      "dataName" = dataName,
+      "column" = column,
+      "op" = op,
+      "value" = value))
 }
+
+#' @title 头部数据
+#' @family data-plyr function
+#' @export
+dp_head <- function(n = 10, dataName = "@result") {
+  ex <- expression({
+    get(dataName) |> head(n)
+  })
+  list(
+    "scriptType" = "dp_head",
+    "taskScript" = ex |> as.character(),
+    "params" = list(
+      "dataName" = dataName,
+      "n" = n)
+  )
+}
+
+#' @title 尾部数据
+#' @family data-plyr function
+#' @export
+dp_tail <- function(n = 10, dataName = "@result") {
+  ex <- expression({
+    get(dataName) |> tail(n)
+  })
+  list(
+    "scriptType" = "dp_tail",
+    "taskScript" = ex |> as.character(),
+    "params" = list(
+      "dataName" = dataName,
+      "n" = n)
+  )
+}
+
+#' @title 按最大值取N条记录
+#' @family data-plyr function
+#' @export
+dp_n_max <- function(orderColumn, n = 10, with_ties = FALSE, dataName = "@result") {
+  ex <- expression({
+    mydata <- get(dataName) |> collect()
+    mydata |> slice_max(order_by = mydata[[orderColumn]], n = n, with_ties = with_ties)
+  })
+  list(
+    "scriptType" = "dp_n_max",
+    "taskScript" = ex |> as.character(),
+    "params" = list(
+      "dataName" = dataName,
+      "orderColumn" = orderColumn,
+      "n" = n,
+      "with_ties" = with_ties)
+  )
+}
+
+#' @title 按最小值取N条记录
+#' @family data-plyr function
+#' @export
+dp_n_min <- function(orderColumn, n = 10, with_ties = FALSE, dataName = "@result") {
+  ex <- expression({
+    mydata <- get(dataName) |> collect()
+    mydata |> slice_min(order_by = mydata[[orderColumn]], n = n, with_ties = with_ties)
+  })
+  list(
+    "scriptType" = "dp_n_min",
+    "taskScript" = ex |> as.character(),
+    "params" = list(
+      "dataName" = dataName,
+      "orderColumn" = orderColumn,
+      "n" = n,
+      "with_ties" = with_ties)
+  )
+}
+

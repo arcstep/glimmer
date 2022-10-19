@@ -36,4 +36,13 @@ taskId、column、op、value等参数构造唯一的dp_filter表达式，
 \item #date# >, #date# <
 }
 }
+\seealso{
+Other data-plyr function: 
+\code{\link{dp_collect}()},
+\code{\link{dp_head}()},
+\code{\link{dp_n_max}()},
+\code{\link{dp_n_min}()},
+\code{\link{dp_read}()},
+\code{\link{dp_tail}()}
+}
 \concept{data-plyr function}

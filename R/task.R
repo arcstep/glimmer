@@ -194,7 +194,7 @@ task_run <- function(taskId,
         yamlParams = yamlParams,
         taskTopic = taskTopic,
         cacheTopic = cacheTopic)
-      item |> ds_append(queueName, cacheTopic)
+      item |> mutate(`@from` = "task_run()") |> ds_append(queueName, cacheTopic)
     }),
     "params" = list(list(
       "taskId" = taskId,
@@ -211,7 +211,7 @@ task_run <- function(taskId,
       item <- task_queue_search(dsName = queueName, cacheTopic = cacheTopic) |>
         filter(id == batchId) |>
         mutate(doneAt = now(tzone = "Asia/Shanghai"))
-      item |> ds_write(queueName, cacheTopic)
+      item |> mutate(`@from` = "task_run()") |> ds_write(queueName, cacheTopic)
     }),
     "params" = list(list("taskId" = taskId, "batchId" = batchId, "queueName" = queueName,
                     "yamlParams" = paramInfo |> task_queue_param_to_yaml(),
