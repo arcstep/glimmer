@@ -251,3 +251,24 @@ test_that("<dp_arrange>", {
   temp_remove()
 })
 
+test_that("<dp_rename>", {
+  sample_config_init()
+  
+  m <- mtcars |> as_tibble() |> rownames_to_column()
+  ds_drop("车数据")
+  ds_init("车数据", keyColumns = "rowname", data = m |> head())
+  
+  m |> as_tibble() |> ds_append("车数据")
+  
+  task_create("cars/dp_read") |>
+    task_item_dp_add(dp_read("车数据")) |>
+    task_item_dp_add(dp_rename("MY_DISP", "disp")) |>
+    task_item_dp_add(dp_rename("中国队", "cyl")) |>
+    task_item_dp_add(dp_select(c("中国队", "MY_DISP"))) |>
+    task_item_dp_add(dp_collect()) |>
+    task_run() |>
+    ncol() |>
+    testthat::expect_equal(2)
+
+  temp_remove()
+})

@@ -17,6 +17,7 @@ Other data-plyr function:
 \code{\link{dp_head}()},
 \code{\link{dp_n_min}()},
 \code{\link{dp_read}()},
+\code{\link{dp_rename}()},
 \code{\link{dp_select}()},
 \code{\link{dp_tail}()}
 }

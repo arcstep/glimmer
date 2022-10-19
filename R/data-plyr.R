@@ -239,3 +239,20 @@ dp_select <- function(columns = list(), everything = FALSE,
       "everything" = everything)
   )
 }
+
+#' @title 列改名
+#' @family data-plyr function
+#' @export
+dp_rename <- function(newName, oldName, dataName = "@result") {
+  ex <- expression({
+    get(dataName) |> rename({{newName}} := oldName)
+  })
+  list(
+    "scriptType" = "dp_n_min",
+    "taskScript" = ex |> as.character(),
+    "params" = list(
+      "dataName" = dataName,
+      "newName" = newName,
+      "oldName" = oldName)
+  )
+}
