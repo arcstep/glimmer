@@ -151,12 +151,6 @@ config_yaml <- function(path = "./", yml = "config.yml") {
   yaml::read_yaml(fs::path_join(c(path, yml)))
 }
 
-## 获取函数列表
-get_funcs <- function(prefix = "^.") {
-  x <- lsf.str("package:glimmer")
-  x[x |> stringr::str_detect(prefix)]
-}
-
 #' @title 获取函数参数
 #' @description 根据规则生成参数要求
 #' 
@@ -203,7 +197,7 @@ get_funs_gali <- function() {
     "import", "-", "tibble", "导入各类数据",
     "export", "tibble", "-", "导出各类数据或报表",
     "read", "dataset", "tibble", "读取Parquet文件组数据集",
-    "save", "tibble", "parquet", "保存Parquet文件组数据集",
+    "write", "tibble", "parquet", "保存Parquet文件组数据集",
     "dataset", "tibble", "tibble", "支持管道的数据框处理",
     "plotly", "tibble", "plotly", "绘制plotly图表",
     "trace", "plotly", "plotly", "增加plotly绘制层",
@@ -211,6 +205,6 @@ get_funs_gali <- function() {
   )
   x <- lsf.str("package:glimmer")
   tibble(funcName = x[x |> stringr::str_detect("^gali_")]) |>
-    mutate(midfix = stringr::str_remove(funcName, "gali_") |> stringr::str_remove("(?<=)_.+")) |>
+    mutate(midfix = stringr::str_remove(funcName, "^gali_") |> stringr::str_remove("(?<=)_.+")) |>
     left_join(p, by = "midfix")
 }

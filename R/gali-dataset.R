@@ -3,12 +3,12 @@
 #' @title 读取数据集
 #' @family gali-dataset function
 #' @export
-gali_read_dataset <- function(s_dsName, s_dataName = "@result") {
+gali_read <- function(s_dsName, s_dataName = "@result") {
   ex <- expression({
     ds_read0(s_dsName, cacheTopic)
   })
   list(
-    "scriptType" = "gali_read_dataset",
+    "scriptType" = "gali_read",
     "taskScript" = ex |> as.character(),
     "params" = list(
       "s_dataName" = s_dataName,

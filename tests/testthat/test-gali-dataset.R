@@ -1,4 +1,4 @@
-test_that("<gali_read_dataset / gali_dataset_collect>", {
+test_that("<gali_read / gali_dataset_collect>", {
   sample_config_init()
   
   m <- mtcars |> as_tibble() |> rownames_to_column()
@@ -6,12 +6,12 @@ test_that("<gali_read_dataset / gali_dataset_collect>", {
   ds_init("车数据", keyColumns = "rowname", data = m |> head())
   
   m |> slice(1:10) |> as_tibble() |> ds_append("车数据")
-  gali_read_dataset("车数据") |>
+  gali_read("车数据") |>
     task_run_gali(cacheTopic = "CACHE") |> collect() |> nrow() |>
     testthat::expect_equal(10)
   
-  task_create("cars/gali_read_dataset") |>
-    task_item_gali_add(gali_read_dataset("车数据")) |>
+  task_create("cars/gali_read") |>
+    task_item_gali_add(gali_read("车数据")) |>
     task_item_gali_add(gali_dataset_collect()) |>
     task_run() |>
     nrow() |>
@@ -125,24 +125,24 @@ test_that("<gali_dataset_head/ gali_dataset_tail>", {
   
   m |> as_tibble() |> ds_append("车数据")
 
-  task_create("cars/gali_read_dataset") |>
-    task_item_gali_add(gali_read_dataset("车数据")) |>
+  task_create("cars/gali_read") |>
+    task_item_gali_add(gali_read("车数据")) |>
     task_item_gali_add(gali_dataset_head()) |>
     task_item_gali_add(gali_dataset_collect()) |>
     task_run() |>
     nrow() |>
     testthat::expect_equal(10)
 
-  task_create("cars/gali_read_dataset") |>
-    task_item_gali_add(gali_read_dataset("车数据")) |>
+  task_create("cars/gali_read") |>
+    task_item_gali_add(gali_read("车数据")) |>
     task_item_gali_add(gali_dataset_head(5)) |>
     task_item_gali_add(gali_dataset_collect()) |>
     task_run() |>
     nrow() |>
     testthat::expect_equal(5)
   
-  task_create("cars/gali_read_dataset") |>
-    task_item_gali_add(gali_read_dataset("车数据")) |>
+  task_create("cars/gali_read") |>
+    task_item_gali_add(gali_read("车数据")) |>
     task_item_gali_add(gali_dataset_tail(6)) |>
     task_item_gali_add(gali_dataset_collect()) |>
     task_run() |>
@@ -161,15 +161,15 @@ test_that("<gali_dataset_n_max/ gali_dataset_n_min>", {
   
   m |> as_tibble() |> ds_append("车数据")
   
-  task_create("cars/gali_read_dataset") |>
-    task_item_gali_add(gali_read_dataset("车数据")) |>
+  task_create("cars/gali_read") |>
+    task_item_gali_add(gali_read("车数据")) |>
     task_item_gali_add(gali_dataset_n_max("cyl", 3)) |>
     task_run() |>
     nrow() |>
     testthat::expect_equal(3)
   
-  task_create("cars/gali_read_dataset") |>
-    task_item_gali_add(gali_read_dataset("车数据")) |>
+  task_create("cars/gali_read") |>
+    task_item_gali_add(gali_read("车数据")) |>
     task_item_gali_add(gali_dataset_n_min("disp", 3)) |>
     task_run() |>
     nrow() |>
@@ -187,32 +187,32 @@ test_that("<gali_dataset_select>", {
   
   m |> as_tibble() |> ds_append("车数据")
   
-  task_create("cars/gali_read_dataset") |>
-    task_item_gali_add(gali_read_dataset("车数据")) |>
+  task_create("cars/gali_read") |>
+    task_item_gali_add(gali_read("车数据")) |>
     task_item_gali_add(gali_dataset_select("cyl")) |>
     task_item_gali_add(gali_dataset_collect()) |>
     task_run() |>
     ncol() |>
     testthat::expect_equal(1)
   
-  task_create("cars/gali_read_dataset") |>
-    task_item_gali_add(gali_read_dataset("车数据")) |>
+  task_create("cars/gali_read") |>
+    task_item_gali_add(gali_read("车数据")) |>
     task_item_gali_add(gali_dataset_select(c("cyl", "disp"))) |>
     task_item_gali_add(gali_dataset_collect()) |>
     task_run() |>
     ncol() |>
     testthat::expect_equal(2)
   
-  task_create("cars/gali_read_dataset") |>
-    task_item_gali_add(gali_read_dataset("车数据")) |>
+  task_create("cars/gali_read") |>
+    task_item_gali_add(gali_read("车数据")) |>
     task_item_gali_add(gali_dataset_select(c("cyl", "disp"), b_everything = T)) |>
     task_item_gali_add(gali_dataset_collect()) |>
     task_run() |>
     ncol() |>
     testthat::expect_equal(17)
 
-  task_create("cars/gali_read_dataset") |>
-    task_item_gali_add(gali_read_dataset("车数据")) |>
+  task_create("cars/gali_read") |>
+    task_item_gali_add(gali_read("车数据")) |>
     task_item_gali_add(gali_dataset_select(c("cyl", "disp"), s_regex = "^@")) |>
     task_item_gali_add(gali_dataset_collect()) |>
     task_run() |>
@@ -232,16 +232,16 @@ test_that("<gali_arrange>", {
   
   m |> as_tibble() |> ds_append("车数据")
   
-  (task_create("cars/gali_read_dataset") |>
-    task_item_gali_add(gali_read_dataset("车数据")) |>
+  (task_create("cars/gali_read") |>
+    task_item_gali_add(gali_read("车数据")) |>
     task_item_gali_add(gali_dataset_arrange("disp")) |>
     task_item_gali_add(gali_dataset_collect()) |>
     task_run() |>
     head(1))$disp |>
     testthat::expect_equal(min(mtcars$disp))
   
-  (task_create("cars/gali_read_dataset") |>
-      task_item_gali_add(gali_read_dataset("车数据")) |>
+  (task_create("cars/gali_read") |>
+      task_item_gali_add(gali_read("车数据")) |>
       task_item_gali_add(gali_dataset_arrange("disp", b_desc = T)) |>
       task_item_gali_add(gali_dataset_collect()) |>
       task_run() |>
@@ -260,8 +260,8 @@ test_that("<gali_rename>", {
   
   m |> as_tibble() |> ds_append("车数据")
   
-  task_create("cars/gali_read_dataset") |>
-    task_item_gali_add(gali_read_dataset("车数据")) |>
+  task_create("cars/gali_read") |>
+    task_item_gali_add(gali_read("车数据")) |>
     task_item_gali_add(gali_dataset_rename("MY_DISP", "disp")) |>
     task_item_gali_add(gali_dataset_rename("中国队", "cyl")) |>
     task_item_gali_add(gali_dataset_select(c("中国队", "MY_DISP"))) |>

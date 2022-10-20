@@ -19,6 +19,6 @@ Other gali-dataset function:
 \code{\link{gali_dataset_n_min}()},
 \code{\link{gali_dataset_select}()},
 \code{\link{gali_dataset_tail}()},
-\code{\link{gali_read_dataset}()}
+\code{\link{gali_read}()}
 }
 \concept{gali-dataset function}

@@ -29,7 +29,7 @@ gali_dataset_filter(
 
 允许为数据集增加多个阈值查询条件，缩小筛查范围。
 
-taskId、s_column、o_name、fv_value等参数构造唯一的gali_filter表达式，
+taskId、s_column、o_name、fv_value等参数构造唯一的gali_dataset_filter表达式，
 这将允许从UI生成或还原该操作。
 
 只要包括以下逻辑判断：
@@ -51,6 +51,6 @@ Other gali-dataset function:
 \code{\link{gali_dataset_rename}()},
 \code{\link{gali_dataset_select}()},
 \code{\link{gali_dataset_tail}()},
-\code{\link{gali_read_dataset}()}
+\code{\link{gali_read}()}
 }
 \concept{gali-dataset function}
