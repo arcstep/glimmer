@@ -1,9 +1,9 @@
 #' @title 直方图
 #' @examples 
-#' mtcars |> task_plotly_hist(x = "mpg")
+#' mtcars |> plot_hist(x = "mpg")
 #' @family task-lib functions
 #' @export
-task_plotly_hist <- function(d, x, color = "brown", xtitle = NULL, ytitle = NULL) {
+plot_hist <- function(d, x, color = "brown", xtitle = NULL, ytitle = NULL) {
   plot_ly(x = as.formula(paste("~", x))) |>
     add_histogram(
       data = d |> collect(),
@@ -19,9 +19,9 @@ task_plotly_hist <- function(d, x, color = "brown", xtitle = NULL, ytitle = NULL
 #' @family task-lib functions
 #' @examples 
 #' mtcars |>
-#'  task_plotly_marker(x = "mpg", y = "disp", alpha = 0.6)
+#'  plot_marker(x = "mpg", y = "disp", alpha = 0.6)
 #' @export
-task_plotly_marker <- function(
+plot_marker <- function(
     d, x, y, alpha = 0.2, name = NULL) {
   d |>
     plot_ly(x = as.formula(paste("~", x)), y = as.formula(paste("~", y))) |>
@@ -33,13 +33,13 @@ task_plotly_marker <- function(
 #' @examples 
 #' mtcars |>
 #'   count(cyl) |>
-#'   task_plotly_bar(x = "cyl", y = "n")
+#'   plot_bar(x = "cyl", y = "n")
 #' 
 #' mpg |> count(class) |>
 #'   mutate(class = forcats::fct_reorder(class, n, .desc = TRUE)) |>
-#'   task_plotly_bar(x = "class", y = "n")
+#'   plot_bar(x = "class", y = "n")
 #' @export
-task_plotly_bar <- function(
+plot_bar <- function(
     d, x, y) {
   d |>
     plot_ly() |>
@@ -50,11 +50,11 @@ task_plotly_bar <- function(
 #' @examples 
 #' mtcars |>
 #'   count(cyl) |> 
-#'   task_plotly_line(x = "cyl", y = "n")
+#'   plot_line(x = "cyl", y = "n")
 #' 
 #' @family task-lib functions
 #' @export
-task_plotly_line <- function(
+plot_line <- function(
     d, x, y,
     fillcolor = "red", linecolor = "rgb(205, 12, 24)", shape = "spline") {
   d |>
@@ -69,14 +69,14 @@ task_plotly_line <- function(
 #' @examples 
 #' mtcars |>
 #'   count(cyl) |>
-#'   task_plotly_area(x = "cyl", y = "n")
+#'   plot_area(x = "cyl", y = "n")
 #'   
 #' mtcars |> group_by(cyl) |>
 #'   summarise(displ = mean(disp)) |>
-#'   task_plotly_area(x = "cyl", y = "displ")
+#'   plot_area(x = "cyl", y = "displ")
 #'   
 #' @export
-task_plotly_area <- function(
+plot_area <- function(
     d, x, y,
     fill = "tozeroy", color = "red", shape = "spline") {
   d |>
@@ -93,10 +93,10 @@ task_plotly_area <- function(
 
 #' @title 饼图
 #' @examples 
-#' mtcars |> task_plotly_pie(value = "cyl")
+#' mtcars |> plot_pie(value = "cyl")
 #' @family task-lib functions
 #' @export
-task_plotly_pie <- function(d, value, label = NULL, hole = 0.4) {
+plot_pie <- function(d, value, label = NULL, hole = 0.4) {
   d |> 
     plot_ly() |>
     add_pie(
@@ -109,9 +109,9 @@ task_plotly_pie <- function(d, value, label = NULL, hole = 0.4) {
 #' @family task-lib functions
 #' @examples 
 #' mtcars |> count(cyl) |>
-#'  task_plotly_pie2(value = "n", pull = c(0.1, 0, 0))
+#'  plot_pie2(value = "n", pull = c(0.1, 0, 0))
 #' @export
-task_plotly_pie2 <- function(d, value, label = NULL, pull = 0, hole = 0.25) {
+plot_pie2 <- function(d, value, label = NULL, pull = 0, hole = 0.25) {
   d |> 
     plot_ly() |>
     add_trace(
@@ -127,11 +127,11 @@ task_plotly_pie2 <- function(d, value, label = NULL, pull = 0, hole = 0.25) {
 #' mtcars |>
 #'   count(cyl) |>
 #'   mutate(cyl = sprintf("CYL: %d", cyl)) |>
-#'   task_plotly_barpolar(theta = "cyl", r = "n")
+#'   plot_barpolar(theta = "cyl", r = "n")
 #'   
 #' @family task-lib functions
 #' @export
-task_plotly_barpolar <- function(d, theta, r, color = NULL, bargap = 0, hole = 0.05, direction = "clockwise") {
+plot_barpolar <- function(d, theta, r, color = NULL, bargap = 0, hole = 0.05, direction = "clockwise") {
   d |> 
     plot_ly() |>
     add_trace(

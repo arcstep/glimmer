@@ -1,5 +1,5 @@
-# multiplication works
+# 简单的datatable
 
     Code
-      task_DT(mtcars)
+      DT_table(mtcars)
 

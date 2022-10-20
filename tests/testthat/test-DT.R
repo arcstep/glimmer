@@ -1,4 +1,4 @@
 test_that("简单的datatable", {
-  mtcars |> task_DT() |>
+  mtcars |> DT_table() |>
     testthat::expect_snapshot()
 })

@@ -199,7 +199,7 @@ get_funs_gali <- function() {
     "read", "dataset", "tibble", "读取Parquet文件组数据集",
     "write", "tibble", "parquet", "保存Parquet文件组数据集",
     "dataset", "tibble", "tibble", "支持管道的数据框处理",
-    "plotly", "tibble", "plotly", "绘制plotly图表",
+    "plot", "tibble", "plotly", "绘制plotly图表",
     "trace", "plotly", "plotly", "增加plotly绘制层",
     "DT", "tibble", "DT", "绘制DT数据表"
   )

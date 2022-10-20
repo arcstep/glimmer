@@ -24,10 +24,10 @@ language = list(
 
 #' @title 数据表
 #' @examples 
-#' mtcars |> task_DT()
+#' mtcars |> DT_table()
 #' @family task-lib functions
 #' @export
-task_DT <- function(d,
+DT_table <- function(d,
                     rownames = FALSE,
                     selection = 'none',
                     extensions = "Responsive",
