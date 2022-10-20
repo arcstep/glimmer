@@ -30,7 +30,7 @@ test_that("<dp_filter>：一般流程", {
     testthat::expect_equal(mtcars |> filter(cyl > 6) |> nrow())
 
   ## 使用新的变量名
-  dp_filter("cyl", ">", 6, dataName = "mydata") |>
+  dp_filter("cyl", ">", 6, s_dataName = "mydata") |>
     task_run_dp(`mydata` = mtcars) |> nrow() |>
     testthat::expect_equal(mtcars |> filter(cyl > 6) |> nrow())
   
@@ -205,7 +205,7 @@ test_that("<dp_select>", {
   
   task_create("cars/dp_read") |>
     task_item_dp_add(dp_read("车数据")) |>
-    task_item_dp_add(dp_select(c("cyl", "disp"), everything = T)) |>
+    task_item_dp_add(dp_select(c("cyl", "disp"), b_everything = T)) |>
     task_item_dp_add(dp_collect()) |>
     task_run() |>
     ncol() |>
@@ -213,7 +213,7 @@ test_that("<dp_select>", {
 
   task_create("cars/dp_read") |>
     task_item_dp_add(dp_read("车数据")) |>
-    task_item_dp_add(dp_select(c("cyl", "disp"), regex = "^@")) |>
+    task_item_dp_add(dp_select(c("cyl", "disp"), s_regex = "^@")) |>
     task_item_dp_add(dp_collect()) |>
     task_run() |>
     ncol() |>
@@ -242,7 +242,7 @@ test_that("<dp_arrange>", {
   
   (task_create("cars/dp_read") |>
       task_item_dp_add(dp_read("车数据")) |>
-      task_item_dp_add(dp_arrange("disp", desc = T)) |>
+      task_item_dp_add(dp_arrange("disp", b_desc = T)) |>
       task_item_dp_add(dp_collect()) |>
       task_run() |>
       head(1))$disp |>

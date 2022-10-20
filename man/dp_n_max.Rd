@@ -4,7 +4,7 @@
 \alias{dp_n_max}
 \title{按最大值取N条记录}
 \usage{
-dp_n_max(orderColumn, n = 10, with_ties = FALSE, dataName = "@result")
+dp_n_max(s_orderColumn, i_n = 10, b_with_ties = FALSE, s_dataName = "@result")
 }
 \description{
 按最大值取N条记录

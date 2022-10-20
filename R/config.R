@@ -160,19 +160,14 @@ get_funcs <- function(prefix = "^.") {
 #' @title 获取函数参数
 #' @description 根据规则生成参数要求
 #' 
-#' 如果参数命名格式按照如下规范约定，则自动生成参数要求
+#' 如果参数命名格式按照如下规范约定，则自动生成参数要求，例如：
 #' \itemize{
 #' \item s_ 要求单个字符串
-#' \item sn_ 要求多个字符串
 #' \item i_ 要求整数
 #' \item f_ 要求浮点数
-#' \item ds_ 要求日期格式字符串
-#' \item dts_ 要求日期时间格式字符串
-#' \item ts_ 要求时间格式字符串
 #' \item t_ 要求时间戳整数
 #' \item c_ 颜色枚举
 #' \item b_ 要求布尔类型
-#' \item e_ 要求枚举值，要求在配置中额外定义
 #' 可以是静态文件定义，也可以是从某个数据集中实时提取
 #' }
 #' @param funcName 函数名称，可以是字符串或函数名
@@ -181,9 +176,11 @@ get_params <- function(funcName) {
   p <- tribble(
     ~prefix, ~typeName, ~tips,
     "s_", "string", "字符串",
-    "sn_", "n_string", "多个字符串",
+    "sn_", "n_string", "字符串序列",
     "i_", "int", "整数",
+    "in_", "int", "整数序列",
     "f_", "float", "浮点数",
+    "fn_", "float", "数值序列",
     "ds_", "date_string", "日期字符串",
     "dts_", "datetime_string", "日期时间字符串",
     "ts_", "time_string", "时间字符串",

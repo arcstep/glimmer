@@ -3,7 +3,7 @@
 #' @title 读取数据集
 #' @family data-plyr function
 #' @export
-dp_read <- function(dsName, dataName = "@result") {
+dp_read <- function(s_dsName, s_dataName = "@result") {
   ex <- expression({
     ds_read0(dsName, cacheTopic)
   })
@@ -11,15 +11,15 @@ dp_read <- function(dsName, dataName = "@result") {
     "scriptType" = "dp_read",
     "taskScript" = ex |> as.character(),
     "params" = list(
-      "dataName" = dataName,
-      "dsName" = dsName)
+      "dataName" = s_dataName,
+      "dsName" = s_dsName)
     )
 }
 
 #' @title 立即执行数据收集（结束惰性计算）
 #' @family data-plyr function
 #' @export
-dp_collect <- function(dataName = "@result") {
+dp_collect <- function(s_dataName = "@result") {
   ex <- expression({
     get(dataName) |> collect()
   })
@@ -27,7 +27,7 @@ dp_collect <- function(dataName = "@result") {
     "scriptType" = "dp_collect",
     "taskScript" = ex |> as.character(),
     "params" = list(
-      "dataName" = dataName)
+      "dataName" = s_dataName)
   )
 }
 
@@ -59,19 +59,19 @@ dp_collect <- function(dataName = "@result") {
 #' @param taskTopic 任务定义的主题文件夹
 #' @family data-plyr function
 #' @export
-dp_filter <- function(column, op, value = list(NULL), dataName = "@result") {
+dp_filter <- function(s_column, op_name, fn_value = list(NULL), s_dataName = "@result") {
   ## 校验参数合法性
-  if(stringr::str_detect(op, "(>|<|>=|<=|==|!=|%in%|%nin%|%regex%|%not-regex%)", negate = TRUE)) {
-    stop("Invalid filter OP: ", op)
+  if(stringr::str_detect(op_name, "(>|<|>=|<=|==|!=|%in%|%nin%|%regex%|%not-regex%)", negate = TRUE)) {
+    stop("Invalid filter OP: ", op_name)
   }
   ## 创建任务表达式
-  if(op %in% c(">", "<", ">=", "<=", "==", "!=", "%in%")) {
+  if(op_name %in% c(">", "<", ">=", "<=", "==", "!=", "%in%")) {
     ex <- expression({
       get(dataName) |>
         filter(do.call(!!sym(op), args = list(!!sym(column), unlist(value)))) |>
         collect()
     })
-  } else if(stringr::str_detect(op, "^[@#% ]*time[@#% ]+(>|<|>=|<=|==)[ ]*$")) {
+  } else if(stringr::str_detect(op_name, "^[@#% ]*time[@#% ]+(>|<|>=|<=|==)[ ]*$")) {
     ex <- expression({
       myop <- stringr::str_replace(op, "[@#%]?time[@#% ]+", "") |> stringr::str_trim()
       data <- get(dataName)
@@ -82,7 +82,7 @@ dp_filter <- function(column, op, value = list(NULL), dataName = "@result") {
         filter(do.call(myop, args = list(x1, x2))) |>
         collect()
     })
-  } else if(stringr::str_detect(op, "^[@#% ]*date[@#% ]+(>|<|>=|<=|==)[ ]*$")) {
+  } else if(stringr::str_detect(op_name, "^[@#% ]*date[@#% ]+(>|<|>=|<=|==)[ ]*$")) {
     ex <- expression({
       myop <- stringr::str_replace(op, "[@#%]?date[@#% ]+", "") |> stringr::str_trim()
       data <- get(dataName)
@@ -93,35 +93,35 @@ dp_filter <- function(column, op, value = list(NULL), dataName = "@result") {
         filter(do.call(myop, args = list(x1, x2))) |>
         collect()
     })
-  } else if(op %in% c("%nin%")) {
+  } else if(op_name %in% c("%nin%")) {
     ## 将 %nin% 转换为可以惰性执行的 %in%
     ex <- expression({
       get(dataName) |>
         filter(!do.call("%in%", args = list(!!sym(column), unlist(value)))) |>
         collect()
     })
-  } else if(op %in% c("%regex%", "%not-regex%")) {
+  } else if(op_name %in% c("%regex%", "%not-regex%")) {
     ## 正则表达式需要不能惰性执行，需要提前collect数据
     ex <- expression({
       get(dataName) |> collect() |> filter(do.call(!!sym(op), args = list(!!sym(column), unlist(value))))
     })
   } else {
-    stop("<dp_filter> Unknown OP: ", op)
+    stop("<dp_filter> Unknown OP: ", op_name)
   }
   list(
     "scriptType" = "dp_filter",
     "taskScript" = ex |> as.character(),
     "params" = list(
-      "dataName" = dataName,
-      "column" = column,
-      "op" = op,
-      "value" = value))
+      "dataName" = s_dataName,
+      "column" = s_column,
+      "op" = op_name,
+      "value" = fn_value))
 }
 
 #' @title 头部数据
 #' @family data-plyr function
 #' @export
-dp_head <- function(n = 10, dataName = "@result") {
+dp_head <- function(i_n = 10, s_dataName = "@result") {
   ex <- expression({
     get(dataName) |> head(n)
   })
@@ -129,15 +129,15 @@ dp_head <- function(n = 10, dataName = "@result") {
     "scriptType" = "dp_head",
     "taskScript" = ex |> as.character(),
     "params" = list(
-      "dataName" = dataName,
-      "n" = n)
+      "dataName" = s_dataName,
+      "n" = i_n)
   )
 }
 
 #' @title 尾部数据
 #' @family data-plyr function
 #' @export
-dp_tail <- function(n = 10, dataName = "@result") {
+dp_tail <- function(i_n = 10, s_dataName = "@result") {
   ex <- expression({
     get(dataName) |> tail(n)
   })
@@ -145,15 +145,15 @@ dp_tail <- function(n = 10, dataName = "@result") {
     "scriptType" = "dp_tail",
     "taskScript" = ex |> as.character(),
     "params" = list(
-      "dataName" = dataName,
-      "n" = n)
+      "dataName" = s_dataName,
+      "n" = i_n)
   )
 }
 
 #' @title 按最大值取N条记录
 #' @family data-plyr function
 #' @export
-dp_n_max <- function(orderColumn, n = 10, with_ties = FALSE, dataName = "@result") {
+dp_n_max <- function(s_orderColumn, i_n = 10, b_with_ties = FALSE, s_dataName = "@result") {
   ex <- expression({
     mydata <- get(dataName) |> collect()
     mydata |> slice_max(order_by = mydata[[orderColumn]], n = n, with_ties = with_ties)
@@ -162,17 +162,17 @@ dp_n_max <- function(orderColumn, n = 10, with_ties = FALSE, dataName = "@result
     "scriptType" = "dp_n_max",
     "taskScript" = ex |> as.character(),
     "params" = list(
-      "dataName" = dataName,
-      "orderColumn" = orderColumn,
-      "n" = n,
-      "with_ties" = with_ties)
+      "dataName" = s_dataName,
+      "orderColumn" = s_orderColumn,
+      "n" = i_n,
+      "with_ties" = b_with_ties)
   )
 }
 
 #' @title 按最小值取N条记录
 #' @family data-plyr function
 #' @export
-dp_n_min <- function(orderColumn, n = 10, with_ties = FALSE, dataName = "@result") {
+dp_n_min <- function(s_orderColumn, i_n = 10, b_with_ties = FALSE, s_dataName = "@result") {
   ex <- expression({
     mydata <- get(dataName) |> collect()
     mydata |> slice_min(order_by = mydata[[orderColumn]], n = n, with_ties = with_ties)
@@ -181,10 +181,10 @@ dp_n_min <- function(orderColumn, n = 10, with_ties = FALSE, dataName = "@result
     "scriptType" = "dp_n_min",
     "taskScript" = ex |> as.character(),
     "params" = list(
-      "dataName" = dataName,
-      "orderColumn" = orderColumn,
-      "n" = n,
-      "with_ties" = with_ties)
+      "dataName" = s_dataName,
+      "orderColumn" = s_orderColumn,
+      "n" = i_n,
+      "with_ties" = b_with_ties)
   )
 }
 
@@ -193,8 +193,8 @@ dp_n_min <- function(orderColumn, n = 10, with_ties = FALSE, dataName = "@result
 #' @title 行排序
 #' @family data-plyr function
 #' @export
-dp_arrange <- function(columns = list(),
-                       desc = FALSE, by_group = FALSE, dataName = "@result") {
+dp_arrange <- function(sn_columns = list(),
+                       b_desc = FALSE, b_by_group = FALSE, s_dataName = "@result") {
   ex <- expression({
     mydata <- get(dataName)
     if(desc) {
@@ -207,10 +207,10 @@ dp_arrange <- function(columns = list(),
     "scriptType" = "dp_n_min",
     "taskScript" = ex |> as.character(),
     "params" = list(
-      "dataName" = dataName,
-      "columns" = columns,
-      "desc" = desc,
-      "by_group" = by_group)
+      "dataName" = s_dataName,
+      "columns" = sn_columns,
+      "desc" = b_desc,
+      "by_group" = b_by_group)
   )
 }
 
@@ -219,8 +219,8 @@ dp_arrange <- function(columns = list(),
 #' @title 选择列，支持惰性计算
 #' @family data-plyr function
 #' @export
-dp_select <- function(columns = list(), everything = FALSE,
-                      regex = NULL, dataName = "@result") {
+dp_select <- function(sn_columns = list(), b_everything = FALSE,
+                      s_regex = NULL, s_dataName = "@result") {
   ex <- expression({
     mydata <- get(dataName)
     if(everything) {
@@ -233,17 +233,17 @@ dp_select <- function(columns = list(), everything = FALSE,
     "scriptType" = "dp_n_min",
     "taskScript" = ex |> as.character(),
     "params" = list(
-      "dataName" = dataName,
-      "columns" = columns |> unlist(),
-      "regex" = regex %empty% "^mamahannihuijiachifan$",
-      "everything" = everything)
+      "dataName" = s_dataName,
+      "columns" = sn_columns |> unlist(),
+      "regex" = s_regex %empty% "^mamahannihuijiachifan$",
+      "everything" = b_everything)
   )
 }
 
 #' @title 列改名
 #' @family data-plyr function
 #' @export
-dp_rename <- function(newName, oldName, dataName = "@result") {
+dp_rename <- function(s_newName, s_oldName, s_dataName = "@result") {
   ex <- expression({
     get(dataName) |> rename({{newName}} := oldName)
   })
@@ -251,8 +251,8 @@ dp_rename <- function(newName, oldName, dataName = "@result") {
     "scriptType" = "dp_n_min",
     "taskScript" = ex |> as.character(),
     "params" = list(
-      "dataName" = dataName,
-      "newName" = newName,
-      "oldName" = oldName)
+      "dataName" = s_dataName,
+      "newName" = s_newName,
+      "oldName" = s_oldName)
   )
 }

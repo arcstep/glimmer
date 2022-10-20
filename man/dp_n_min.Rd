@@ -4,7 +4,7 @@
 \alias{dp_n_min}
 \title{按最小值取N条记录}
 \usage{
-dp_n_min(orderColumn, n = 10, with_ties = FALSE, dataName = "@result")
+dp_n_min(s_orderColumn, i_n = 10, b_with_ties = FALSE, s_dataName = "@result")
 }
 \description{
 按最小值取N条记录

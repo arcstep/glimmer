@@ -4,7 +4,7 @@
 \alias{dp_collect}
 \title{立即执行数据收集（结束惰性计算）}
 \usage{
-dp_collect(dataName = "@result")
+dp_collect(s_dataName = "@result")
 }
 \description{
 立即执行数据收集（结束惰性计算）

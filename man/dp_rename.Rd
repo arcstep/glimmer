@@ -4,7 +4,7 @@
 \alias{dp_rename}
 \title{列改名}
 \usage{
-dp_rename(newName, oldName, dataName = "@result")
+dp_rename(s_newName, s_oldName, s_dataName = "@result")
 }
 \description{
 列改名

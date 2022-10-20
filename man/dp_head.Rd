@@ -4,7 +4,7 @@
 \alias{dp_head}
 \title{头部数据}
 \usage{
-dp_head(n = 10, dataName = "@result")
+dp_head(i_n = 10, s_dataName = "@result")
 }
 \description{
 头部数据

@@ -4,7 +4,7 @@
 \alias{dp_tail}
 \title{尾部数据}
 \usage{
-dp_tail(n = 10, dataName = "@result")
+dp_tail(i_n = 10, s_dataName = "@result")
 }
 \description{
 尾部数据

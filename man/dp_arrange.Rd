@@ -5,10 +5,10 @@
 \title{行排序}
 \usage{
 dp_arrange(
-  columns = list(),
-  desc = FALSE,
-  by_group = FALSE,
-  dataName = "@result"
+  sn_columns = list(),
+  b_desc = FALSE,
+  b_by_group = FALSE,
+  s_dataName = "@result"
 )
 }
 \description{

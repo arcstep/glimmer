@@ -4,7 +4,7 @@
 \alias{dp_read}
 \title{读取数据集}
 \usage{
-dp_read(dsName, dataName = "@result")
+dp_read(s_dsName, s_dataName = "@result")
 }
 \description{
 读取数据集

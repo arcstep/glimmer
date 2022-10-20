@@ -5,10 +5,10 @@
 \title{选择列，支持惰性计算}
 \usage{
 dp_select(
-  columns = list(),
-  everything = FALSE,
-  regex = NULL,
-  dataName = "@result"
+  sn_columns = list(),
+  b_everything = FALSE,
+  s_regex = NULL,
+  s_dataName = "@result"
 )
 }
 \description{

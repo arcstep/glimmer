@@ -4,9 +4,11 @@
 \alias{dp_filter}
 \title{定义数据过滤任务}
 \usage{
-dp_filter(column, op, value = list(NULL), dataName = "@result")
+dp_filter(s_column, op_name, fn_value = list(NULL), s_dataName = "@result")
 }
 \arguments{
+\item{taskId}{任务ID}
+
 \item{column}{列名}
 
 \item{op}{阈值范围判断符号}
@@ -14,8 +16,6 @@ dp_filter(column, op, value = list(NULL), dataName = "@result")
 \item{value}{阈值}
 
 \item{dataName}{内存中的数据框名称，默认为 @result}
-
-\item{taskId}{任务ID}
 
 \item{taskTopic}{任务定义的主题文件夹}
 }
