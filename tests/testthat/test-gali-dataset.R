@@ -20,6 +20,23 @@ test_that("<gali_read / gali_dataset_collect>", {
   temp_remove()
 })
 
+test_that("<gali_write>", {
+  sample_config_init()
+  
+  m <- mtcars |> as_tibble() |> rownames_to_column()
+  ds_drop("车数据")
+  ds_init("车数据", keyColumns = "rowname", data = m |> head())
+
+  task_create("cars/gali_read") |>
+    task_item_gali_add(gali_write("车数据")) |>
+    task_run(`@result` = m)
+  
+  ds_read0("车数据") |> collect() |> nrow() |>
+    testthat::expect_equal(32)
+  
+  temp_remove()
+})
+
 test_that("<gali_dataset_filter>：一般流程", {
   sample_config_init()
   sample_import_files()
@@ -260,15 +277,15 @@ test_that("<gali_rename>", {
   
   m |> as_tibble() |> ds_append("车数据")
   
-  task_create("cars/gali_read") |>
+  resp <- task_create("cars/gali_read") |>
     task_item_gali_add(gali_read("车数据")) |>
     task_item_gali_add(gali_dataset_rename("MY_DISP", "disp")) |>
     task_item_gali_add(gali_dataset_rename("中国队", "cyl")) |>
-    task_item_gali_add(gali_dataset_select(c("中国队", "MY_DISP"))) |>
     task_item_gali_add(gali_dataset_collect()) |>
     task_run() |>
-    ncol() |>
-    testthat::expect_equal(2)
-
+    names()
+  ("MY_DISP" %in% resp) |> testthat::expect_true()
+  ("中国队" %in% resp) |> testthat::expect_true()
+  
   temp_remove()
 })

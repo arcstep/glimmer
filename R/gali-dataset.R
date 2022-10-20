@@ -1,4 +1,4 @@
-## 打开数据集 ----
+## 存取数据集 ----
 
 #' @title 读取数据集
 #' @family gali-dataset function
@@ -14,6 +14,23 @@ gali_read <- function(s_dsName, s_dataName = "@result") {
       "s_dataName" = s_dataName,
       "s_dsName" = s_dsName)
     )
+}
+
+#' @title 写入数据集
+#' @family gali-dataset function
+#' @export
+gali_write <- function(s_dsName, s_dataName = "@result") {
+  ex <- expression({
+    get(s_dataName) |> collect() |>
+      ds_write(s_dsName, topic = cacheTopic)
+  })
+  list(
+    "scriptType" = "gali_write",
+    "taskScript" = ex |> as.character(),
+    "params" = list(
+      "s_dataName" = s_dataName,
+      "s_dsName" = s_dsName)
+  )
 }
 
 #' @title 立即执行数据收集（结束惰性计算）

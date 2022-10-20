@@ -19,6 +19,7 @@ Other gali-dataset function:
 \code{\link{gali_dataset_n_min}()},
 \code{\link{gali_dataset_rename}()},
 \code{\link{gali_dataset_select}()},
-\code{\link{gali_read}()}
+\code{\link{gali_read}()},
+\code{\link{gali_write}()}
 }
 \concept{gali-dataset function}
