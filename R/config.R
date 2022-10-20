@@ -150,3 +150,58 @@ config_init <- function(path = "./",
 config_yaml <- function(path = "./", yml = "config.yml") {
   yaml::read_yaml(fs::path_join(c(path, yml)))
 }
+
+## 获取函数列表
+get_funcs <- function(prefix = "^.") {
+  x <- lsf.str("package:glimmer")
+  x[x |> stringr::str_detect(prefix)]
+}
+
+#' @title 获取函数参数
+#' @description 根据规则生成参数要求
+#' 
+#' 如果参数命名格式按照如下规范约定，则自动生成参数要求
+#' \itemize{
+#' \item s_ 要求单个字符串
+#' \item sn_ 要求多个字符串
+#' \item i_ 要求整数
+#' \item f_ 要求浮点数
+#' \item ds_ 要求日期格式字符串
+#' \item dts_ 要求日期时间格式字符串
+#' \item ts_ 要求时间格式字符串
+#' \item t_ 要求时间戳整数
+#' \item c_ 颜色枚举
+#' \item b_ 要求布尔类型
+#' \item e_ 要求枚举值，要求在配置中额外定义
+#' 可以是静态文件定义，也可以是从某个数据集中实时提取
+#' }
+#' @param funcName 函数名称，可以是字符串或函数名
+#' @export
+get_params <- function(funcName) {
+  p <- tribble(
+    ~prefix, ~typeName, ~tips,
+    "s_", "string", "字符串",
+    "sn_", "n_string", "多个字符串",
+    "i_", "int", "整数",
+    "f_", "float", "浮点数",
+    "ds_", "date_string", "日期字符串",
+    "dts_", "datetime_string", "日期时间字符串",
+    "ts_", "time_string", "时间字符串",
+    "t_", "timestamp", "时间戳",
+    "c_", "color", "颜色",
+    "b_", "bool", "布尔",
+    "e_", "enum", "枚举",
+    "op_", "op", "过滤器操作"
+  )
+  tibble(paramName = formalArgs(funcName)) |>
+    mutate(prefix = stringr::str_remove(paramName, "(?<=_)(.*)")) |>
+    left_join(p, by = "prefix")
+}
+
+#' @title 所有dataset处理函数
+#' @export
+get_funs_ds <- purrr::partial(get_funcs, prefix = "^ds_")
+
+#' @title 所有dp函数
+#' @export
+get_funs_dp <- purrr::partial(get_funcs, prefix = "^dp_")
