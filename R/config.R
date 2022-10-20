@@ -188,17 +188,29 @@ get_params <- function(funcName) {
     "c_", "color", "颜色",
     "b_", "bool", "布尔",
     "e_", "enum", "枚举",
-    "op_", "op", "过滤器操作"
+    "o_", "operater", "逻辑操作符"
   )
   tibble(paramName = formalArgs(funcName)) |>
     mutate(prefix = stringr::str_remove(paramName, "(?<=_)(.*)")) |>
     left_join(p, by = "prefix")
 }
 
-#' @title 所有dataset处理函数
+#' @title 所有gali函数
 #' @export
-get_funs_ds <- purrr::partial(get_funcs, prefix = "^ds_")
-
-#' @title 所有dp函数
-#' @export
-get_funs_gali <- purrr::partial(get_funcs, prefix = "^gali_")
+get_funs_gali <- function() {
+  p <- tribble(
+    ~midfix, ~input, ~output, ~tips,
+    "import", "-", "tibble", "导入各类数据",
+    "export", "tibble", "-", "导出各类数据或报表",
+    "read", "dataset", "tibble", "读取Parquet文件组数据集",
+    "save", "tibble", "parquet", "保存Parquet文件组数据集",
+    "dataset", "tibble", "tibble", "支持管道的数据框处理",
+    "plotly", "tibble", "plotly", "绘制plotly图表",
+    "trace", "plotly", "plotly", "增加plotly绘制层",
+    "DT", "tibble", "DT", "绘制DT数据表"
+  )
+  x <- lsf.str("package:glimmer")
+  tibble(funcName = x[x |> stringr::str_detect("^gali_")]) |>
+    mutate(midfix = stringr::str_remove(funcName, "gali_") |> stringr::str_remove("(?<=)_.+")) |>
+    left_join(p, by = "midfix")
+}

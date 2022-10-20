@@ -6,7 +6,7 @@ test_that("<gali_read_dataset / gali_dataset_collect>", {
   ds_init("车数据", keyColumns = "rowname", data = m |> head())
   
   m |> slice(1:10) |> as_tibble() |> ds_append("车数据")
-  gali_read_dataset_dataset("车数据") |>
+  gali_read_dataset("车数据") |>
     task_run_gali(cacheTopic = "CACHE") |> collect() |> nrow() |>
     testthat::expect_equal(10)
   
@@ -116,7 +116,7 @@ test_that("<gali_dataset_filter>：比较时间和日期", {
     )
 })
 
-test_that("<gali_head/ gali_tail>", {
+test_that("<gali_dataset_head/ gali_dataset_tail>", {
   sample_config_init()
   
   m <- mtcars |> as_tibble() |> rownames_to_column()
@@ -127,7 +127,7 @@ test_that("<gali_head/ gali_tail>", {
 
   task_create("cars/gali_read_dataset") |>
     task_item_gali_add(gali_read_dataset("车数据")) |>
-    task_item_gali_add(gali_head()) |>
+    task_item_gali_add(gali_dataset_head()) |>
     task_item_gali_add(gali_dataset_collect()) |>
     task_run() |>
     nrow() |>
@@ -135,7 +135,7 @@ test_that("<gali_head/ gali_tail>", {
 
   task_create("cars/gali_read_dataset") |>
     task_item_gali_add(gali_read_dataset("车数据")) |>
-    task_item_gali_add(gali_head(5)) |>
+    task_item_gali_add(gali_dataset_head(5)) |>
     task_item_gali_add(gali_dataset_collect()) |>
     task_run() |>
     nrow() |>
@@ -143,7 +143,7 @@ test_that("<gali_head/ gali_tail>", {
   
   task_create("cars/gali_read_dataset") |>
     task_item_gali_add(gali_read_dataset("车数据")) |>
-    task_item_gali_add(gali_tail(6)) |>
+    task_item_gali_add(gali_dataset_tail(6)) |>
     task_item_gali_add(gali_dataset_collect()) |>
     task_run() |>
     nrow() |>
@@ -188,7 +188,7 @@ test_that("<gali_dataset_select>", {
   m |> as_tibble() |> ds_append("车数据")
   
   task_create("cars/gali_read_dataset") |>
-    task_item_gali_add(gali_dataset_read_dataset("车数据")) |>
+    task_item_gali_add(gali_read_dataset("车数据")) |>
     task_item_gali_add(gali_dataset_select("cyl")) |>
     task_item_gali_add(gali_dataset_collect()) |>
     task_run() |>

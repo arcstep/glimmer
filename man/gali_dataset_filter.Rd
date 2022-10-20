@@ -6,7 +6,7 @@
 \usage{
 gali_dataset_filter(
   s_column,
-  op_name,
+  o_name,
   fv_value = list(NULL),
   s_dataName = "@result"
 )
@@ -14,7 +14,7 @@ gali_dataset_filter(
 \arguments{
 \item{s_column}{列名}
 
-\item{op_name}{阈值范围判断符号}
+\item{o_name}{阈值范围判断符号}
 
 \item{fv_value}{阈值}
 
@@ -29,7 +29,7 @@ gali_dataset_filter(
 
 允许为数据集增加多个阈值查询条件，缩小筛查范围。
 
-taskId、s_column、op_name、fv_value等参数构造唯一的gali_filter表达式，
+taskId、s_column、o_name、fv_value等参数构造唯一的gali_filter表达式，
 这将允许从UI生成或还原该操作。
 
 只要包括以下逻辑判断：

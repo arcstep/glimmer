@@ -2,10 +2,10 @@
 % Please edit documentation in R/config.R
 \name{get_funs_gali}
 \alias{get_funs_gali}
-\title{所有dp函数}
+\title{所有gali函数}
 \usage{
-get_funs_gali(...)
+get_funs_gali()
 }
 \description{
-所有dp函数
+所有gali函数
 }
