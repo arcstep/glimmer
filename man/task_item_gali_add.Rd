@@ -4,12 +4,12 @@
 \alias{task_item_gali_add}
 \title{增加子任务}
 \usage{
-task_item_gali_add(taskId, myplyr = list(), taskTopic = "TASK_DEFINE")
+task_item_gali_add(taskId, galiResp = list(), taskTopic = "TASK_DEFINE")
 }
 \arguments{
 \item{taskId}{任务标识}
 
-\item{myplyr}{gali_filter等函数生成的执行函数}
+\item{galiResp}{gali_函数生成的执行函数}
 
 \item{taskTopic}{保存任务定义的存储主题文件夹}
 }
@@ -24,9 +24,9 @@ Other task-define function:
 \code{\link{task_read}()},
 \code{\link{task_run0}()},
 \code{\link{task_run_dir}()},
-\code{\link{task_run_dp}()},
 \code{\link{task_run_expr}()},
 \code{\link{task_run_file}()},
+\code{\link{task_run_gali}()},
 \code{\link{task_run_string}()},
 \code{\link{task_run}()},
 \code{\link{task_search}()}

@@ -1,9 +1,9 @@
 ## 打开数据集 ----
 
 #' @title 读取数据集
-#' @family data-plyr function
+#' @family gali-dataset function
 #' @export
-gali_read <- function(s_dsName, s_dataName = "@result") {
+gali_read_dataset <- function(s_dsName, s_dataName = "@result") {
   ex <- expression({
     ds_read0(s_dsName, cacheTopic)
   })
@@ -17,9 +17,9 @@ gali_read <- function(s_dsName, s_dataName = "@result") {
 }
 
 #' @title 立即执行数据收集（结束惰性计算）
-#' @family data-plyr function
+#' @family gali-dataset function
 #' @export
-gali_collect <- function(s_dataName = "@result") {
+gali_dataset_collect <- function(s_dataName = "@result") {
   ex <- expression({
     get(s_dataName) |> collect()
   })
@@ -57,9 +57,9 @@ gali_collect <- function(s_dataName = "@result") {
 #' @param fv_value 阈值
 #' @param s_dataName 内存中的数据框名称，默认为 @result
 #' @param taskTopic 任务定义的主题文件夹
-#' @family data-plyr function
+#' @family gali-dataset function
 #' @export
-gali_filter <- function(s_column, op_name, fv_value = list(NULL), s_dataName = "@result") {
+gali_dataset_filter <- function(s_column, op_name, fv_value = list(NULL), s_dataName = "@result") {
   ## 校验参数合法性
   if(stringr::str_detect(op_name, "(>|<|>=|<=|==|!=|%in%|%nin%|%regex%|%not-regex%)", negate = TRUE)) {
     stop("Invalid filter OP: ", op_name)
@@ -119,9 +119,9 @@ gali_filter <- function(s_column, op_name, fv_value = list(NULL), s_dataName = "
 }
 
 #' @title 头部数据
-#' @family data-plyr function
+#' @family gali-dataset function
 #' @export
-gali_head <- function(i_n = 10, s_dataName = "@result") {
+gali_dataset_head <- function(i_n = 10, s_dataName = "@result") {
   ex <- expression({
     get(s_dataName) |> head(i_n)
   })
@@ -135,9 +135,9 @@ gali_head <- function(i_n = 10, s_dataName = "@result") {
 }
 
 #' @title 尾部数据
-#' @family data-plyr function
+#' @family gali-dataset function
 #' @export
-gali_tail <- function(i_n = 10, s_dataName = "@result") {
+gali_dataset_tail <- function(i_n = 10, s_dataName = "@result") {
   ex <- expression({
     get(s_dataName) |> tail(i_n)
   })
@@ -151,9 +151,9 @@ gali_tail <- function(i_n = 10, s_dataName = "@result") {
 }
 
 #' @title 按最大值取N条记录
-#' @family data-plyr function
+#' @family gali-dataset function
 #' @export
-gali_n_max <- function(s_orderColumn, i_n = 10, b_with_ties = FALSE, s_dataName = "@result") {
+gali_dataset_n_max <- function(s_orderColumn, i_n = 10, b_with_ties = FALSE, s_dataName = "@result") {
   ex <- expression({
     mydata <- get(s_dataName) |> collect()
     mydata |> slice_max(order_by = mydata[[s_orderColumn]], n = i_n, with_ties = b_with_ties)
@@ -170,9 +170,9 @@ gali_n_max <- function(s_orderColumn, i_n = 10, b_with_ties = FALSE, s_dataName 
 }
 
 #' @title 按最小值取N条记录
-#' @family data-plyr function
+#' @family gali-dataset function
 #' @export
-gali_n_min <- function(s_orderColumn, i_n = 10, b_with_ties = FALSE, s_dataName = "@result") {
+gali_dataset_n_min <- function(s_orderColumn, i_n = 10, b_with_ties = FALSE, s_dataName = "@result") {
   ex <- expression({
     mydata <- get(s_dataName) |> collect()
     mydata |> slice_min(order_by = mydata[[s_orderColumn]], n = i_n, with_ties = b_with_ties)
@@ -191,9 +191,9 @@ gali_n_min <- function(s_orderColumn, i_n = 10, b_with_ties = FALSE, s_dataName 
 ## 行排序----
 
 #' @title 行排序
-#' @family data-plyr function
+#' @family gali-dataset function
 #' @export
-gali_arrange <- function(sv_columns = list(),
+gali_dataset_arrange <- function(sv_columns = list(),
                        b_desc = FALSE, b_by_group = FALSE, s_dataName = "@result") {
   ex <- expression({
     mydata <- get(s_dataName)
@@ -217,9 +217,9 @@ gali_arrange <- function(sv_columns = list(),
 ## 列操作----
 
 #' @title 选择列，支持惰性计算
-#' @family data-plyr function
+#' @family gali-dataset function
 #' @export
-gali_select <- function(sv_columns = list(), b_everything = FALSE,
+gali_dataset_select <- function(sv_columns = list(), b_everything = FALSE,
                       s_regex = NULL, s_dataName = "@result") {
   ex <- expression({
     mydata <- get(s_dataName)
@@ -241,9 +241,9 @@ gali_select <- function(sv_columns = list(), b_everything = FALSE,
 }
 
 #' @title 列改名
-#' @family data-plyr function
+#' @family gali-dataset function
 #' @export
-gali_rename <- function(s_newName, s_oldName, s_dataName = "@result") {
+gali_dataset_rename <- function(s_newName, s_oldName, s_dataName = "@result") {
   ex <- expression({
     get(s_dataName) |> rename({{s_newName}} := s_oldName)
   })

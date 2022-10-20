@@ -30,15 +30,15 @@ task_create <- function(taskId, runLevel = 500L, online = TRUE,
 
 #' @title 增加子任务
 #' @param taskId 任务标识
-#' @param myplyr gali_filter等函数生成的执行函数
+#' @param galiResp gali_函数生成的执行函数
 #' @param taskTopic 保存任务定义的存储主题文件夹
 #' @family task-define function
 #' @export
-task_item_gali_add <- function(taskId, myplyr = list(), taskTopic = "TASK_DEFINE") {
+task_item_gali_add <- function(taskId, galiResp = list(), taskTopic = "TASK_DEFINE") {
   task_item_add(taskId,
-                taskScript = myplyr$taskScript,
-                params = myplyr$params,
-                scriptType = myplyr$scriptType,
+                taskScript = galiResp$taskScript,
+                params = galiResp$params,
+                scriptType = galiResp$scriptType,
                 taskTopic = taskTopic)
 }
 
@@ -323,24 +323,24 @@ task_run_expr <- function(taskExpr, params = list(NULL), runMode = "in-process",
   })
 }
 
-#' @title 快速运行data-plyr函数
+#' @title 快速运行gali_函数
 #' @param taskExpr 脚本表达式
 #' @family task-define function
 #' @export
-task_run_dp <- function(dpItem, runMode = "in-process", ...) {
+task_run_gali <- function(galiItem, runMode = "in-process", ...) {
   paramInfo <- list(...)
   ## 提取任务信息
   items <- tibble(
-    "taskScript" = dpItem$taskScript,
-    "params" = list(dpItem$params),
-    "scriptType" = dpItem$scriptType)
+    "taskScript" = galiItem$taskScript,
+    "params" = list(galiItem$params),
+    "scriptType" = galiItem$scriptType)
   tryCatch({
     task_run0(items, runMode, ...)
   }, error = function(e) {
     stop(
       e,
-      "task_run_dp Failed: ",
-      "<", dpItem$taskScript, "> ",
+      "task_run_gali Failed: ",
+      "<", galiItem$taskScript, "> ",
       paramInfo |> unlist() |> paste(collapse = ","))
   })
 }
