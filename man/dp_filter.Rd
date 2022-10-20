@@ -7,15 +7,15 @@
 dp_filter(s_column, op_name, fn_value = list(NULL), s_dataName = "@result")
 }
 \arguments{
+\item{s_column}{列名}
+
+\item{op_name}{阈值范围判断符号}
+
+\item{fn_value}{阈值}
+
+\item{s_dataName}{内存中的数据框名称，默认为 @result}
+
 \item{taskId}{任务ID}
-
-\item{column}{列名}
-
-\item{op}{阈值范围判断符号}
-
-\item{value}{阈值}
-
-\item{dataName}{内存中的数据框名称，默认为 @result}
 
 \item{taskTopic}{任务定义的主题文件夹}
 }
@@ -24,7 +24,7 @@ dp_filter(s_column, op_name, fn_value = list(NULL), s_dataName = "@result")
 
 允许为数据集增加多个阈值查询条件，缩小筛查范围。
 
-taskId、column、op、value等参数构造唯一的dp_filter表达式，
+taskId、s_column、op_name、fn_value等参数构造唯一的dp_filter表达式，
 这将允许从UI生成或还原该操作。
 
 只要包括以下逻辑判断：
