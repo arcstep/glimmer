@@ -176,11 +176,11 @@ get_params <- function(funcName) {
   p <- tribble(
     ~prefix, ~typeName, ~tips,
     "s_", "string", "字符串",
-    "sn_", "n_string", "字符串序列",
+    "sv_", "n_string", "字符串序列",
     "i_", "int", "整数",
-    "in_", "int", "整数序列",
+    "iv_", "int", "整数序列",
     "f_", "float", "浮点数",
-    "fn_", "float", "数值序列",
+    "fv_", "float", "数值序列",
     "ds_", "date_string", "日期字符串",
     "dts_", "datetime_string", "日期时间字符串",
     "ts_", "time_string", "时间字符串",
@@ -201,4 +201,4 @@ get_funs_ds <- purrr::partial(get_funcs, prefix = "^ds_")
 
 #' @title 所有dp函数
 #' @export
-get_funs_dp <- purrr::partial(get_funcs, prefix = "^dp_")
+get_funs_gali <- purrr::partial(get_funcs, prefix = "^gali_")

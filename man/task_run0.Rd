@@ -19,7 +19,7 @@ Other task-define function:
 \code{\link{task_create}()},
 \code{\link{task_id}()},
 \code{\link{task_item_add}()},
-\code{\link{task_item_dp_add}()},
+\code{\link{task_item_gali_add}()},
 \code{\link{task_read}()},
 \code{\link{task_run_dir}()},
 \code{\link{task_run_dp}()},

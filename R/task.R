@@ -30,11 +30,11 @@ task_create <- function(taskId, runLevel = 500L, online = TRUE,
 
 #' @title 增加子任务
 #' @param taskId 任务标识
-#' @param myplyr dp_filter等函数生成的执行函数
+#' @param myplyr gali_filter等函数生成的执行函数
 #' @param taskTopic 保存任务定义的存储主题文件夹
 #' @family task-define function
 #' @export
-task_item_dp_add <- function(taskId, myplyr = list(), taskTopic = "TASK_DEFINE") {
+task_item_gali_add <- function(taskId, myplyr = list(), taskTopic = "TASK_DEFINE") {
   task_item_add(taskId,
                 taskScript = myplyr$taskScript,
                 params = myplyr$params,
@@ -398,7 +398,7 @@ task_run0 <- function(taskItems, runMode = "in-process", ...) {
                  parse(file = p) |> eval(envir = TaskRun.ENV),
                  envir = TaskRun.ENV)
           })
-      } else if(stringr::str_detect(scriptType, "^dp_")) {
+      } else if(stringr::str_detect(scriptType, "^gali_")) {
         assign("@result",
                parse(text = taskScript) |> eval(envir = TaskRun.ENV),
                envir = TaskRun.ENV)

@@ -9,14 +9,14 @@ test_that("创建模型：一般情况", {
   
   ## 构造风险模型
   risk_model_create("cars", modelName = "risk/cyl-too-big") |>
-    task_item_dp_add(dp_filter("cyl", ">=", 8))
+    task_item_gali_add(gali_filter("cyl", ">=", 8))
   ("risk/cyl-too-big/main" |> task_run())$cyl |> unique() |>
     testthat::expect_equal(8)
 
   ## 写入风险疑点数据
   risk_model_create("cars", modelName = "risk/cyl-middle") |>
-    task_item_dp_add(dp_filter("cyl", ">=", 6)) |>
-    task_item_dp_add(dp_filter("cyl", "<", 8)) |>
+    task_item_gali_add(gali_filter("cyl", ">=", 6)) |>
+    task_item_gali_add(gali_filter("cyl", "<", 8)) |>
     risk_data_build()
   
   "risk/cyl-middle/main" |> task_run()
@@ -55,8 +55,8 @@ test_that("疑点数据：清理未处理的疑点数据", {
   
   ## 写入风险疑点数据
   risk_model_create("cars", modelName = "risk/cyl-middle") |>
-    task_item_dp_add(dp_filter("cyl", ">=", 6)) |>
-    task_item_dp_add(dp_filter("cyl", "<", 8)) |>
+    task_item_gali_add(gali_filter("cyl", ">=", 6)) |>
+    task_item_gali_add(gali_filter("cyl", "<", 8)) |>
     risk_data_build()
   
   "risk/cyl-middle/main" |> task_run()
