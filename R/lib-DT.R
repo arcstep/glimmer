@@ -25,7 +25,7 @@ language = list(
 #' @title 数据表
 #' @examples 
 #' mtcars |> DT_table()
-#' @family task-lib functions
+#' @family lib-DT functions
 #' @export
 DT_table <- function(d,
                     rownames = FALSE,

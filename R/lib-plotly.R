@@ -1,7 +1,7 @@
 #' @title 直方图
 #' @examples 
 #' mtcars |> plot_hist(x = "mpg")
-#' @family task-lib functions
+#' @family lib-plotly functions
 #' @export
 plot_hist <- function(d, x, color = "brown", xtitle = NULL, ytitle = NULL) {
   plot_ly(x = as.formula(paste("~", x))) |>
@@ -16,7 +16,7 @@ plot_hist <- function(d, x, color = "brown", xtitle = NULL, ytitle = NULL) {
 
 
 #' @title 散点图
-#' @family task-lib functions
+#' @family lib-plotly functions
 #' @examples 
 #' mtcars |>
 #'  plot_marker(x = "mpg", y = "disp", alpha = 0.6)
@@ -29,7 +29,7 @@ plot_marker <- function(
 }
 
 #' @title 柱图
-#' @family task-lib functions
+#' @family lib-plotly functions
 #' @examples 
 #' mtcars |>
 #'   count(cyl) |>
@@ -52,7 +52,7 @@ plot_bar <- function(
 #'   count(cyl) |> 
 #'   plot_line(x = "cyl", y = "n")
 #' 
-#' @family task-lib functions
+#' @family lib-plotly functions
 #' @export
 plot_line <- function(
     d, x, y,
@@ -65,7 +65,7 @@ plot_line <- function(
 }
 
 #' @title 面积图
-#' @family task-lib functions
+#' @family lib-plotly functions
 #' @examples 
 #' mtcars |>
 #'   count(cyl) |>
@@ -94,7 +94,7 @@ plot_area <- function(
 #' @title 饼图
 #' @examples 
 #' mtcars |> plot_pie(value = "cyl")
-#' @family task-lib functions
+#' @family lib-plotly functions
 #' @export
 plot_pie <- function(d, value, label = NULL, hole = 0.4) {
   d |> 
@@ -106,7 +106,7 @@ plot_pie <- function(d, value, label = NULL, hole = 0.4) {
 }
 
 #' @title 饼图
-#' @family task-lib functions
+#' @family lib-plotly functions
 #' @examples 
 #' mtcars |> count(cyl) |>
 #'  plot_pie2(value = "n", pull = c(0.1, 0, 0))
@@ -129,7 +129,7 @@ plot_pie2 <- function(d, value, label = NULL, pull = 0, hole = 0.25) {
 #'   mutate(cyl = sprintf("CYL: %d", cyl)) |>
 #'   plot_barpolar(theta = "cyl", r = "n")
 #'   
-#' @family task-lib functions
+#' @family lib-plotly functions
 #' @export
 plot_barpolar <- function(d, theta, r, color = NULL, bargap = 0, hole = 0.05, direction = "clockwise") {
   d |> 

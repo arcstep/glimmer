@@ -129,7 +129,8 @@ import_search <- function(fileMatch = ".*",
     d0 |> filter(ignore == ignoreFlag) |>
       collect() |>
       filter(stringr::str_detect(filePath, fileMatch)) |>
-      filter(stringr::str_detect(batchFolder, batchMatch))
+      filter(stringr::str_detect(batchFolder, batchMatch)) |>
+      mutate(fileSize = fs::as_fs_bytes(fileSize))
   } else {
     tibble()
   }
