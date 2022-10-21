@@ -151,6 +151,33 @@ config_yaml <- function(path = "./", yml = "config.yml") {
   yaml::read_yaml(fs::path_join(c(path, yml)))
 }
 
+##
+all_param_type <- tribble(
+  ~prefix, ~typeName, ~tips,
+  "s_", "string", "字符串",
+  "sv_", "string...", "字符串序列", 
+  "i_", "int", "整数",
+  "iv_", "int...", "整数序列",
+  "f_", "float", "浮点数",
+  "fv_", "float...", "数值序列",
+  "ds_", "date_string", "日期字符串",
+  "dts_", "datetime_string", "日期时间字符串",
+  "ts_", "time_string", "时间字符串",
+  "t_", "timestamp", "时间戳",
+  "c_", "color", "颜色",
+  "b_", "bool", "布尔",
+  "e_", "enum", "枚举",
+  "o_", "operater", "逻辑操作符"
+)
+
+#' @title 自动转换参数值
+get_param_auto <- function(params) {
+  params |> as_tibble() |>
+    pivot_longer(names_to = "paramName", values_to = "value") |>
+    mutate(prefix = stringr::str_remove(paramName, "(?<=_)(.*)")) |>
+    left_join(all_param_type, by = "prefix")
+}
+
 #' @title 获取函数参数
 #' @description 根据规则生成参数要求
 #' 
@@ -167,27 +194,10 @@ config_yaml <- function(path = "./", yml = "config.yml") {
 #' @param funcName 函数名称，可以是字符串或函数名
 #' @export
 get_params <- function(funcName) {
-  p <- tribble(
-    ~prefix, ~typeName, ~tips,
-    "s_", "string", "字符串",
-    "sv_", "string...", "字符串序列",
-    "i_", "int", "整数",
-    "iv_", "int...", "整数序列",
-    "f_", "float", "浮点数",
-    "fv_", "float...", "数值序列",
-    "ds_", "date_string", "日期字符串",
-    "dts_", "datetime_string", "日期时间字符串",
-    "ts_", "time_string", "时间字符串",
-    "t_", "timestamp", "时间戳",
-    "c_", "color", "颜色",
-    "b_", "bool", "布尔",
-    "e_", "enum", "枚举",
-    "o_", "operater", "逻辑操作符"
-  )
   tibble(paramName = formalArgs(funcName),
          defaultValue = formals(funcName) |> as.character()) |>
     mutate(prefix = stringr::str_remove(paramName, "(?<=_)(.*)")) |>
-    left_join(p, by = "prefix")
+    left_join(all_param_type, by = "prefix")
 }
 
 #' @title 查询函数

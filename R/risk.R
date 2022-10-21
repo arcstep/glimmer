@@ -121,11 +121,11 @@ risk_data_read <- function(todoFlag = TRUE, riskDataName = "__RISK_DATA__", cach
 risk_model_search <- function(modelMatch = ".*", taskTopic = "TASK_DEFINE") {
   root_path <- get_path(taskTopic)
   if(fs::dir_exists(root_path)) {
-    tasks <- fs::dir_ls(root_path, type = "file", all = T, glob = "*.yml", recurse = T)
+    tasks <- fs::dir_ls(root_path, type = "file", all = T, glob = "*.rds", recurse = T)
     if(length(tasks) > 0) {
       tasks |>
         purrr::map_df(function(path) {
-          x <- yaml::read_yaml(path)
+          x <- readRDS(path)
           x$itemsCount <- length(x$items[1])
           x$items <- list(as_tibble(x$items))
           names(x$extention) |> purrr::walk(function(item) x[[item]] <<- x$extention[[item]])

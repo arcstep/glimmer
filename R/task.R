@@ -11,9 +11,9 @@ task_create <- function(taskId, runLevel = 500L, online = TRUE,
                         taskType = "__UNKNOWN__", desc = "-",
                         taskTopic = "TASK_DEFINE", scriptsTopic = "TASK_SCRIPTS",
                         extention = list()) {
-  path <- get_path(taskTopic, paste0(taskId, ".yml"))
+  path <- get_path(taskTopic, paste0(taskId, ".rds"))
   fs::path_dir(path) |> fs::dir_create()
-  yml <- list(
+  settings <- list(
     "taskId" = taskId,
     "runLevel" = runLevel,
     "online" = online,
@@ -24,7 +24,7 @@ task_create <- function(taskId, runLevel = 500L, online = TRUE,
     "scriptsTopic" = scriptsTopic,
     "createdAt" = as_datetime(lubridate::now(), tz = "Asia/Shanghai") |> as.character()
   )
-  yml |> yaml::write_yaml(path)
+  settings |> saveRDS(path)
   taskId
 }
 
@@ -34,11 +34,11 @@ task_create <- function(taskId, runLevel = 500L, online = TRUE,
 #' @param taskTopic 保存任务定义的存储主题文件夹
 #' @family task-define function
 #' @export
-task_item_gali_add <- function(taskId, galiResp = list(), taskTopic = "TASK_DEFINE") {
+task_item_gali_add <- function(taskId, galiFuncName, params = list(), taskTopic = "TASK_DEFINE") {
   task_item_add(taskId,
-                taskScript = galiResp$taskScript,
-                params = galiResp$params,
-                scriptType = galiResp$scriptType,
+                taskScript = galiFuncName,
+                params = params,
+                scriptType = "gali",
                 taskTopic = taskTopic)
 }
 
@@ -56,10 +56,10 @@ task_item_add <- function(
     params = list(NULL),
     scriptType = "string",
     taskTopic = "TASK_DEFINE") {
-  path <- get_path(taskTopic, paste0(taskId, ".yml"))
+  path <- get_path(taskTopic, paste0(taskId, ".rds"))
   if(fs::file_exists(path)) {
     ## 写入任务定义配置文件
-    meta <- yaml::read_yaml(path)
+    meta <- readRDS(path)
     item <- tibble(
       "taskScript" = taskScript,
       "params" = list(params %empty% NULL),
@@ -69,7 +69,7 @@ task_item_add <- function(
     } else {
       meta$items <- rbind(as_tibble(meta$items), item)
     }
-    meta |> yaml::write_yaml(path)
+    meta |> saveRDS(path)
     ## 使用模板创建脚本
     if(scriptType == "file") task_script_file_create(taskScript)
     if(scriptType == "dir") task_script_dir_create(taskScript)
@@ -112,15 +112,15 @@ task_read <- function(taskId, taskTopic = "TASK_DEFINE") {
   if(length(taskId) != 1) {
     stop("taskId length MUST be 1 >> ", taskId |> paste(collapse = ","))
   }
-  path <- get_path(taskTopic, paste0(taskId, ".yml"))
+  path <- get_path(taskTopic, paste0(taskId, ".rds"))
   if(fs::file_exists(path)) {
-    x <- yaml::read_yaml(path)
+    x <- readRDS(path)
     x$items <- as_tibble(x$items)
-    x$yaml_path = path
+    x$task_path = path
     x
   } else {
     warning("No Task Define: ", taskId)
-    list("yaml_path" = path)
+    list("task_path" = path)
   }
 }
 
@@ -131,11 +131,11 @@ task_read <- function(taskId, taskTopic = "TASK_DEFINE") {
 task_search <- function(taskMatch = ".*", typeMatch = ".*", taskTopic = "TASK_DEFINE") {
   root_path <- get_path(taskTopic)
   if(fs::dir_exists(root_path)) {
-    tasks <- fs::dir_ls(root_path, type = "file", all = T, glob = "*.yml", recurse = T)
+    tasks <- fs::dir_ls(root_path, type = "file", all = T, glob = "*.rds", recurse = T)
     if(length(tasks) > 0) {
       tasks |>
         purrr::map_df(function(path) {
-          x <- yaml::read_yaml(path)
+          x <- readRDS(path)
           x$itemsCount <- length(x$items[1])
           x$items <- list(as_tibble(x$items))
           x$extention <- list(x$extention)
@@ -159,7 +159,7 @@ task_search <- function(taskMatch = ".*", typeMatch = ".*", taskTopic = "TASK_DE
 task_id <- function(taskMatch = ".*", taskTopic = "TASK_DEFINE") {
   root_path <- get_path(taskTopic)
   if(fs::dir_exists(root_path)) {
-    tasks <- fs::dir_ls(root_path, type = "file", all = T, regexp = paste0(taskMatch, ".*\\.yml$"), recurse = T)
+    tasks <- fs::dir_ls(root_path, type = "file", all = T, regexp = paste0(taskMatch, ".*\\.rds$"), recurse = T)
     if(length(tasks) > 0) {
       tasks |> stringr::str_remove(root_path) |>
         stringr::str_sub(2, -5)
@@ -173,56 +173,77 @@ task_id <- function(taskMatch = ".*", taskTopic = "TASK_DEFINE") {
 
 #' @title 运行任务
 #' @param taskId 任务标识
+#' @param withQueue 是否在运行队列中显示状态
+#' @param queueName 指定队列数据集
 #' @param taskTopic 保存任务定义的存储主题文件夹
+#' @param scriptsTopic 脚本文件保存位置
+#' @param cacheTopic 数据集保存位置
 #' @param runMode 运行模式（默认为进程内执行，改为r或r_bg为子进程执行）
 #' @family task-define function
 #' @export
 task_run <- function(taskId,
+                     withQueue = FALSE,
+                     queueName = "__TASK_QUEUE__",
                      taskTopic = "TASK_DEFINE",
                      scriptsTopic = "TASK_SCRIPTS",
                      cacheTopic = "CACHE",
-                     queueName = "__TASK_QUEUE__",
                      runMode = "in-process", ...) {
   paramInfo <- list(...)
-  ## 提取任务信息
+  ## 设置运行环境
   batchId <- gen_batchNum()
-  item_run <- tibble(
-    "taskScript" = expression({
-      item <- task_queue_item(
-        taskId = taskId,
-        id = batchId,
-        yamlParams = yamlParams,
-        taskTopic = taskTopic,
-        cacheTopic = cacheTopic)
-      item |> mutate(`@from` = "task_run()") |> ds_append(queueName, cacheTopic)
-    }),
+  item_head <- tibble(
+    "taskScript" = expression({taskId}),
     "params" = list(list(
+      "s_OUTPUT" = "@result",
       "taskId" = taskId,
       "batchId" = batchId,
-      "queueName" = queueName,
-      "yamlParams" = paramInfo |> task_queue_param_to_yaml(),
       "taskTopic" = taskTopic,
       "cacheTopic" = cacheTopic,
       "scriptsTopic" = scriptsTopic)),
     "scriptType" = "queue"
   )
-  item_done <- tibble(
-    "taskScript" = expression({
-      item <- task_queue_search(dsName = queueName, cacheTopic = cacheTopic) |>
-        filter(id == batchId) |>
-        mutate(doneAt = now(tzone = "Asia/Shanghai"))
-      item |> mutate(`@from` = "task_run()") |> ds_write(queueName, cacheTopic)
-    }),
-    "params" = list(list("taskId" = taskId, "batchId" = batchId, "queueName" = queueName,
-                    "yamlParams" = paramInfo |> task_queue_param_to_yaml(),
-                    "taskTopic" = taskTopic, "cacheTopic" = cacheTopic)),
-    "scriptType" = "queue"
-  )
-  items <- rbind(
-    item_run,
-    task_read(taskId, taskTopic)$items,
-    item_done
-  )
+  if(withQueue) {
+    item_run <- tibble(
+      "taskScript" = expression({
+        item <- task_queue_item(
+          taskId = taskId,
+          id = batchId,
+          yamlParams = yamlParams,
+          taskTopic = taskTopic,
+          cacheTopic = cacheTopic)
+        item |> mutate(`@from` = "task_run()") |> ds_append(queueName, cacheTopic)
+      }),
+      "params" = list(list(
+        "queueName" = queueName,
+        "yamlParams" = paramInfo |> task_queue_param_to_yaml())),
+      "scriptType" = "queue"
+    )
+    item_done <- tibble(
+      "taskScript" = expression({
+        item <- task_queue_search(dsName = queueName, cacheTopic = cacheTopic) |>
+          filter(id == batchId) |>
+          mutate(doneAt = now(tzone = "Asia/Shanghai"))
+        item |> mutate(`@from` = "task_run()") |> ds_write(queueName, cacheTopic)
+      }),
+      "params" = list(list("taskId" = taskId, "batchId" = batchId, "queueName" = queueName,
+                           "yamlParams" = paramInfo |> task_queue_param_to_yaml(),
+                           "taskTopic" = taskTopic, "cacheTopic" = cacheTopic)),
+      "scriptType" = "queue"
+    )    
+    items <- rbind(
+      item_head,
+      item_run,
+      task_read(taskId, taskTopic)$items,
+      item_done
+    )
+  } else {
+    ## 不使用队列记录运行状态
+    items <- rbind(
+      item_head,
+      task_read(taskId, taskTopic)$items
+    )
+  }
+
   tryCatch({
     task_run0(items, runMode, scriptsTopic = scriptsTopic, ...)
   }, error = function(e) {
@@ -233,7 +254,6 @@ task_run <- function(taskId,
       paramInfo |> unlist() |> paste(collapse = ","))
   })
 }
-
 
 #' @title 快速运行脚本文件
 #' @param taskFile 任务文件路径
@@ -353,7 +373,8 @@ task_run_gali <- function(galiItem, runMode = "in-process", ...) {
 task_run0 <- function(taskItems, runMode = "in-process", ...) {
   taskToRun <- function(..., taskItems) {
     ## 子函数内定义一个设置返回值的函数，供内部使用
-    TaskRun.ENV <- new.env(hash = TRUE)
+    # TaskRun.ENV <- new.env(hash = TRUE)
+    TaskRun.ENV <- globalenv()
     taskParams <- list(...)
     names(taskParams) |> purrr::walk(function(i) {
       assign(i, taskParams[[i]], envir = TaskRun.ENV)
@@ -398,13 +419,20 @@ task_run0 <- function(taskItems, runMode = "in-process", ...) {
                  parse(file = p) |> eval(envir = TaskRun.ENV),
                  envir = TaskRun.ENV)
           })
-      } else if(stringr::str_detect(scriptType, "^gali_")) {
+      } else if(scriptType == "gali") {
+        myparam <- formalArgs(taskScript)
+        galiParam <- params[myparam[myparam %in% names(params)]] %empty% list()
         assign("@result",
-               parse(text = taskScript) |> eval(envir = TaskRun.ENV),
+               do.call(taskScript, args = galiParam, quote = TRUE, envir = TaskRun.ENV),
                envir = TaskRun.ENV)
         
       } else {
         warning("UNKNOWN ScriptType: ", scriptType)
+      }
+      
+      ## s_OUTPUT 可将任务执行结果保存在指定变量中
+      if("s_OUTPUT" %in% ls(envir = TaskRun.ENV)) {
+        assign(get("s_OUTPUT"), `@result`, envir = TaskRun.ENV)
       }
     })
     get("@result", envir = TaskRun.ENV)
