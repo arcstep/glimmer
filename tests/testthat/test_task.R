@@ -53,6 +53,9 @@ test_that("<task_run>", {
   task_run("task_sample_simple") |> nrow() |>
     testthat::expect_equal(1)
 
+  task_run("task_sample_simple", withQueue = TRUE) |> nrow() |>
+    testthat::expect_equal(1)
+  
   task_run("task_sample_dir") |> ncol() |>
     testthat::expect_equal(3)
   
@@ -89,6 +92,50 @@ test_that("<task_run_[string|file|dir|expr]>", {
     testthat::expect_equal("liyihan-5")
   
   temp_remove()
+})
+
+test_that("使用gali函数", {
+  sample_config_init()
+  sample_import_files()
+  
+  ##
+  assign(
+    "gali_myfunc1",
+    function() { mtcars |> as_tibble() },
+    envir = globalenv())
+  task_create(taskId = "Gali_01", list()) |>
+    task_gali_add("gali_myfunc1")
+  task_run("Gali_01") |> nrow() |>
+    testthat::expect_equal(nrow(mtcars))
+
+  ##
+  assign(
+    "gali_myarrange",
+    function(d = NULL, sv_columns) {
+      (d %empty% get(s_OUTPUT)) |>
+        arrange(!!!syms(sv_columns))},
+    envir = globalenv())
+  task_create(taskId = "Gali_02", list()) |>
+    task_gali_add("gali_myfunc1") |>
+    task_gali_add("gali_myarrange",
+                       params = list(s_OUTPUT = "@result", sv_columns = "disp"))
+  task_run("Gali_02")$disp[[1]] |>
+    testthat::expect_equal(min(mtcars$disp))
+  
+  task_create(taskId = "Gali_03", list()) |>
+    task_gali_add("gali_myarrange",
+                       params = list("s_OUTPUT" = "x", "x" = mtcars, sv_columns = "disp"))
+  task_run("Gali_03")$disp[[1]] |>
+    testthat::expect_equal(min(mtcars$disp))
+
+  task_create(taskId = "Gali_04", list("@result" = mtcars)) |>
+    task_gali_add("gali_myarrange",
+                  params = list(sv_columns = "disp"))
+  task_run("Gali_04")$disp[[1]] |>
+    testthat::expect_equal(min(mtcars$disp))
+  
+  temp_remove()
+  
 })
 
 test_that("运行任务：异常情况", {

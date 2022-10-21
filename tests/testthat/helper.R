@@ -7,6 +7,8 @@ library(lubridate, warn.conflicts = FALSE)
 rootPath <- tempdir()
 
 sample_dataset_init <- function() {
+  config_init(rootPath)
+  
   ##
   ds_init("student", data = tibble("name" = "adi", "age" = 5L))
   ds_init("score", schema = list(
@@ -17,6 +19,7 @@ sample_dataset_init <- function() {
 }
 
 sample_task_define <- function() {
+  config_init(testthat::test_path())
   ## simple
   task_create(taskId = "build_cars", taskType = "__BUILD__") |>
     task_item_add(taskScript = "BUILD/cars.R", scriptType = "file")
@@ -65,9 +68,9 @@ sample_config_init <- function() {
 }
 
 sample_import_files <- function() {
-  fs::dir_copy(testthat::test_path("_sample_import"), get_path("IMPORT"), overwrite = TRUE)
-  fs::dir_copy(testthat::test_path("_sample_task_define"), get_path("TASK_DEFINE"), overwrite = TRUE)
-  fs::dir_copy(testthat::test_path("_sample_task_scripts"), get_path("TASK_SCRIPTS"), overwrite = TRUE)
+  fs::dir_copy(testthat::test_path("_IMPORT"), get_path("IMPORT"), overwrite = TRUE)
+  fs::dir_copy(testthat::test_path("_TASK_DEFINE"), get_path("TASK_DEFINE"), overwrite = TRUE)
+  fs::dir_copy(testthat::test_path("_TASK_SCRIPTS"), get_path("TASK_SCRIPTS"), overwrite = TRUE)
 }
 
 temp_remove <- function() {

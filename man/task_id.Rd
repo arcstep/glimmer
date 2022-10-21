@@ -12,8 +12,8 @@ task_id(taskMatch = ".*", taskTopic = "TASK_DEFINE")
 \seealso{
 Other task-define function: 
 \code{\link{task_create}()},
+\code{\link{task_gali_add}()},
 \code{\link{task_item_add}()},
-\code{\link{task_item_gali_add}()},
 \code{\link{task_read}()},
 \code{\link{task_run0}()},
 \code{\link{task_run_dir}()},

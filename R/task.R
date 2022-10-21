@@ -30,20 +30,6 @@ task_create <- function(taskId, runLevel = 500L, online = TRUE,
 
 #' @title 增加子任务
 #' @param taskId 任务标识
-#' @param galiResp gali_函数生成的执行函数
-#' @param taskTopic 保存任务定义的存储主题文件夹
-#' @family task-define function
-#' @export
-task_item_gali_add <- function(taskId, galiFuncName, params = list(), taskTopic = "TASK_DEFINE") {
-  task_item_add(taskId,
-                taskScript = galiFuncName,
-                params = params,
-                scriptType = "gali",
-                taskTopic = taskTopic)
-}
-
-#' @title 增加子任务
-#' @param taskId 任务标识
 #' @param taskScript 子任务的执行路径
 #' @param params 子任务的参数设置
 #' @param scriptType 可以是string,file,dir, 或其他系统内置函数
@@ -80,6 +66,12 @@ task_item_add <- function(
     stop("Can't Add Task Before Task Define: ", taskId)
   }
 }
+
+#' @title 为任务增加gali函数子任务
+#' @family task-define function
+#' @export
+task_gali_add <- purrr::partial(task_item_add, scriptType = "gali")
+
 
 #' @title 创建脚本文件
 task_script_file_create <- function(scriptFile, scriptsTopic = "TASK_SCRIPTS") {

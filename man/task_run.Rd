@@ -6,10 +6,11 @@
 \usage{
 task_run(
   taskId,
+  withQueue = FALSE,
+  queueName = "__TASK_QUEUE__",
   taskTopic = "TASK_DEFINE",
   scriptsTopic = "TASK_SCRIPTS",
   cacheTopic = "CACHE",
-  queueName = "__TASK_QUEUE__",
   runMode = "in-process",
   ...
 )
@@ -17,7 +18,15 @@ task_run(
 \arguments{
 \item{taskId}{任务标识}
 
+\item{withQueue}{是否在运行队列中显示状态}
+
+\item{queueName}{指定队列数据集}
+
 \item{taskTopic}{保存任务定义的存储主题文件夹}
+
+\item{scriptsTopic}{脚本文件保存位置}
+
+\item{cacheTopic}{数据集保存位置}
 
 \item{runMode}{运行模式（默认为进程内执行，改为r或r_bg为子进程执行）}
 }
@@ -27,9 +36,9 @@ task_run(
 \seealso{
 Other task-define function: 
 \code{\link{task_create}()},
+\code{\link{task_gali_add}()},
 \code{\link{task_id}()},
 \code{\link{task_item_add}()},
-\code{\link{task_item_gali_add}()},
 \code{\link{task_read}()},
 \code{\link{task_run0}()},
 \code{\link{task_run_dir}()},

@@ -17,9 +17,9 @@ task_run0(taskItems, runMode = "in-process", ...)
 \seealso{
 Other task-define function: 
 \code{\link{task_create}()},
+\code{\link{task_gali_add}()},
 \code{\link{task_id}()},
 \code{\link{task_item_add}()},
-\code{\link{task_item_gali_add}()},
 \code{\link{task_read}()},
 \code{\link{task_run_dir}()},
 \code{\link{task_run_expr}()},
