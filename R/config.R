@@ -170,11 +170,11 @@ get_params <- function(funcName) {
   p <- tribble(
     ~prefix, ~typeName, ~tips,
     "s_", "string", "字符串",
-    "sv_", "n_string", "字符串序列",
+    "sv_", "string...", "字符串序列",
     "i_", "int", "整数",
-    "iv_", "int", "整数序列",
+    "iv_", "int...", "整数序列",
     "f_", "float", "浮点数",
-    "fv_", "float", "数值序列",
+    "fv_", "float...", "数值序列",
     "ds_", "date_string", "日期字符串",
     "dts_", "datetime_string", "日期时间字符串",
     "ts_", "time_string", "时间字符串",
@@ -184,27 +184,33 @@ get_params <- function(funcName) {
     "e_", "enum", "枚举",
     "o_", "operater", "逻辑操作符"
   )
-  tibble(paramName = formalArgs(funcName)) |>
+  tibble(paramName = formalArgs(funcName),
+         defaultValue = formals(funcName) |> as.character()) |>
     mutate(prefix = stringr::str_remove(paramName, "(?<=_)(.*)")) |>
     left_join(p, by = "prefix")
 }
 
-#' @title 所有gali函数
+#' @title 查询函数
 #' @export
-get_funs_gali <- function() {
+get_funs <- function(regex = ".*", pos = "package:glimmer") {
   p <- tribble(
-    ~midfix, ~input, ~output, ~tips,
+    ~type, ~input, ~output, ~tips,
     "import", "-", "tibble", "导入各类数据",
     "export", "tibble", "-", "导出各类数据或报表",
     "read", "dataset", "tibble", "读取Parquet文件组数据集",
     "write", "tibble", "parquet", "保存Parquet文件组数据集",
-    "dataset", "tibble", "tibble", "支持管道的数据框处理",
+    "ds", "tibble", "tibble", "支持管道的数据框处理",
     "plot", "tibble", "plotly", "绘制plotly图表",
     "trace", "plotly", "plotly", "增加plotly绘制层",
     "DT", "tibble", "DT", "绘制DT数据表"
   )
-  x <- lsf.str("package:glimmer")
-  tibble(funcName = x[x |> stringr::str_detect("^gali_")]) |>
-    mutate(midfix = stringr::str_remove(funcName, "^gali_") |> stringr::str_remove("(?<=)_.+")) |>
-    left_join(p, by = "midfix")
+  x <- lsf.str(pos)
+  tibble(funcName = x[x |> stringr::str_detect(regex)]) |>
+    mutate(type = stringr::str_remove(funcName, regex) |> stringr::str_remove("(?<=)_.+")) |>
+    left_join(p, by = "type")
 }
+
+#' @title 所有gali函数
+#' @export
+get_funs_gali <- purrr::partial(get_funs, regex = "^gali_")
+
