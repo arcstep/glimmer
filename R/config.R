@@ -222,5 +222,8 @@ get_funs <- function(regex = ".*", pos = "package:glimmer") {
 
 #' @title 所有gali函数
 #' @export
-get_funs_gali <- purrr::partial(get_funs, regex = "^gali_")
+get_funs_gali <- function(matchName = ".*", pos = "package:glimmer") {
+  get_funs(regex = "^gali_", pos) |>
+    filter(stringr::str_detect(funcName, matchName))
+}
 
