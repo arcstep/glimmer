@@ -15,7 +15,7 @@ import_scan(
 读取导入素材，同时读取导入状态库，
 将未曾导入或有修改时间有变动的文件写入状态库。
 
-处理导入任务时也将修改这一状态库，标记doneAt、ignore等字段。
+处理导入任务时也将修改这一状态库，标记todo、ignore等字段。
 }
 \seealso{
 Other import function: 

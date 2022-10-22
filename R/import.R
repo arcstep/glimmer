@@ -19,6 +19,7 @@ import_init <- function(dsName = "__IMPORT_FILES__", cacheTopic = "CACHE", snapT
     "filePath" = "AAA/my.csv",
     "fileSize" = 537.0, # fs::bytes
     "lastmodifiedAt" = dt_datetime(), # modification_time
+    "todo" = dt_bool(), # 待处理标志
     "doneAt" = dt_datetime(),  # 任务处理完成时间
     "ignore" = dt_bool(), # 不做处理
     "year" = 2022L, # createdAt year
@@ -81,7 +82,7 @@ import_changed <- function(importTopic = "IMPORT", snapTopic = "SNAP") {
 #' 读取导入素材，同时读取导入状态库，
 #' 将未曾导入或有修改时间有变动的文件写入状态库。
 #' 
-#' 处理导入任务时也将修改这一状态库，标记doneAt、ignore等字段。
+#' 处理导入任务时也将修改这一状态库，标记todo、ignore等字段。
 #' @family import function
 #' @export
 import_scan <- function(importDataset = "__IMPORT_FILES__",
@@ -102,8 +103,9 @@ import_scan <- function(importDataset = "__IMPORT_FILES__",
     }
     ## 入库
     if(nrow(newScan) > 0) {
-      newScan |> ds_append(dsName = importDataset, topic = cacheTopic)
-      ds_submit(dsName = importDataset, topic = cacheTopic)
+      newScan |>
+        mutate(todo = TRUE) |>
+        ds_write(dsName = importDataset, topic = cacheTopic)
     } else {
       message("No new files to import!!")
     }
@@ -122,10 +124,10 @@ import_search <- function(fileMatch = ".*",
                          importDataset = "__IMPORT_FILES__",
                          cacheTopic = "CACHE",
                          ignoreFlag = FALSE,
-                         newFilesFlag = TRUE) {
+                         b_todo = TRUE) {
   filesToRead <- ds_read(dsName = importDataset, topic = cacheTopic)
   if(!rlang::is_empty(filesToRead)) {
-    d0 <- filesToRead |> filter(is.na(doneAt) == newFilesFlag)
+    d0 <- filesToRead |> filter(todo %in% b_todo)
     d0 |> filter(ignore == ignoreFlag) |>
       collect() |>
       filter(stringr::str_detect(filePath, fileMatch)) |>
@@ -171,7 +173,7 @@ import_run <- function(files = tibble(),
             if(toImport) {
               task_run(taskId = taskId, taskTopic = taskTopic, importTopic = importTopic, files = matched$path)
               filesToRead |>
-                mutate(doneAt = now(tzone = "Asia/Shanghai")) |>
+                mutate(todo = FALSE, doneAt = now(tzone = "Asia/Shanghai")) |>
                 ds_append(importDataset, cacheTopic)
             }
             hasMatched <<- hasMatched + nrow(matched)

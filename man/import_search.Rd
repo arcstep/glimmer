@@ -10,7 +10,7 @@ import_search(
   importDataset = "__IMPORT_FILES__",
   cacheTopic = "CACHE",
   ignoreFlag = FALSE,
-  newFilesFlag = TRUE
+  b_todo = TRUE
 )
 }
 \description{
