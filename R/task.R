@@ -376,20 +376,29 @@ task_run0 <- function(taskItems, runMode = "in-process", ...) {
     }
     ## 逐项执行子任务
     taskItems |> purrr::pwalk(function(taskScript, params, scriptType) {
-      names(params) |> purrr::walk(function(i) {
-        assign(i, params[[i]], envir = TaskRun.ENV)
-      })
       if(scriptType == "string") {
+        names(params) |> purrr::walk(function(i) {
+          assign(i, params[[i]], envir = TaskRun.ENV)
+        })
         assign("@result",
                parse(text = taskScript) |> eval(envir = TaskRun.ENV),
                envir = TaskRun.ENV)
       } else if(scriptType == "queue") {
+        names(params) |> purrr::walk(function(i) {
+          assign(i, params[[i]], envir = TaskRun.ENV)
+        })
         eval(taskScript, envir = TaskRun.ENV)
       } else if(scriptType == "expr") {
+        names(params) |> purrr::walk(function(i) {
+          assign(i, params[[i]], envir = TaskRun.ENV)
+        })
         assign("@result",
                eval(taskScript, envir = TaskRun.ENV),
                envir = TaskRun.ENV)
       } else if(scriptType == "file") {
+        names(params) |> purrr::walk(function(i) {
+          assign(i, params[[i]], envir = TaskRun.ENV)
+        })
         pathScripts <- get_path(get("scriptsTopic", envir = TaskRun.ENV), taskScript)
         if(!fs::file_exists(pathScripts)) {
           stop("No such script file: ", pathScripts)
@@ -398,6 +407,9 @@ task_run0 <- function(taskItems, runMode = "in-process", ...) {
                parse(file = pathScripts) |> eval(envir = TaskRun.ENV),
                envir = TaskRun.ENV)
       } else if(scriptType == "dir") {
+        names(params) |> purrr::walk(function(i) {
+          assign(i, params[[i]], envir = TaskRun.ENV)
+        })
         pathScripts <- get_path(get("scriptsTopic", envir = TaskRun.ENV), taskScript)
         if(!fs::dir_exists(pathScripts)) {
           stop("No such script dir: ", pathScripts)
@@ -414,6 +426,10 @@ task_run0 <- function(taskItems, runMode = "in-process", ...) {
       } else if(scriptType == "gali") {
         myparam <- formalArgs(taskScript)
         galiParam <- params[myparam[myparam %in% names(params)]] %empty% list()
+        envParam <- params[names(params) %nin% myparam] %empty% list()
+        names(envParam) |> purrr::walk(function(i) {
+          assign(i, params[[i]], envir = TaskRun.ENV)
+        })
         assign("@result",
                do.call(taskScript, args = galiParam, quote = TRUE, envir = TaskRun.ENV),
                envir = TaskRun.ENV)

@@ -117,8 +117,7 @@ test_that("使用gali函数", {
     envir = globalenv())
   task_create(taskId = "Gali_02", list()) |>
     task_gali_add("gali_myfunc1") |>
-    task_gali_add("gali_myarrange",
-                       params = list(s_OUTPUT = "@result", sv_columns = "disp"))
+    task_gali_add("gali_myarrange", params = list(s_OUTPUT = "@result", sv_columns = "disp"))
   task_run("Gali_02")$disp[[1]] |>
     testthat::expect_equal(min(mtcars$disp))
   

@@ -4,22 +4,22 @@
 \alias{gali_read}
 \title{读取数据集}
 \usage{
-gali_read(s_dsName)
+gali_read(s_dsName, b_noDeleted = TRUE)
 }
 \description{
 读取数据集
 }
 \seealso{
 Other gali-dataset function: 
-\code{\link{gali_dataset_arrange}()},
-\code{\link{gali_dataset_collect}()},
-\code{\link{gali_dataset_filter}()},
-\code{\link{gali_dataset_head}()},
-\code{\link{gali_dataset_n_max}()},
-\code{\link{gali_dataset_n_min}()},
-\code{\link{gali_dataset_rename}()},
-\code{\link{gali_dataset_select}()},
-\code{\link{gali_dataset_tail}()},
+\code{\link{gali_ds_arrange}()},
+\code{\link{gali_ds_collect}()},
+\code{\link{gali_ds_filter}()},
+\code{\link{gali_ds_head}()},
+\code{\link{gali_ds_n_max}()},
+\code{\link{gali_ds_n_min}()},
+\code{\link{gali_ds_rename}()},
+\code{\link{gali_ds_select}()},
+\code{\link{gali_ds_tail}()},
 \code{\link{gali_write}()}
 }
 \concept{gali-dataset function}
