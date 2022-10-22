@@ -4,13 +4,7 @@
 \alias{task_item_add}
 \title{增加子任务}
 \usage{
-task_item_add(
-  taskId,
-  taskScript,
-  params = list(NULL),
-  scriptType = "string",
-  taskTopic = "TASK_DEFINE"
-)
+task_item_add(taskId, taskScript, params = list(NULL), scriptType = "string")
 }
 \arguments{
 \item{taskId}{任务标识}
@@ -20,8 +14,6 @@ task_item_add(
 \item{params}{子任务的参数设置}
 
 \item{scriptType}{可以是string,file,dir, 或其他系统内置函数}
-
-\item{taskTopic}{保存任务定义的存储主题文件夹}
 }
 \description{
 增加子任务

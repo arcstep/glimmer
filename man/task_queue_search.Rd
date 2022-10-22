@@ -5,7 +5,7 @@
 \title{所有队列任务}
 \usage{
 task_queue_search(
-  done = FALSE,
+  b_todo = TRUE,
   taskMatch = ".*",
   dsName = "__TASK_QUEUE__",
   cacheTopic = "CACHE"

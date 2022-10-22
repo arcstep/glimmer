@@ -10,6 +10,7 @@
 task_create <- function(taskId, runLevel = 500L, online = TRUE,
                         taskType = "__UNKNOWN__", desc = "-",
                         taskTopic = "TASK_DEFINE", scriptsTopic = "TASK_SCRIPTS",
+                        queueName = "__TASK_QUEUE__", cacheTopic = "CACHE",
                         extention = list()) {
   path <- get_path(taskTopic, paste0(taskId, ".rds"))
   fs::path_dir(path) |> fs::dir_create()
@@ -22,6 +23,8 @@ task_create <- function(taskId, runLevel = 500L, online = TRUE,
     "extention" = extention,
     "taskTopic" = taskTopic,
     "scriptsTopic" = scriptsTopic,
+    "queueName" = queueName,
+    "cacheTopic" = cacheTopic,
     "createdAt" = as_datetime(lubridate::now(), tz = "Asia/Shanghai") |> as.character()
   )
   settings |> saveRDS(path)
@@ -33,15 +36,13 @@ task_create <- function(taskId, runLevel = 500L, online = TRUE,
 #' @param taskScript 子任务的执行路径
 #' @param params 子任务的参数设置
 #' @param scriptType 可以是string,file,dir, 或其他系统内置函数
-#' @param taskTopic 保存任务定义的存储主题文件夹
 #' @family task-define function
 #' @export
 task_item_add <- function(
     taskId,
     taskScript,
     params = list(NULL),
-    scriptType = "string",
-    taskTopic = "TASK_DEFINE") {
+    scriptType = "string") {
   path <- get_path(taskTopic, paste0(taskId, ".rds"))
   if(fs::file_exists(path)) {
     ## 写入任务定义配置文件
@@ -175,69 +176,50 @@ task_id <- function(taskMatch = ".*", taskTopic = "TASK_DEFINE") {
 #' @export
 task_run <- function(taskId,
                      withQueue = FALSE,
-                     queueName = "__TASK_QUEUE__",
                      taskTopic = "TASK_DEFINE",
-                     scriptsTopic = "TASK_SCRIPTS",
-                     cacheTopic = "CACHE",
                      runMode = "in-process", ...) {
   paramInfo <- list(...)
   ## 设置运行环境
   batchId <- gen_batchNum()
-  item_head <- tibble(
-    "taskScript" = expression({taskId}),
-    "params" = list(list(
-      "s_OUTPUT" = "@result",
-      "taskId" = taskId,
-      "batchId" = batchId,
-      "taskTopic" = taskTopic,
-      "cacheTopic" = cacheTopic,
-      "scriptsTopic" = scriptsTopic)),
-    "scriptType" = "queue"
-  )
+  taskMeta <- task_read(taskId)
   if(withQueue) {
     item_run <- tibble(
+      "scriptType" = "queue",
       "taskScript" = expression({
         item <- task_queue_item(
-          taskId = taskId,
           id = batchId,
-          yamlParams = yamlParams,
-          taskTopic = taskTopic,
-          cacheTopic = cacheTopic)
-        item |> mutate(`@from` = "task_run()") |> ds_append(queueName, cacheTopic)
+          taskId = taskId,
+          taskTopic = taskTopic)
+        item |> mutate(`@from` = "task_run()") |> ds_append(queueName, taskMeta$cacheTopic)
       }),
-      "params" = list(list(
-        "queueName" = queueName,
-        "yamlParams" = paramInfo |> task_queue_param_to_yaml())),
-      "scriptType" = "queue"
+      "params" = list(list("taskId" = taskId, "batchId" = batchId, "queueName" = taskMeta$queueName,
+                           "yamlParams" = paramInfo |> yaml::as.yaml(),
+                           "taskTopic" = taskTopic, "cacheTopic" = taskMeta$cacheTopic))
     )
     item_done <- tibble(
+      "scriptType" = "queue",
       "taskScript" = expression({
-        item <- task_queue_search(dsName = queueName, cacheTopic = cacheTopic) |>
+        item <- task_queue_search(dsName = queueName, cacheTopic = taskMeta$cacheTopic) |>
           filter(id == batchId) |>
-          mutate(doneAt = now(tzone = "Asia/Shanghai"))
-        item |> mutate(`@from` = "task_run()") |> ds_write(queueName, cacheTopic)
+          mutate(todo = FALSE, doneAt = now(tzone = "Asia/Shanghai"))
+        item |> mutate(`@from` = "task_run()") |> ds_write(queueName, taskMeta$cacheTopic)
       }),
-      "params" = list(list("taskId" = taskId, "batchId" = batchId, "queueName" = queueName,
-                           "yamlParams" = paramInfo |> task_queue_param_to_yaml(),
-                           "taskTopic" = taskTopic, "cacheTopic" = cacheTopic)),
-      "scriptType" = "queue"
+      "params" = list(list("taskId" = taskId, "batchId" = batchId, "queueName" = taskMeta$queueName,
+                           "yamlParams" = paramInfo |> yaml::as.yaml(),
+                           "taskTopic" = taskTopic, "cacheTopic" = taskMeta$cacheTopic))
     )    
     items <- rbind(
-      item_head,
       item_run,
       task_read(taskId, taskTopic)$items,
       item_done
     )
   } else {
     ## 不使用队列记录运行状态
-    items <- rbind(
-      item_head,
-      task_read(taskId, taskTopic)$items
-    )
+    items <- task_read(taskId, taskTopic)$items
   }
 
   tryCatch({
-    task_run0(items, runMode, scriptsTopic = scriptsTopic, ...)
+    task_run0(items, runMode, scriptsTopic = scriptsTopic, `@task` = taskMeta, ...)
   }, error = function(e) {
     stop(
       e,
@@ -374,13 +356,19 @@ task_run0 <- function(taskItems, runMode = "in-process", ...) {
     if("@result" %nin% ls(envir = TaskRun.ENV)) {
       assign("@result", list(), envir = TaskRun.ENV)
     }
+    ## s_OUTPUT 可将任务执行结果保存在指定变量中
+    if("s_OUTPUT" %in% ls(envir = TaskRun.ENV)) {
+      myoutput <- get("s_OUTPUT")
+    } else {
+      myoutput <- "@result"
+    }
     ## 逐项执行子任务
     taskItems |> purrr::pwalk(function(taskScript, params, scriptType) {
       if(scriptType == "string") {
         names(params) |> purrr::walk(function(i) {
           assign(i, params[[i]], envir = TaskRun.ENV)
         })
-        assign("@result",
+        assign(myoutput,
                parse(text = taskScript) |> eval(envir = TaskRun.ENV),
                envir = TaskRun.ENV)
       } else if(scriptType == "queue") {
@@ -392,7 +380,7 @@ task_run0 <- function(taskItems, runMode = "in-process", ...) {
         names(params) |> purrr::walk(function(i) {
           assign(i, params[[i]], envir = TaskRun.ENV)
         })
-        assign("@result",
+        assign(myoutput,
                eval(taskScript, envir = TaskRun.ENV),
                envir = TaskRun.ENV)
       } else if(scriptType == "file") {
@@ -403,7 +391,7 @@ task_run0 <- function(taskItems, runMode = "in-process", ...) {
         if(!fs::file_exists(pathScripts)) {
           stop("No such script file: ", pathScripts)
         }
-        assign("@result",
+        assign(myoutput,
                parse(file = pathScripts) |> eval(envir = TaskRun.ENV),
                envir = TaskRun.ENV)
       } else if(scriptType == "dir") {
@@ -419,7 +407,7 @@ task_run0 <- function(taskItems, runMode = "in-process", ...) {
           stop("None R file existing in scripts dir: ", pathScripts)
         }
         allFiles |> sort() |> purrr::walk(function(p) {
-          assign("@result",
+          assign(myoutput,
                  parse(file = p) |> eval(envir = TaskRun.ENV),
                  envir = TaskRun.ENV)
           })
@@ -430,17 +418,11 @@ task_run0 <- function(taskItems, runMode = "in-process", ...) {
         names(envParam) |> purrr::walk(function(i) {
           assign(i, params[[i]], envir = TaskRun.ENV)
         })
-        assign("@result",
+        assign(myoutput,
                do.call(taskScript, args = galiParam, quote = TRUE, envir = TaskRun.ENV),
                envir = TaskRun.ENV)
-        
       } else {
         warning("UNKNOWN ScriptType: ", scriptType)
-      }
-      
-      ## s_OUTPUT 可将任务执行结果保存在指定变量中
-      if("s_OUTPUT" %in% ls(envir = TaskRun.ENV)) {
-        assign(get("s_OUTPUT"), `@result`, envir = TaskRun.ENV)
       }
     })
     get("@result", envir = TaskRun.ENV)

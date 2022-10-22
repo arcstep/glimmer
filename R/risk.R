@@ -69,16 +69,7 @@ risk_model_create <- function(dsName,
                 riskDataName = riskDataName,
                 riskTip = riskTip,
                 riskLevel = riskLevel)) |>
-    task_item_add(expression({dsName |> ds_read(topic = cacheTopic)}) |> as.character(),
-                  params = list(
-                    "dsName" = dsName,
-                    "modelId" = modelId,
-                    "riskDataName" = riskDataName,
-                    "cacheTopic" = cacheTopic,
-                    "taskTopic" = taskTopic,
-                    "scriptsTopic" = scriptsTopic),
-                  scriptType = "string",
-                  taskTopic = taskTopic)
+    task_gali_add("gali_read", list("e_dsName" = dsName))
 }
 
 #' @title 读取疑点数据

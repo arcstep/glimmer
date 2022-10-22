@@ -9,6 +9,7 @@ task_queue_init <- function(dsName = "__TASK_QUEUE__", cacheTopic = "CACHE") {
     "taskTopic" = dt_string(),
     "taskId" = dt_string(),
     "ymlParams" = dt_string(),
+    "todo" = dt_bool(),
     "runAt" = dt_datetime(),
     "doneAt" = dt_datetime(),
     "year" = dt_int(), # createdAt year
@@ -43,6 +44,7 @@ task_queue_item <- function(taskId, yamlParams = "[]\n", id = gen_batchNum(),
     "taskTopic" = taskTopic,
     "taskId" = taskId,
     "ymlParams" = yamlParams,
+    "todo" = TRUE,
     "runAt" = runAt,
     "year" = as.integer(lubridate::year(runAt)),
     "month" = as.integer(lubridate::month(runAt)))
@@ -51,9 +53,9 @@ task_queue_item <- function(taskId, yamlParams = "[]\n", id = gen_batchNum(),
 #' @title 所有队列任务
 #' @family queue function
 #' @export
-task_queue_search <- function(done = FALSE, taskMatch = ".*", dsName = "__TASK_QUEUE__", cacheTopic = "CACHE") {
+task_queue_search <- function(b_todo = TRUE, taskMatch = ".*", dsName = "__TASK_QUEUE__", cacheTopic = "CACHE") {
   all <- ds_read(dsName = dsName, topic = cacheTopic) |>
-    filter((!is.na(doneAt)) %in% done) |>
+    filter(todo %in% b_todo) |>
     collect()
   if(!rlang::is_empty(all)) {
     all |> filter(stringr::str_detect(taskId, taskMatch)) |>

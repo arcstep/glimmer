@@ -7,10 +7,7 @@
 task_run(
   taskId,
   withQueue = FALSE,
-  queueName = "__TASK_QUEUE__",
   taskTopic = "TASK_DEFINE",
-  scriptsTopic = "TASK_SCRIPTS",
-  cacheTopic = "CACHE",
   runMode = "in-process",
   ...
 )
@@ -20,15 +17,15 @@ task_run(
 
 \item{withQueue}{是否在运行队列中显示状态}
 
-\item{queueName}{指定队列数据集}
-
 \item{taskTopic}{保存任务定义的存储主题文件夹}
+
+\item{runMode}{运行模式（默认为进程内执行，改为r或r_bg为子进程执行）}
+
+\item{queueName}{指定队列数据集}
 
 \item{scriptsTopic}{脚本文件保存位置}
 
 \item{cacheTopic}{数据集保存位置}
-
-\item{runMode}{运行模式（默认为进程内执行，改为r或r_bg为子进程执行）}
 }
 \description{
 运行任务

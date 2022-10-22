@@ -12,6 +12,8 @@ task_create(
   desc = "-",
   taskTopic = "TASK_DEFINE",
   scriptsTopic = "TASK_SCRIPTS",
+  queueName = "__TASK_QUEUE__",
+  cacheTopic = "CACHE",
   extention = list()
 )
 }
