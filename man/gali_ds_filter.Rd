@@ -38,8 +38,10 @@ taskId、s_column、o_name、fv_value等参数构造唯一的gali_ds_filter表�
 }
 \seealso{
 Other gali-dataset function: 
+\code{\link{gali_ds_add_count}()},
 \code{\link{gali_ds_arrange}()},
 \code{\link{gali_ds_collect}()},
+\code{\link{gali_ds_count}()},
 \code{\link{gali_ds_head}()},
 \code{\link{gali_ds_n_max}()},
 \code{\link{gali_ds_n_min}()},

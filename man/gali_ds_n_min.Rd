@@ -11,8 +11,10 @@ gali_ds_n_min(d = NULL, s_orderColumn, i_n = 10, b_with_ties = FALSE)
 }
 \seealso{
 Other gali-dataset function: 
+\code{\link{gali_ds_add_count}()},
 \code{\link{gali_ds_arrange}()},
 \code{\link{gali_ds_collect}()},
+\code{\link{gali_ds_count}()},
 \code{\link{gali_ds_filter}()},
 \code{\link{gali_ds_head}()},
 \code{\link{gali_ds_n_max}()},

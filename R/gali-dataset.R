@@ -149,3 +149,22 @@ gali_ds_rename <- function(d = NULL, s_newName, s_oldName) {
   names(mydata)[names(mydata) == s_oldName] <- s_newName
   mydata
 }
+
+#' @title 计数统计
+#' @family gali-dataset function
+#' @export
+gali_ds_count <- function(d = NULL, sv_columns = c(), b_sort = FALSE, s_name = "n") {
+  d %empty% get(s_OUTPUT) |>
+    select(sv_columns) |>
+    collect() |>
+    count(!!!syms(sv_columns), sort = b_sort, name = s_name)
+}
+
+#' @title 计数统计，并将结果追加到原数据集
+#' @family gali-dataset function
+#' @export
+gali_ds_add_count <- function(d = NULL, sv_columns = c(), b_sort = FALSE, s_name = "n") {
+  d %empty% get(s_OUTPUT) |>
+    collect() |>
+    add_count(!!!syms(sv_columns), sort = b_sort, name = s_name)
+}
