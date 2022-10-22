@@ -11,9 +11,9 @@ risk_data_init(dsName = "__RISK_DATA__", cacheTopic = "CACHE")
 }
 \seealso{
 Other risk function: 
-\code{\link{risk_data_build}()},
 \code{\link{risk_data_clear}()},
 \code{\link{risk_data_read}()},
+\code{\link{risk_data_write}()},
 \code{\link{risk_model_create}()},
 \code{\link{risk_model_search}()}
 }

@@ -79,29 +79,24 @@ risk_model_create <- function(dsName,
                   taskTopic = taskTopic)
 }
 
-#' @title 生成疑点数据
-#' @description
-#' 将筛查后的疑点数据写入数据集
-#' 
-#' @family risk function
+#' @title 定义风险模型
+#' @family gali-risk function
 #' @export
-risk_data_build <- function(modelId,
-                            riskDataName = "__RISK_DATA__",
-                            cacheTopic = "CACHE",
-                            taskTopic = "TASK_DEFINE",
-                            scriptsTopic = "TASK_SCRIPTS") {
-  task_item_add(modelId,
-                expression({
-                  `@result` |>
-                    risk_data_write(dsName,
-                                    modelId = modelId,
-                                    riskDataName = riskDataName,
-                                    cacheTopic = cacheTopic,
-                                    taskTopic = taskTopic)
-                  }) |> as.character(),
-                scriptType = "string",
-                taskTopic = taskTopic)
-}
+gali_create_risk_model <- function(s_dsName,
+                                   s_modelName,
+                                   s_tagName = "main",
+                                   s_riskTip = "-",
+                                   e_riskLevel = "L",
+                                   s_modelDesc = "-",
+                                   s_author = "-") {
+  risk_model_create(dsName = s_dsName,
+                    modelName = s_modelName,
+                    tagName = s_tagName,
+                    riskTip = s_riskTip,
+                    riskLevel = e_riskLevel,
+                    modelDesc = s_modelDesc,
+                    author = s_author)
+} 
 
 #' @title 读取疑点数据
 #' @family risk function
@@ -113,6 +108,13 @@ risk_data_read <- function(todoFlag = TRUE, riskDataName = "__RISK_DATA__", cach
   } else {
     x |> collect() |> filter(is.na(doneAt) %in% todoFlag)
   }
+}
+
+#' @title 读取疑点数据
+#' @family gali-risk function
+#' @export
+gali_read_risk <- function(b_todoFlag = TRUE) {
+  risk_data_read(b_todoFlag)
 }
 
 #' @title 查找风险模型
@@ -145,6 +147,13 @@ risk_model_search <- function(modelMatch = ".*", taskTopic = "TASK_DEFINE") {
   }
 }
 
+#' @title 查找风险模型
+#' @family gali-risk function
+#' @export
+gali_search_risk_model <- function(s_modelMatch = ".*") {
+  risk_model_search(s_modelMatch)
+}
+
 #' @title 清理未处理的疑点数据
 #' @description
 #' 重新生成模型时，一般需要清理未处理的疑点数据
@@ -163,16 +172,27 @@ risk_data_clear <- function(modelId,
     ds_append(dsName = riskDataName, topic = cacheTopic)
 }
 
-#' @title 写入疑点数据
-risk_data_write <- function(d,
-                            datasetName,
-                            modelId,
-                            riskDataName = "__RISK_DATA__",
-                            cacheTopic = "CACHE",
-                            taskTopic = "TASK_DEFINE") {
-  task <- task_read(modelId, taskTopic = taskTopic)
-  dsYaml <- ds_yaml(datasetName, cacheTopic)
+#' @title 根据风险模型生成并写入疑点数据
+#' @description 
+#' 如果疑点数据已经生成，但未处理，则先清理这些数据
+#' 
+#' @family risk function
+#' @export
+risk_data_write <- function(d, s_modelId) {
+  ## 根据任务ID获取数据
+  task <- task_read(s_modelId)
+  if(task$taskType != "__RISK__") {
+    stop("Not Risk Model Task: ", s_modelId, "!!")
+  }
+  datasetName <- task$extention$dsName
+  dsYaml <- ds_yaml(datasetName)
   submitTime <- now(tzone = "Asia/Shanghai")
+  ## 清理未处理完的疑点数据
+  risk_data_clear(s_modelId,
+                  riskDataName = task$riskDataName,
+                  cacheTopic = task$cacheTopic,
+                  taskTopic = task$taskTopic)
+  ## 生成疑点数据
   d |>
     select(dsYaml$keyColumns, dsYaml$titleColumn) |>
     collect() |>
@@ -186,5 +206,12 @@ risk_data_write <- function(d,
     mutate(riskTip = task$extention$riskTip) |>
     mutate(submitAt = submitTime) |>
     mutate(year = year(submitTime), month = month(submitTime)) |>
-    ds_write(riskDataName, cacheTopic)
+    ds_write(task$extention$riskDataName)
+}
+
+#' @title 根据风险模型生成并写入疑点数据
+#' @family gali-risk function
+#' @export
+gali_write_risk <- function(d = NULL, s_modelId) {
+  risk_data_write(d %empty% get(s_OUTPUT), s_modelId)
 }

@@ -166,7 +166,7 @@ all_param_type <- tribble(
   "t_", "timestamp", "时间戳",
   "c_", "color", "颜色",
   "b_", "bool", "布尔",
-  "e_", "enum", "枚举",
+  "e_", "enum", "枚举值",
   "o_", "operater", "逻辑操作符"
 )
 
@@ -207,6 +207,8 @@ get_funs <- function(regex = ".*", pos = "package:glimmer") {
     ~type, ~input, ~output, ~tips,
     "import", "-", "tibble", "导入各类数据",
     "export", "tibble", "-", "导出各类数据或报表",
+    "create", "-", "-", "创建元数据",
+    "search", "-", "-", "列举元数据",
     "read", "dataset", "tibble", "读取Parquet文件组数据集",
     "write", "tibble", "parquet", "保存Parquet文件组数据集",
     "ds", "tibble", "tibble", "支持管道的数据框处理",

@@ -2,17 +2,19 @@
 % Please edit documentation in R/risk.R
 \name{risk_data_write}
 \alias{risk_data_write}
-\title{写入疑点数据}
+\title{根据风险模型生成并写入疑点数据}
 \usage{
-risk_data_write(
-  d,
-  datasetName,
-  modelId,
-  riskDataName = "__RISK_DATA__",
-  cacheTopic = "CACHE",
-  taskTopic = "TASK_DEFINE"
-)
+risk_data_write(d, s_modelId)
 }
 \description{
-写入疑点数据
+如果疑点数据已经生成，但未处理，则先清理这些数据
 }
+\seealso{
+Other risk function: 
+\code{\link{risk_data_clear}()},
+\code{\link{risk_data_init}()},
+\code{\link{risk_data_read}()},
+\code{\link{risk_model_create}()},
+\code{\link{risk_model_search}()}
+}
+\concept{risk function}

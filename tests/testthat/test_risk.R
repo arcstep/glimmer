@@ -8,18 +8,19 @@ test_that("创建模型：一般情况", {
   m |> ds_write("cars")
   
   ## 构造风险模型
-  risk_model_create("cars", modelName = "risk/cyl-too-big") |>
-    task_item_gali_add(gali_dataset_filter("cyl", ">=", 8))
-  ("risk/cyl-too-big/main" |> task_run())$cyl |> unique() |>
+  resp <- risk_model_create("cars", modelName = "risk/cyl-too-big") |>
+    task_gali_add("gali_ds_filter", list(s_column = "cyl", o_name = ">=", fv_value = 8)) |>
+    task_gali_add("gali_ds_collect") |>
+    task_run()
+  resp$cyl |> unique() |>
     testthat::expect_equal(8)
 
   ## 写入风险疑点数据
   risk_model_create("cars", modelName = "risk/cyl-middle") |>
-    task_item_gali_add(gali_dataset_filter("cyl", ">=", 6)) |>
-    task_item_gali_add(gali_dataset_filter("cyl", "<", 8)) |>
-    risk_data_build()
-  
-  "risk/cyl-middle/main" |> task_run()
+    task_gali_add("gali_ds_filter", list(s_column = "cyl", o_name = ">=", fv_value = 6)) |>
+    task_gali_add("gali_ds_filter", list(s_column = "cyl", o_name = "<", fv_value = 8)) |>
+    risk_data_build() |>
+    task_run()
   (risk_data_read() |> distinct(dataTitle))$dataTitle |>
     testthat::expect_equal("6")
 
@@ -55,9 +56,9 @@ test_that("疑点数据：清理未处理的疑点数据", {
   
   ## 写入风险疑点数据
   risk_model_create("cars", modelName = "risk/cyl-middle") |>
-    task_item_gali_add(gali_dataset_filter("cyl", ">=", 6)) |>
-    task_item_gali_add(gali_dataset_filter("cyl", "<", 8)) |>
-    risk_data_build()
+    task_gali_add(gali_ds_filter("cyl", ">=", 6)) |>
+    task_gali_add(gali_ds_filter("cyl", "<", 8)) |>
+    gali_write_risk()
   
   "risk/cyl-middle/main" |> task_run()
   risk_data_read() |> nrow() |>
