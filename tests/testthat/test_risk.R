@@ -64,10 +64,7 @@ test_that("疑点数据：清理未处理的疑点数据", {
   risk_data_read() |> nrow() |>
     testthat::expect_equal(7)
   
-  risk_data_read() |>
-    filter(dataId == "1") |>
-    mutate(doneAt = now()) |>
-    ds_write("__RISK_DATA__")
+  risk_data_read() |> filter(dataId == "1") |> risk_data_set_done()
   risk_data_read() |> nrow() |>
     testthat::expect_equal(6)
 

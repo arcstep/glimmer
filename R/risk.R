@@ -14,6 +14,7 @@ risk_data_init <- function(dsName = "__RISK_DATA__", cacheTopic = "CACHE") {
     "riskLevel" =  dt_string(),
     "riskTip" = dt_string(),
     "submitAt" = dt_datetime(),
+    "todo" = dt_bool(),
     "doneAt" = dt_datetime(),
     "year" = dt_int(),    # submitAt year
     "month" = dt_int())   # submitAt month
@@ -88,7 +89,7 @@ risk_data_read <- function(todoFlag = TRUE, riskDataName = "__RISK_DATA__", cach
   if(rlang::is_empty(x)) {
     tibble()
   } else {
-    x |> collect() |> filter(is.na(doneAt) %in% todoFlag)
+    x |> collect() |> filter(todo %in% todoFlag)
   }
 }
 
@@ -133,14 +134,39 @@ risk_data_clear <- function(modelId,
                             cacheTopic = "CACHE",
                             taskTopic = "TASK_DEFINE") {
   task <- task_read(modelId, taskTopic = taskTopic)
-  allData <- ds_read(riskDataName, topic = cacheTopic)
+  allData <- risk_data_read(TRUE, riskDataName, cacheTopic)
   if(!rlang::is_empty(allData)) {
     allData |>
-      filter(is.na(doneAt)) |>
       collect() |>
       ds_as_deleted() |>
       ds_append(dsName = riskDataName, topic = cacheTopic)
   }
+}
+
+#' @title 为疑点数据设置todo标记
+#' @family risk function
+#' @export
+risk_data_set_todo <- function(d,
+                              b_todoFlag = TRUE,
+                              riskDataName = "__RISK_DATA__",
+                              cacheTopic = "CACHE") {
+  risk_data_read(c(TRUE, FALSE), riskDataName, cacheTopic) |>
+    semi_join(d |> collect(), by = c("modelName", "dsName", "dataId")) |>
+    mutate(todo = b_todoFlag) |>
+    ds_write("__RISK_DATA__")
+}
+
+#' @title 为疑点数据设置已完成标记
+#' @family risk function
+#' @export
+risk_data_set_done <- function(d,
+                           t_doneAt = now(),
+                           riskDataName = "__RISK_DATA__",
+                           cacheTopic = "CACHE") {
+  risk_data_read(TRUE, riskDataName, cacheTopic) |>
+    semi_join(d |> collect(), by = c("modelName", "dsName", "dataId")) |>
+    mutate(todo = FALSE, doneAt = t_doneAt) |>
+    ds_write("__RISK_DATA__")
 }
 
 #' @title 根据风险模型生成并写入疑点数据
@@ -171,10 +197,10 @@ risk_data_write <- function(d, s_modelId) {
     mutate(dsName = datasetName) |>
     mutate(modelName = task$extention$modelName)
   ## 已处理数据
-  allRiskData <- ds_read0(task$extention$riskDataName, task$extention$cacheTopic)
+  allRiskData <- risk_data_read(FALSE, task$extention$riskDataName, task$extention$cacheTopic)
   if(!rlang::is_empty(allRiskData)) {
     toWrite <- d0 |> anti_join(
-      allRiskData |> filter(!is.na(doneAt)) |> select(modelName, dsName, dataId) |> collect(),
+      allRiskData |> filter(!todo) |> select(modelName, dsName, dataId) |> collect(),
       by = c("modelName", "dsName", "dataId"))
   } else {
     toWrite <- d0
@@ -187,6 +213,7 @@ risk_data_write <- function(d, s_modelId) {
     mutate(riskLevel = task$extention$riskLevel) |>
     mutate(riskTip = task$extention$riskTip) |>
     mutate(submitAt = submitTime) |>
+    mutate(todo = TRUE) |>
     mutate(year = year(submitTime), month = month(submitTime)) |>
     ds_write(task$extention$riskDataName, topic = task$extention$cacheTopic)
 }
