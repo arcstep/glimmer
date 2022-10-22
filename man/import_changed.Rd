@@ -14,6 +14,7 @@ Other import function:
 \code{\link{import_init}()},
 \code{\link{import_run}()},
 \code{\link{import_scan}()},
-\code{\link{import_search}()}
+\code{\link{import_search}()},
+\code{\link{import_task_create}()}
 }
 \concept{import function}

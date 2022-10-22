@@ -138,6 +138,26 @@ import_search <- function(fileMatch = ".*",
   }
 }
 
+#' @title 定义导入任务
+#' @family import function
+#' @export
+import_task_create <- function(taskId,
+                               importFileMatch,
+                               targetDataset,
+                               importTopic = "IMPORT",
+                               cacheTopic = "CACHE",
+                               taskTopic = "TASK_DEFINE",
+                               scriptsTopic = "TASK_SCRIPTS") {
+  task_create(taskId = modelId,
+              taskType = "__IMPORT__",
+              taskTopic = taskTopic,
+              extention = list(
+                importFileMatch = importFileMatch,
+                importTopic = importTopic,
+                targetDataset = targetDataset,
+                cacheTopic = cacheTopic))
+}
+
 #' @title 执行所有导入任务
 #' @description 
 #' 对于新素材，或指定素材文件，执行所有任务检查。
