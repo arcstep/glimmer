@@ -64,6 +64,7 @@ risk_model_create <- function(dsName,
                 tagName = tagName,
                 author = author,
                 dsName = dsName,
+                cacheTopic = cacheTopic,
                 riskDataName = riskDataName,
                 riskTip = riskTip,
                 riskLevel = riskLevel)) |>
@@ -79,25 +80,6 @@ risk_model_create <- function(dsName,
                   taskTopic = taskTopic)
 }
 
-#' @title 定义风险模型
-#' @family gali-risk function
-#' @export
-gali_create_risk_model <- function(s_dsName,
-                                   s_modelName,
-                                   s_tagName = "main",
-                                   s_riskTip = "-",
-                                   e_riskLevel = "L",
-                                   s_modelDesc = "-",
-                                   s_author = "-") {
-  risk_model_create(dsName = s_dsName,
-                    modelName = s_modelName,
-                    tagName = s_tagName,
-                    riskTip = s_riskTip,
-                    riskLevel = e_riskLevel,
-                    modelDesc = s_modelDesc,
-                    author = s_author)
-} 
-
 #' @title 读取疑点数据
 #' @family risk function
 #' @export
@@ -108,13 +90,6 @@ risk_data_read <- function(todoFlag = TRUE, riskDataName = "__RISK_DATA__", cach
   } else {
     x |> collect() |> filter(is.na(doneAt) %in% todoFlag)
   }
-}
-
-#' @title 读取疑点数据
-#' @family gali-risk function
-#' @export
-gali_read_risk <- function(b_todoFlag = TRUE) {
-  risk_data_read(b_todoFlag)
 }
 
 #' @title 查找风险模型
@@ -147,13 +122,6 @@ risk_model_search <- function(modelMatch = ".*", taskTopic = "TASK_DEFINE") {
   }
 }
 
-#' @title 查找风险模型
-#' @family gali-risk function
-#' @export
-gali_search_risk_model <- function(s_modelMatch = ".*") {
-  risk_model_search(s_modelMatch)
-}
-
 #' @title 清理未处理的疑点数据
 #' @description
 #' 重新生成模型时，一般需要清理未处理的疑点数据
@@ -165,11 +133,14 @@ risk_data_clear <- function(modelId,
                             cacheTopic = "CACHE",
                             taskTopic = "TASK_DEFINE") {
   task <- task_read(modelId, taskTopic = taskTopic)
-  ds_read(riskDataName, topic = cacheTopic) |>
-    filter(is.na(doneAt)) |>
-    collect() |>
-    ds_as_deleted() |>
-    ds_append(dsName = riskDataName, topic = cacheTopic)
+  allData <- ds_read(riskDataName, topic = cacheTopic)
+  if(!rlang::is_empty(allData)) {
+    allData |>
+      filter(is.na(doneAt)) |>
+      collect() |>
+      ds_as_deleted() |>
+      ds_append(dsName = riskDataName, topic = cacheTopic)
+  }
 }
 
 #' @title 根据风险模型生成并写入疑点数据
@@ -189,29 +160,40 @@ risk_data_write <- function(d, s_modelId) {
   submitTime <- now(tzone = "Asia/Shanghai")
   ## 清理未处理完的疑点数据
   risk_data_clear(s_modelId,
-                  riskDataName = task$riskDataName,
-                  cacheTopic = task$cacheTopic,
+                  riskDataName = task$extention$riskDataName,
+                  cacheTopic = task$extention$cacheTopic,
                   taskTopic = task$taskTopic)
-  ## 生成疑点数据
-  d |>
+  ## 潜在疑点数据
+  d0 <- d |>
     select(dsYaml$keyColumns, dsYaml$titleColumn) |>
     collect() |>
     unite("dataId", dsYaml$keyColumns) |>
-    unite("dataTitle", dsYaml$titleColumn) |>
-    mutate(modelName = task$extention$modelName) |>
     mutate(dsName = datasetName) |>
+    mutate(modelName = task$extention$modelName)
+  ## 已处理数据
+  allRiskData <- ds_read0(task$extention$riskDataName, task$extention$cacheTopic)
+  if(!rlang::is_empty(allRiskData)) {
+    toWrite <- d0 |> anti_join(
+      allRiskData |> filter(!is.na(doneAt)) |> select(modelName, dsName, dataId) |> collect(),
+      by = c("modelName", "dsName", "dataId"))
+  } else {
+    toWrite <- d0
+  }
+  ## 生成疑点数据
+  toWrite |>
+    unite("dataTitle", dsYaml$titleColumn) |>
     mutate(tagName = task$extention$tagName) |>
     mutate(batchNumber = gen_batchNum()) |>
     mutate(riskLevel = task$extention$riskLevel) |>
     mutate(riskTip = task$extention$riskTip) |>
     mutate(submitAt = submitTime) |>
     mutate(year = year(submitTime), month = month(submitTime)) |>
-    ds_write(task$extention$riskDataName)
+    ds_write(task$extention$riskDataName, topic = task$extention$cacheTopic)
 }
 
 #' @title 根据风险模型生成并写入疑点数据
 #' @family gali-risk function
 #' @export
-gali_write_risk <- function(d = NULL, s_modelId) {
-  risk_data_write(d %empty% get(s_OUTPUT), s_modelId)
+gali_write_risk <- function(d = NULL, s_modelId = NULL) {
+  risk_data_write(d %empty% get(s_OUTPUT), s_modelId %empty% get("taskId"))
 }

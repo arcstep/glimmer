@@ -19,7 +19,7 @@ test_that("创建模型：一般情况", {
   risk_model_create("cars", modelName = "risk/cyl-middle") |>
     task_gali_add("gali_ds_filter", list(s_column = "cyl", o_name = ">=", fv_value = 6)) |>
     task_gali_add("gali_ds_filter", list(s_column = "cyl", o_name = "<", fv_value = 8)) |>
-    risk_data_build() |>
+    task_gali_add("gali_write_risk") |>
     task_run()
   (risk_data_read() |> distinct(dataTitle))$dataTitle |>
     testthat::expect_equal("6")
@@ -56,21 +56,29 @@ test_that("疑点数据：清理未处理的疑点数据", {
   
   ## 写入风险疑点数据
   risk_model_create("cars", modelName = "risk/cyl-middle") |>
-    task_gali_add(gali_ds_filter("cyl", ">=", 6)) |>
-    task_gali_add(gali_ds_filter("cyl", "<", 8)) |>
-    gali_write_risk()
+    task_gali_add("gali_ds_filter", list(s_column = "cyl", o_name = ">=", fv_value = 6)) |>
+    task_gali_add("gali_ds_filter", list(s_column = "cyl", o_name = "<", fv_value = 8)) |>
+    task_gali_add("gali_write_risk") |>
+    task_run()
   
-  "risk/cyl-middle/main" |> task_run()
   risk_data_read() |> nrow() |>
-    testthat::expect(7)
+    testthat::expect_equal(7)
   
   risk_data_read() |>
     filter(dataId == "1") |>
     mutate(doneAt = now()) |>
     ds_write("__RISK_DATA__")
   risk_data_read() |> nrow() |>
-    testthat::expect(6)
+    testthat::expect_equal(6)
 
+  risk_model_create("cars", modelName = "risk/cyl-middle", tagName = "V2") |>
+    task_gali_add("gali_ds_filter", list(s_column = "cyl", o_name = ">=", fv_value = 6)) |>
+    task_gali_add("gali_write_risk") |>
+    task_run()
+  
+  risk_data_read() |> nrow() |>
+    testthat::expect_equal(20)
+  
   temp_remove()
 })
 
