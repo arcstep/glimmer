@@ -10,7 +10,7 @@ test_that("<gali_read / gali_ds_collect>", {
     testthat::expect_equal(10)
   
   task_create("cars/gali_read") |>
-    task_gali_add("gali_read", params = list(s_dsName = "车数据")) |>
+    task_gali_add("gali_read", params = list(e_dsName = "车数据")) |>
     task_gali_add("gali_ds_collect") |>
     task_run() |>
     nrow() |>
@@ -27,13 +27,13 @@ test_that("<gali_write>", {
   ds_init("车数据", keyColumns = "rowname", data = m |> head())
 
   task_create("cars/gali_read") |>
-    task_gali_add("gali_write", params = list(s_dsName = "车数据")) |>
+    task_gali_add("gali_write", params = list(e_dsName = "车数据")) |>
     task_run(`@result` = m |> slice(1:10))
   ds_read0("车数据") |> collect() |> nrow() |>
     testthat::expect_equal(10)
   
   task_create("cars/gali_read") |>
-    task_gali_add("gali_write", params = list(s_dsName = "车数据", `@result` = m |> slice(5:15))) |>
+    task_gali_add("gali_write", params = list(e_dsName = "车数据", `@result` = m |> slice(5:15))) |>
     task_run()
   ds_read0("车数据") |> collect() |> nrow() |>
     testthat::expect_equal(15)
@@ -144,7 +144,7 @@ test_that("<gali_ds_head/ gali_ds_tail>", {
   m |> as_tibble() |> ds_write("车数据")
 
   task_create("cars/gali_read") |>
-    task_gali_add("gali_read", list(s_dsName = "车数据")) |>
+    task_gali_add("gali_read", list(e_dsName = "车数据")) |>
     task_gali_add("gali_ds_head") |>
     task_gali_add("gali_ds_collect") |>
     task_run() |>
@@ -152,7 +152,7 @@ test_that("<gali_ds_head/ gali_ds_tail>", {
     testthat::expect_equal(10)
 
   task_create("cars/gali_read") |>
-    task_gali_add("gali_read", list(s_dsName = "车数据")) |>
+    task_gali_add("gali_read", list(e_dsName = "车数据")) |>
     task_gali_add("gali_ds_head", list(i_n = 5)) |>
     task_gali_add("gali_ds_collect") |>
     task_run() |>
@@ -160,7 +160,7 @@ test_that("<gali_ds_head/ gali_ds_tail>", {
     testthat::expect_equal(5)
   
   task_create("cars/gali_read") |>
-    task_gali_add("gali_read", list(s_dsName = "车数据")) |>
+    task_gali_add("gali_read", list(e_dsName = "车数据")) |>
     task_gali_add("gali_ds_tail", list(i_n = 6)) |>
     task_gali_add("gali_ds_collect") |>
     task_run() |>
@@ -180,14 +180,14 @@ test_that("<gali_ds_n_max/ gali_ds_n_min>", {
   m |> as_tibble() |> ds_write("车数据")
   
   task_create("cars/gali_read") |>
-    task_gali_add("gali_read", list(s_dsName = "车数据")) |>
+    task_gali_add("gali_read", list(e_dsName = "车数据")) |>
     task_gali_add("gali_ds_n_max", list(s_orderColumn = "cyl", i_n = 3)) |>
     task_run() |>
     nrow() |>
     testthat::expect_equal(3)
   
   task_create("cars/gali_read") |>
-    task_gali_add("gali_read", list(s_dsName = "车数据")) |>
+    task_gali_add("gali_read", list(e_dsName = "车数据")) |>
     task_gali_add("gali_ds_n_min", list(s_orderColumn = "disp", i_n = 3)) |>
     task_run() |>
     nrow() |>
@@ -206,7 +206,7 @@ test_that("<gali_ds_select>", {
   m |> as_tibble() |> ds_write("车数据")
   
   task_create("cars/gali_read") |>
-    task_gali_add("gali_read", list(s_dsName = "车数据")) |>
+    task_gali_add("gali_read", list(e_dsName = "车数据")) |>
     task_gali_add("gali_ds_select", list(sv_columns = "cyl")) |>
     task_gali_add("gali_ds_collect") |>
     task_run() |>
@@ -214,7 +214,7 @@ test_that("<gali_ds_select>", {
     testthat::expect_equal(1)
   
   task_create("cars/gali_read") |>
-    task_gali_add("gali_read", list(s_dsName = "车数据")) |>
+    task_gali_add("gali_read", list(e_dsName = "车数据")) |>
     task_gali_add("gali_ds_select", list(sv_columns = c("cyl", "disp"))) |>
     task_gali_add("gali_ds_collect") |>
     task_run() |>
@@ -222,7 +222,7 @@ test_that("<gali_ds_select>", {
     testthat::expect_equal(2)
   
   task_create("cars/gali_read") |>
-    task_gali_add("gali_read", list(s_dsName = "车数据")) |>
+    task_gali_add("gali_read", list(e_dsName = "车数据")) |>
     task_gali_add("gali_ds_select", list(sv_columns = c("cyl", "disp"), b_everything = T)) |>
     task_gali_add("gali_ds_collect") |>
     task_run() |>
@@ -230,7 +230,7 @@ test_that("<gali_ds_select>", {
     testthat::expect_equal(17)
 
   task_create("cars/gali_read") |>
-    task_gali_add("gali_read", list(s_dsName = "车数据")) |>
+    task_gali_add("gali_read", list(e_dsName = "车数据")) |>
     task_gali_add("gali_ds_select", list(sv_columns = c("cyl", "disp"), s_regex = "^@")) |>
     task_gali_add("gali_ds_collect") |>
     task_run() |>
@@ -251,7 +251,7 @@ test_that("<gali_arrange>", {
   m |> as_tibble() |> ds_write("车数据")
   
   (task_create("cars/gali_read") |>
-    task_gali_add("gali_read", list(s_dsName = "车数据")) |>
+    task_gali_add("gali_read", list(e_dsName = "车数据")) |>
     task_gali_add("gali_ds_arrange", list(sv_columns = "disp")) |>
     task_gali_add("gali_ds_collect") |>
     task_run() |>
@@ -259,7 +259,7 @@ test_that("<gali_arrange>", {
     testthat::expect_equal(min(mtcars$disp))
   
   (task_create("cars/gali_read") |>
-      task_gali_add("gali_read", list(s_dsName = "车数据")) |>
+      task_gali_add("gali_read", list(e_dsName = "车数据")) |>
       task_gali_add("gali_ds_arrange", list(sv_columns = "disp", b_desc = T)) |>
       task_gali_add("gali_ds_collect") |>
       task_run() |>
@@ -281,7 +281,7 @@ test_that("<gali_rename>", {
   m |> as_tibble() |> ds_write("车数据")
   
   resp <- task_create("cars/gali_read") |>
-    task_gali_add("gali_read", list(s_dsName = "车数据")) |>
+    task_gali_add("gali_read", list(e_dsName = "车数据")) |>
     task_gali_add("gali_ds_rename", list(s_newName = "MY_DISP", s_oldName = "disp")) |>
     task_gali_add("gali_ds_rename", list(s_newName = "中国队", s_oldName = "cyl")) |>
     task_gali_add("gali_ds_collect") |>

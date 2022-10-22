@@ -3,17 +3,17 @@
 #' @title 读取数据集
 #' @family gali-dataset function
 #' @export
-gali_read <- function(s_dsName, b_noDeleted = TRUE) {
-  ds_read0(s_dsName, noDeleted = b_noDeleted)
+gali_read <- function(e_dsName, b_noDeleted = TRUE) {
+  ds_read0(e_dsName, noDeleted = b_noDeleted)
 }
 
 #' @title 写入数据集
 #' @family gali-dataset function
 #' @export
-gali_write <- function(d = NULL, s_dsName) {
+gali_write <- function(d = NULL, e_dsName) {
   (d %empty% get(s_OUTPUT)) |>
     collect() |>
-    ds_write(s_dsName)
+    ds_write(e_dsName)
 }
 
 #' @title 立即执行数据收集（结束惰性计算）

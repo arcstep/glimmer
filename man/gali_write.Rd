@@ -4,7 +4,7 @@
 \alias{gali_write}
 \title{写入数据集}
 \usage{
-gali_write(d = NULL, s_dsName)
+gali_write(d = NULL, e_dsName)
 }
 \description{
 写入数据集

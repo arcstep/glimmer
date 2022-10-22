@@ -4,7 +4,7 @@
 \alias{gali_read}
 \title{读取数据集}
 \usage{
-gali_read(s_dsName, b_noDeleted = TRUE)
+gali_read(e_dsName, b_noDeleted = TRUE)
 }
 \description{
 读取数据集
