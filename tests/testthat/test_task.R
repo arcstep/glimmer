@@ -112,9 +112,39 @@ test_that("<task_run>: file|dir", {
   temp_remove()
 })
 
+test_that("<task_run>: function", {
+  sample_init()
+  ##
+  mycars <- function() { mtcars |> as_tibble() }
+  mycyl <- function(i_cyl = 4) { mtcars |> as_tibble() |> filter(cyl == i_cyl) }
+  myarrange <- function(d, sv_columns) {
+    d |> arrange(!!!syms(sv_columns))
+  }
+  
+  ## 无参
+  task_create(taskId = "fun01") |>
+    task_item_add(scriptType = "function", taskScript = "mycars") |>
+    task_run() |> nrow() |>
+    testthat::expect_equal(nrow(mtcars))
+
+  ## 有参
+  task_create(taskId = "fun02") |>
+    task_item_add(scriptType = "function", taskScript = "mycyl") |>
+    task_run() |> nrow() |>
+    testthat::expect_equal(nrow(mtcars |> filter(cyl == 4)))
+  
+  task_create(taskId = "fun02") |>
+    task_item_add(scriptType = "function", taskScript = "mycyl", params = list(i_cyl = 6)) |>
+    task_run() |> nrow() |>
+    testthat::expect_equal(nrow(mtcars |> filter(cyl == 6)))
+  
+  temp_remove()
+  
+})
+
 test_that("<task_run>: gali", {
   sample_init()
-
+  
   ##
   assign(
     "gali_myfunc1",
@@ -124,7 +154,7 @@ test_that("<task_run>: gali", {
     task_gali_add("gali_myfunc1")
   task_run("Gali_01") |> nrow() |>
     testthat::expect_equal(nrow(mtcars))
-
+  
   ##
   assign(
     "gali_myarrange",
@@ -140,10 +170,10 @@ test_that("<task_run>: gali", {
   
   task_create(taskId = "Gali_03") |>
     task_gali_add("gali_myarrange",
-                       params = list("s_OUTPUT" = "x", "x" = mtcars, sv_columns = "disp"))
+                  params = list("s_OUTPUT" = "x", "x" = mtcars, sv_columns = "disp"))
   task_run("Gali_03")$disp[[1]] |>
     testthat::expect_equal(min(mtcars$disp))
-
+  
   task_create(taskId = "Gali_04", list("@result" = mtcars)) |>
     task_gali_add("gali_myarrange",
                   params = list(sv_columns = "disp"))

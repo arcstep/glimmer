@@ -38,7 +38,7 @@ task_create <- function(taskId, online = FALSE,
 #' @param params 执行脚本的参数映射
 #' @param inputAsign 将执行环境内变量赋值给入参
 #' @param outputAsign 将函数输出复制该执行环境内的变量
-#' @param scriptType 可以是string,file,dir, 或其他系统内置函数
+#' @param scriptType 可以是string,expr,function,gali,file,dir,empty等
 #' @param taskTopic 任务主题存储位置
 #' @family task-define function
 #' @export
@@ -258,10 +258,10 @@ task_run0 <- function(taskItems, runMode = "in-process", ...) {
     curResult <- NULL
     ## 逐项执行子任务
     taskItems |> purrr::pwalk(function(taskScript, params, scriptType, inputAsign, outputAsign) {
-      if(scriptType == "gali") {
+      if(scriptType %in% c("gali", "function")) {
         ## 提取函数定义参数，无法匹配的参数
         myparam <- formalArgs(taskScript)
-        galiParam <- params[myparam[myparam %in% names(params)]] %empty% list()
+        funcParam <- params[myparam[myparam %in% names(params)]] %empty% list()
         ## 设置执行环境变量值
         envParam <- params[names(params) %nin% myparam] %empty% list()
         names(envParam) |> purrr::walk(function(i) {
@@ -271,11 +271,11 @@ task_run0 <- function(taskItems, runMode = "in-process", ...) {
         names(inputAsign) |> purrr::walk(function(i) {
           ## 如果映射目标不存在，就忽略
           if(i %in% myparam && inputAsign[[i]] %in% ls(TaskRun.ENV)) {
-            galiParam[[i]] <- get(inputAsign[[i]], envir = TaskRun.ENV)
+            funcParam[[i]] <- get(inputAsign[[i]], envir = TaskRun.ENV)
           }
         })
         ## 将输出值保存在"result"
-        curResult <<- do.call(taskScript, args = galiParam, quote = TRUE, envir = TaskRun.ENV)
+        curResult <<- do.call(taskScript, args = funcParam, envir = TaskRun.ENV)
       } else {
         ## 提取子任务定义参数
         names(params) |> purrr::walk(function(i) {
