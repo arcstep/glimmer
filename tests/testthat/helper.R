@@ -8,7 +8,7 @@ rootPath <- tempdir()
 
 sample_dataset_init <- function() {
   config_init(rootPath)
-  
+
   ##
   ds_init("student", data = tibble("name" = "adi", "age" = 5L))
   ds_init("score", schema = list(
@@ -19,58 +19,69 @@ sample_dataset_init <- function() {
 }
 
 sample_task_define <- function() {
-  config_init(testthat::test_path())
+  config_init(rootPath, option = list(
+    "IMPORT" = fs::path_join(c(testthat::test_path(), "_IMPORT")),
+    "TASK_DEFINE" = fs::path_join(c(testthat::test_path(), "_TASK_DEFINE")),
+    "TASK_SCRIPTS" = fs::path_join(c(testthat::test_path(), "_TASK_SCRIPTS"))
+  ))
   ## simple
   task_create(taskId = "build_cars", taskType = "__BUILD__") |>
-    task_item_add(taskScript = "BUILD/cars.R", scriptType = "file")
+    task_item_add(taskScript = "BUILD/cars.R", scriptType = "file", touchFiles = F)
 
   ## tast test
   task_create(taskId = "task_sample_simple") |>
-    task_item_add(taskScript = "SIMPLE/a.R", scriptType = "file") |>
-    task_item_add(taskScript = "result <- (x |> filter(age > 6))", scriptType = "string")
+    task_item_add(taskScript = "SIMPLE/a.R", scriptType = "file", touchFiles = F) |>
+    task_item_add(taskScript = "result <- (x |> filter(age > 6))", scriptType = "string", touchFiles = F)
 
   task_create(taskId = "task_sample_dir") |>
-    task_item_add(taskScript = "SIMPLE", scriptType = "dir")
+    task_item_add(taskScript = "SIMPLE", scriptType = "dir", touchFiles = F)
 
   task_create(taskId = "task_sample_define_param") |>
-    task_item_add(taskScript = "SIMPLE/a.R", scriptType = "file") |>
-    task_item_add(taskScript = "result <- (x |> filter(age > myage))", params = list(myage = 3), scriptType = "string")
+    task_item_add(taskScript = "SIMPLE/a.R", scriptType = "file", touchFiles = F) |>
+    task_item_add(taskScript = "result <- (x |> filter(age > myage))", params = list(myage = 3), scriptType = "string", touchFiles = F)
 
   task_create(taskId = "task_sample_runtime_param") |>
-    task_item_add(taskScript = "SIMPLE/a.R", scriptType = "file") |>
-    task_item_add(taskScript = "result <- (x |> filter(age > myage))", scriptType = "string")
+    task_item_add(taskScript = "SIMPLE/a.R", scriptType = "file", touchFiles = F) |>
+    task_item_add(taskScript = "result <- (x |> filter(age > myage))", scriptType = "string", touchFiles = F)
 
   task_create(taskId = "task_sample_error") |>
-    task_item_add(taskScript = "stop('I m an error!')", scriptType = "string")
+    task_item_add(taskScript = "stop('I m an error!')", scriptType = "string", touchFiles = F)
 
+  ## 文件不存在
   task_create(taskId = "task_sample_file_not_exist") |>
-    task_item_add(taskScript = "NOT_EXISTING_FILE", scriptType = "file")
+    task_item_add(taskScript = "NOT_EXISTING_FILE", scriptType = "file", touchFiles = F)
 
+  ## 目录不存在
   task_create(taskId = "task_sample_dir_not_exist") |>
-    task_item_add(taskScript = "NOT_EXISTING_DIR", scriptType = "dir")
+    task_item_add(taskScript = "NOT_EXISTING_DIR", scriptType = "dir", touchFiles = F)
 
+  ## 空文件夹
   task_create(taskId = "task_sample_empty_dir") |>
-    task_item_add(taskScript = "EMPTY_FOLDER", scriptType = "dir")
-  
+    task_item_add(taskScript = "EMPTY_FOLDER", scriptType = "dir", touchFiles = F)
+
   ## import test
   mytask_add <- function(taskId, scriptFile) {
     task_create(taskId = taskId, taskType = "__IMPORT__") |>
-      task_item_add(taskScript = scriptFile, scriptType = "file")
+      task_item_add(taskScript = scriptFile, scriptType = "file", touchFiles = F)
   }
   mytask_add("A/student", "IMPORT/student.R")
   mytask_add("A/score", "IMPORT/score.R")
 }
 
-sample_config_init <- function() {
-  config_init(rootPath)
-  import_init()
-  task_queue_init()
-}
-
-sample_import_files <- function() {
+sample_files_prepare <- function() {
   fs::dir_copy(testthat::test_path("_IMPORT"), get_path("IMPORT"), overwrite = TRUE)
   fs::dir_copy(testthat::test_path("_TASK_DEFINE"), get_path("TASK_DEFINE"), overwrite = TRUE)
   fs::dir_copy(testthat::test_path("_TASK_SCRIPTS"), get_path("TASK_SCRIPTS"), overwrite = TRUE)
+}
+
+sample_init <- function() {
+  temp_remove()
+  
+  config_init(rootPath)
+  import_init()
+  task_queue_init()
+  
+  sample_files_prepare()
 }
 
 temp_remove <- function() {

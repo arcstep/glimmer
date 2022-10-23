@@ -10,6 +10,7 @@ task_item_add(
   params = list(NULL),
   inputAsign = list(NULL),
   outputAsign = list(NULL),
+  touchFiles = TRUE,
   taskTopic = "TASK_DEFINE",
   scriptType = "string"
 )

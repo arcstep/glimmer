@@ -48,6 +48,7 @@ task_item_add <- function(
     params = list(NULL),
     inputAsign = list(NULL),
     outputAsign = list(NULL),
+    touchFiles = TRUE,
     taskTopic = "TASK_DEFINE",
     scriptType = "string") {
   path <- get_path(taskTopic, paste0(taskId, ".rds"))
@@ -68,8 +69,10 @@ task_item_add <- function(
     }
     meta |> saveRDS(path)
     ## 使用模板创建脚本
-    if(scriptType == "file") task_script_file_create(taskScript)
-    if(scriptType == "dir") task_script_dir_create(taskScript)
+    if(touchFiles) {
+      if(scriptType == "file") task_script_file_create(taskScript)
+      if(scriptType == "dir") task_script_dir_create(taskScript)
+    }
     ##
     ## 支持管道定义
     taskId

@@ -1,5 +1,5 @@
 test_that("<gali_read / gali_ds_collect>", {
-  sample_config_init()
+  sample_init()
   
   m <- mtcars |> as_tibble() |> rownames_to_column()
   ds_drop("车数据")
@@ -20,7 +20,7 @@ test_that("<gali_read / gali_ds_collect>", {
 })
 
 test_that("<gali_write>", {
-  sample_config_init()
+  sample_init()
   
   m <- mtcars |> as_tibble() |> rownames_to_column()
   ds_drop("车数据")
@@ -42,8 +42,7 @@ test_that("<gali_write>", {
 })
 
 test_that("<gali_ds_filter>：一般流程", {
-  sample_config_init()
-  sample_import_files()
+  sample_init()
 
   ## 使用默认的 @result 获得返回值
   mtcars |> gali_ds_filter("cyl", ">", 6) |> nrow() |>
@@ -135,7 +134,7 @@ test_that("<gali_ds_filter>：比较时间和日期", {
 })
 
 test_that("<gali_ds_head/ gali_ds_tail>", {
-  sample_config_init()
+  sample_init()
   
   m <- mtcars |> as_tibble() |> rownames_to_column()
   ds_drop("车数据")
@@ -171,7 +170,7 @@ test_that("<gali_ds_head/ gali_ds_tail>", {
 })
 
 test_that("<gali_ds_n_max/ gali_ds_n_min>", {
-  sample_config_init()
+  sample_init()
   
   m <- mtcars |> as_tibble() |> rownames_to_column()
   ds_drop("车数据")
@@ -197,7 +196,7 @@ test_that("<gali_ds_n_max/ gali_ds_n_min>", {
 })
 
 test_that("<gali_ds_select>", {
-  sample_config_init()
+  sample_init()
   
   m <- mtcars |> as_tibble() |> rownames_to_column()
   ds_drop("车数据")
@@ -242,7 +241,7 @@ test_that("<gali_ds_select>", {
 
 
 test_that("<gali_arrange>", {
-  sample_config_init()
+  sample_init()
   
   m <- mtcars |> as_tibble() |> rownames_to_column()
   ds_drop("车数据")
@@ -270,7 +269,7 @@ test_that("<gali_arrange>", {
 })
 
 test_that("<gali_rename>", {
-  sample_config_init()
+  sample_init()
   
   m <- mtcars |> as_tibble() |> rownames_to_column()
   # m |> gali_ds_rename(s_newName = "中国队", s_oldName = "disp")
