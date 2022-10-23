@@ -19,12 +19,6 @@ Other task-define function:
 \code{\link{task_id}()},
 \code{\link{task_item_add}()},
 \code{\link{task_read}()},
-\code{\link{task_run0}()},
-\code{\link{task_run_dir}()},
-\code{\link{task_run_expr}()},
-\code{\link{task_run_file}()},
-\code{\link{task_run_gali}()},
-\code{\link{task_run_string}()},
 \code{\link{task_run}()}
 }
 \concept{task-define function}

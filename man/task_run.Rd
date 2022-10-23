@@ -20,12 +20,6 @@ task_run(
 \item{taskTopic}{保存任务定义的存储主题文件夹}
 
 \item{runMode}{运行模式（默认为进程内执行，改为r或r_bg为子进程执行）}
-
-\item{queueName}{指定队列数据集}
-
-\item{scriptsTopic}{脚本文件保存位置}
-
-\item{cacheTopic}{数据集保存位置}
 }
 \description{
 运行任务
@@ -37,12 +31,6 @@ Other task-define function:
 \code{\link{task_id}()},
 \code{\link{task_item_add}()},
 \code{\link{task_read}()},
-\code{\link{task_run0}()},
-\code{\link{task_run_dir}()},
-\code{\link{task_run_expr}()},
-\code{\link{task_run_file}()},
-\code{\link{task_run_gali}()},
-\code{\link{task_run_string}()},
 \code{\link{task_search}()}
 }
 \concept{task-define function}

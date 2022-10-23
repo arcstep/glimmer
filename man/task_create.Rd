@@ -6,29 +6,30 @@
 \usage{
 task_create(
   taskId,
-  runLevel = 500L,
   online = TRUE,
   taskType = "__UNKNOWN__",
   desc = "-",
   taskTopic = "TASK_DEFINE",
   scriptsTopic = "TASK_SCRIPTS",
-  queueName = "__TASK_QUEUE__",
+  queueDataset = "__TASK_QUEUE__",
+  importDataset = "__IMPORT_FILES__",
   cacheTopic = "CACHE",
+  importTopic = "IMPORT",
   extention = list()
 )
 }
 \arguments{
 \item{taskId}{任务唯一标识，每个\code{taskId}会保存为一个独立文件}
 
-\item{runLevel}{同一批次任务中，运行时的优先级}
-
-\item{online}{任务是否启用}
+\item{online}{如果任务下线，在推荐可执行任务时将忽略}
 
 \item{taskType}{任务类型}
 
 \item{desc}{任务描述}
 
 \item{taskTopic}{保存任务定义的存储主题文件夹}
+
+\item{runLevel}{同一批次任务中，运行时的优先级}
 }
 \description{
 创建任务执行框架
@@ -39,12 +40,6 @@ Other task-define function:
 \code{\link{task_id}()},
 \code{\link{task_item_add}()},
 \code{\link{task_read}()},
-\code{\link{task_run0}()},
-\code{\link{task_run_dir}()},
-\code{\link{task_run_expr}()},
-\code{\link{task_run_file}()},
-\code{\link{task_run_gali}()},
-\code{\link{task_run_string}()},
 \code{\link{task_run}()},
 \code{\link{task_search}()}
 }

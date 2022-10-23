@@ -4,14 +4,28 @@
 \alias{task_item_add}
 \title{增加子任务}
 \usage{
-task_item_add(taskId, taskScript, params = list(NULL), scriptType = "string")
+task_item_add(
+  taskId,
+  taskScript,
+  params = list(NULL),
+  inputAsign = list(NULL),
+  outputAsign = list(NULL),
+  taskTopic = "TASK_DEFINE",
+  scriptType = "string"
+)
 }
 \arguments{
 \item{taskId}{任务标识}
 
 \item{taskScript}{子任务的执行路径}
 
-\item{params}{子任务的参数设置}
+\item{params}{执行脚本的参数映射}
+
+\item{inputAsign}{将执行环境内变量赋值给入参}
+
+\item{outputAsign}{将函数输出复制该执行环境内的变量}
+
+\item{taskTopic}{任务主题存储位置}
 
 \item{scriptType}{可以是string,file,dir, 或其他系统内置函数}
 }
@@ -24,12 +38,6 @@ Other task-define function:
 \code{\link{task_gali_add}()},
 \code{\link{task_id}()},
 \code{\link{task_read}()},
-\code{\link{task_run0}()},
-\code{\link{task_run_dir}()},
-\code{\link{task_run_expr}()},
-\code{\link{task_run_file}()},
-\code{\link{task_run_gali}()},
-\code{\link{task_run_string}()},
 \code{\link{task_run}()},
 \code{\link{task_search}()}
 }

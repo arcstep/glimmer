@@ -11,7 +11,7 @@ gali_read <- function(e_dsName, b_noDeleted = TRUE) {
 #' @family gali-dataset function
 #' @export
 gali_write <- function(d = NULL, e_dsName) {
-  (d %empty% get(s_OUTPUT)) |>
+  (d %empty% get("@output", envir = globalenv())) |>
     collect() |>
     ds_write(e_dsName)
 }
@@ -20,7 +20,7 @@ gali_write <- function(d = NULL, e_dsName) {
 #' @family gali-dataset function
 #' @export
 gali_ds_collect <- function(d = NULL) {
-  (d %empty% get(s_OUTPUT)) |>
+  (d %empty% get("@output", envir = globalenv())) |>
     collect()
 }
 
@@ -58,7 +58,7 @@ gali_ds_filter <- function(d = NULL, s_column, o_name, fv_value = list(NULL)) {
     stop("Invalid filter OP: ", o_name)
   }
 
-  mydata <- d %empty% get(s_OUTPUT)
+  mydata <- d %empty% get("@output", envir = globalenv())
   ## 创建任务表达式
   if(o_name %in% c(">", "<", ">=", "<=", "==", "!=", "%in%")) {
     mydata |> filter(do.call(!!sym(o_name), args = list(!!sym(s_column), unlist(fv_value))))
@@ -90,21 +90,21 @@ gali_ds_filter <- function(d = NULL, s_column, o_name, fv_value = list(NULL)) {
 #' @family gali-dataset function
 #' @export
 gali_ds_head <- function(d = NULL, i_n = 10) {
-  d %empty% get(s_OUTPUT) |> head(i_n)
+  d %empty% get("@output", envir = globalenv()) |> head(i_n)
 }
 
 #' @title 尾部数据
 #' @family gali-dataset function
 #' @export
 gali_ds_tail <- function(d = NULL, i_n = 10) {
-  d %empty% get(s_OUTPUT) |> tail(i_n)
+  d %empty% get("@output", envir = globalenv()) |> tail(i_n)
 }
 
 #' @title 按最大值取N条记录
 #' @family gali-dataset function
 #' @export
 gali_ds_n_max <- function(d = NULL, s_orderColumn, i_n = 10, b_with_ties = FALSE) {
-  mydata <- d %empty% get(s_OUTPUT) |> collect()
+  mydata <- d %empty% get("@output", envir = globalenv()) |> collect()
   mydata |> slice_max(order_by = mydata[[s_orderColumn]], n = i_n, with_ties = b_with_ties)
 }
 
@@ -112,7 +112,7 @@ gali_ds_n_max <- function(d = NULL, s_orderColumn, i_n = 10, b_with_ties = FALSE
 #' @family gali-dataset function
 #' @export
 gali_ds_n_min <- function(d = NULL, s_orderColumn, i_n = 10, b_with_ties = FALSE) {
-  mydata <- d %empty% get(s_OUTPUT) |> collect()
+  mydata <- d %empty% get("@output", envir = globalenv()) |> collect()
   mydata |> slice_min(order_by = mydata[[s_orderColumn]], n = i_n, with_ties = b_with_ties)
 }
 
@@ -122,7 +122,7 @@ gali_ds_n_min <- function(d = NULL, s_orderColumn, i_n = 10, b_with_ties = FALSE
 #' @family gali-dataset function
 #' @export
 gali_ds_arrange <- function(d = NULL, sv_columns = list(), b_desc = FALSE, b_by_group = FALSE) {
-  mydata <- d %empty% get(s_OUTPUT)
+  mydata <- d %empty% get("@output", envir = globalenv())
   if(b_desc) {
     mydata |> arrange(desc(!!!syms(sv_columns)), .by_group = b_by_group)
   } else {
@@ -136,7 +136,7 @@ gali_ds_arrange <- function(d = NULL, sv_columns = list(), b_desc = FALSE, b_by_
 #' @family gali-dataset function
 #' @export
 gali_ds_select <- function(d = NULL, sv_columns = list(), b_everything = FALSE, s_regex = NULL) {
-  d %empty% get(s_OUTPUT) |>
+  d %empty% get("@output", envir = globalenv()) |>
     select(contains(sv_columns |> unlist()),
            matches(s_regex %empty% "^mamaxiannichifanman$"), if(b_everything) everything() else NULL)
 }
@@ -145,7 +145,7 @@ gali_ds_select <- function(d = NULL, sv_columns = list(), b_everything = FALSE, 
 #' @family gali-dataset function
 #' @export
 gali_ds_rename <- function(d = NULL, s_newName, s_oldName) {
-  mydata <- d %empty% get(s_OUTPUT) |> collect()
+  mydata <- d %empty% get("@output", envir = globalenv()) |> collect()
   names(mydata)[names(mydata) == s_oldName] <- s_newName
   mydata
 }
@@ -154,7 +154,7 @@ gali_ds_rename <- function(d = NULL, s_newName, s_oldName) {
 #' @family gali-dataset function
 #' @export
 gali_ds_count <- function(d = NULL, sv_columns = c(), b_sort = FALSE, s_name = "n") {
-  d %empty% get(s_OUTPUT) |>
+  d %empty% get("@output", envir = globalenv()) |>
     select(sv_columns) |>
     collect() |>
     count(!!!syms(sv_columns), sort = b_sort, name = s_name)
@@ -164,7 +164,7 @@ gali_ds_count <- function(d = NULL, sv_columns = c(), b_sort = FALSE, s_name = "
 #' @family gali-dataset function
 #' @export
 gali_ds_add_count <- function(d = NULL, sv_columns = c(), b_sort = FALSE, s_name = "n") {
-  d %empty% get(s_OUTPUT) |>
+  d %empty% get("@output", envir = globalenv()) |>
     collect() |>
     add_count(!!!syms(sv_columns), sort = b_sort, name = s_name)
 }

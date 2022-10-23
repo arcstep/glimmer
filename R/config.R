@@ -202,30 +202,30 @@ get_params <- function(funcName) {
 
 #' @title 查询函数
 #' @export
-get_funs <- function(regex = ".*", pos = "package:glimmer") {
+get_funs <- function(prefix = ".*", pos = "package:glimmer") {
   p <- tribble(
     ~type, ~input, ~output, ~tips,
-    "import", "-", "tibble", "导入各类数据",
-    "export", "tibble", "-", "导出各类数据或报表",
+    "import", "-", "@tibble", "导入数据到内存",
+    "export", "@tibble", "-", "导出数据到磁盘",
     "create", "-", "-", "创建元数据",
     "search", "-", "-", "列举元数据",
-    "read", "dataset", "tibble", "读取Parquet文件组数据集",
-    "write", "tibble", "parquet", "保存Parquet文件组数据集",
-    "ds", "tibble", "tibble", "支持管道的数据框处理",
-    "plot", "tibble", "plotly", "绘制plotly图表",
-    "trace", "plotly", "plotly", "增加plotly绘制层",
-    "DT", "tibble", "DT", "绘制DT数据表"
+    "read", "@dsName", "@tibble", "读取Parquet文件组数据集",
+    "write", "@tibble", "@dsName", "保存Parquet文件组数据集",
+    "ds", "@tibble", "@tibble", "处理矩形数据",
+    "plot", "@tibble", "@plotly", "绘制plotly图表",
+    "trace", "@plotly", "@plotly", "增加plotly绘制层",
+    "DT", "@tibble", "@DT", "绘制DT数据表"
   )
   x <- lsf.str(pos)
-  tibble(funcName = x[x |> stringr::str_detect(regex)]) |>
-    mutate(type = stringr::str_remove(funcName, regex) |> stringr::str_remove("(?<=)_.+")) |>
+  tibble(funcName = x[x |> stringr::str_detect(prefix)]) |>
+    mutate(type = stringr::str_remove(funcName, prefix) |> stringr::str_remove("(?<=)_.+")) |>
     left_join(p, by = "type")
 }
 
 #' @title 所有gali函数
 #' @export
 get_funs_gali <- function(matchName = ".*", pos = "package:glimmer") {
-  get_funs(regex = "^gali_", pos) |>
+  get_funs("^gali_", pos) |>
     filter(stringr::str_detect(funcName, matchName))
 }
 
