@@ -6,7 +6,7 @@
 \usage{
 task_item_add(
   taskId,
-  taskScript,
+  taskScript = "ls()",
   params = list(NULL),
   inputAsign = list(NULL),
   outputAsign = list(NULL),

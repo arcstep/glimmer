@@ -1,8 +1,7 @@
 test_that("定义任务：string类型", {
-  sample_config_init()
-  sample_import_files()
-  
-  task_create(taskId = "A", list())
+  sample_init()
+
+  task_create(taskId = "A")
   task_read("A")$taskType |>
     testthat::expect_equal("__UNKNOWN__")
 
@@ -22,10 +21,9 @@ test_that("定义任务：string类型", {
 })
 
 test_that("定义任务：file类型，且使用管道风格", {
-  sample_config_init()
-  sample_import_files()
-  
-  task_create(taskId = "B", list()) |>
+  sample_init()
+
+  task_create(taskId = "B") |>
     task_item_add(taskScript = "A/a.R", scriptType = "file") |>
     task_item_add(taskScript = "result <- (x |> filter(age > 6))", scriptType = "string")
   task_read("B")$items |> nrow() |>
@@ -35,9 +33,8 @@ test_that("定义任务：file类型，且使用管道风格", {
 })
 
 test_that("定义任务：dir类型", {
-  sample_config_init()
-  sample_import_files()
-  
+  sample_init()
+
   task_create(taskId = "C") |>
     task_item_add(taskScript = "A", scriptType = "dir")
   task_read("C")$items |> nrow() |>
@@ -46,10 +43,57 @@ test_that("定义任务：dir类型", {
   temp_remove()
 })
 
-test_that("<task_run>", {
-  sample_config_init()
-  sample_import_files()
+test_that("<task_run>: string|expr|empty", {
+  sample_init()
   
+  ## 空的执行环境中
+  task_create(taskId = "A-str") |>
+    task_item_add(taskScript = "ls()", scriptType = "string") |>
+    task_run() |>
+    testthat::expect_equal("@task")
+
+  task_create(taskId = "A-expr") |>
+    task_item_add(taskScript = expression({ls()}), scriptType = "expr") |>
+    task_run() |>
+    testthat::expect_equal("@task")
+  
+  ## 获取执行环境中的变量
+  (task_create(taskId = "A-expr") |>
+    task_item_add(taskScript = expression({`@task`}), scriptType = "expr") |>
+    task_run())$online |>
+    testthat::expect_false()
+
+  ## 设置执行环境变量
+  task_create(taskId = "A-expr") |>
+    task_item_add(scriptType = "expr", taskScript = expression({myname})) |>
+    task_run(myname = "xueyile") |>
+    testthat::expect_equal("xueyile")
+  
+  task_create(taskId = "A-expr") |>
+      task_item_add(scriptType = "empty", params = list("myname" = "xueyile")) |>
+      task_item_add(scriptType = "expr", taskScript = expression({myname})) |>
+      task_run() |>
+    testthat::expect_equal("xueyile")
+  
+  ## 映射输出
+  task_create(taskId = "C-expr") |>
+    task_item_add(scriptType = "empty",
+                  params = list("a" = 3, "b" = 3)) |>
+    task_item_add(scriptType = "expr",
+                  taskScript = expression({list(x = a^2, y = b*2)}),
+                  outputAsign = list("m" = "x", "n" = "y")) |>
+    task_item_add(scriptType = "expr",
+                  taskScript = expression({m+n})) |>
+    task_run() |>
+    testthat::expect_equal(3^2+3*2)
+
+  temp_remove()
+})
+
+
+test_that("<task_run>: file|dir", {
+  sample_init()
+
   task_run("task_sample_simple") |> nrow() |>
     testthat::expect_equal(1)
 
@@ -68,42 +112,15 @@ test_that("<task_run>", {
   temp_remove()
 })
 
-test_that("<task_run_[string|file|dir|expr]>", {
-  sample_config_init()
-  sample_import_files()
+test_that("<task_run>: gali", {
+  sample_init()
 
-  task_run_expr(expression({mtcars |> as_tibble()})) |> nrow() |>
-    testthat::expect_equal(32)
-  
-  task_run_expr(expression({mtcars |> filter(cyl == a)}), a = 6) |> nrow() |>
-    testthat::expect_equal(7)
-
-  x <- 6
-  task_run_expr(expression({mtcars |> filter(cyl == a)}), a = x) |> nrow() |>
-    testthat::expect_equal(7)
-  
-  task_run_string("mtcars") |> nrow() |>
-    testthat::expect_equal(32)
-  
-  task_run_file("SIMPLE/a.R") |> nrow() |>
-    testthat::expect_equal(5)
-
-  task_run_dir("SIMPLE")$id[[1]] |>
-    testthat::expect_equal("liyihan-5")
-  
-  temp_remove()
-})
-
-test_that("使用gali函数", {
-  sample_config_init()
-  sample_import_files()
-  
   ##
   assign(
     "gali_myfunc1",
     function() { mtcars |> as_tibble() },
     envir = globalenv())
-  task_create(taskId = "Gali_01", list()) |>
+  task_create(taskId = "Gali_01") |>
     task_gali_add("gali_myfunc1")
   task_run("Gali_01") |> nrow() |>
     testthat::expect_equal(nrow(mtcars))
@@ -115,13 +132,13 @@ test_that("使用gali函数", {
       (d %empty% get(s_OUTPUT)) |>
         arrange(!!!syms(sv_columns))},
     envir = globalenv())
-  task_create(taskId = "Gali_02", list()) |>
+  task_create(taskId = "Gali_02") |>
     task_gali_add("gali_myfunc1") |>
     task_gali_add("gali_myarrange", params = list(s_OUTPUT = "@result", sv_columns = "disp"))
   task_run("Gali_02")$disp[[1]] |>
     testthat::expect_equal(min(mtcars$disp))
   
-  task_create(taskId = "Gali_03", list()) |>
+  task_create(taskId = "Gali_03") |>
     task_gali_add("gali_myarrange",
                        params = list("s_OUTPUT" = "x", "x" = mtcars, sv_columns = "disp"))
   task_run("Gali_03")$disp[[1]] |>
@@ -138,9 +155,8 @@ test_that("使用gali函数", {
 })
 
 test_that("运行任务：异常情况", {
-  sample_config_init()
-  sample_import_files()
-  
+  sample_init()
+
   task_run("task_sample_error", myage = 6) |>
     testthat::expect_error("I m an error")
   

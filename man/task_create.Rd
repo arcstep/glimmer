@@ -6,7 +6,7 @@
 \usage{
 task_create(
   taskId,
-  online = TRUE,
+  online = FALSE,
   taskType = "__UNKNOWN__",
   desc = "-",
   taskTopic = "TASK_DEFINE",

@@ -7,7 +7,7 @@
 #' @param desc 任务描述
 #' @family task-define function
 #' @export
-task_create <- function(taskId, online = TRUE,
+task_create <- function(taskId, online = FALSE,
                         taskType = "__UNKNOWN__", desc = "-",
                         taskTopic = "TASK_DEFINE", scriptsTopic = "TASK_SCRIPTS",
                         queueDataset = "__TASK_QUEUE__",importDataset = "__IMPORT_FILES__",
@@ -44,7 +44,7 @@ task_create <- function(taskId, online = TRUE,
 #' @export
 task_item_add <- function(
     taskId,
-    taskScript,
+    taskScript = "ls()",
     params = list(NULL),
     inputAsign = list(NULL),
     outputAsign = list(NULL),
@@ -203,8 +203,9 @@ task_run <- function(taskId,
         item |> mutate(`@from` = "task_run()") |> ds_append(`@task`$queueDataset, `@task`$cacheTopic)
         ##
       }),
-      "params" = list(list("taskId" = taskId, "batchId" = batchId,
-                           "yamlParams" = paramInfo |> yaml::as.yaml()))
+      "params" = list(list("taskId" = taskId, "batchId" = batchId)),
+      "inputAsign" = list(),
+      "outputAsign" = list()
     )
     item_done <- tibble(
       "scriptType" = "queue",
@@ -217,7 +218,9 @@ task_run <- function(taskId,
         ##
       }),
       "params" = list(list("taskId" = taskId, "batchId" = batchId,
-                           "yamlParams" = paramInfo |> yaml::as.yaml()))
+                           "yamlParams" = paramInfo |> yaml::as.yaml())),
+      "inputAsign" = list(),
+      "outputAsign" = list()
     )    
     items <- rbind(
       item_run,
@@ -251,8 +254,8 @@ task_run0 <- function(taskItems, runMode = "in-process", ...) {
     names(taskParams) |> purrr::walk(function(i) {
       assign(i, taskParams[[i]], envir = TaskRun.ENV)
     })
-    ## 将任务执行结果保存在指定变量中
-    myoutput <- "@result"
+    ## 将结果保存在curResult
+    curResult <- NULL
     ## 逐项执行子任务
     taskItems |> purrr::pwalk(function(taskScript, params, scriptType, inputAsign, outputAsign) {
       if(scriptType == "gali") {
@@ -271,10 +274,8 @@ task_run0 <- function(taskItems, runMode = "in-process", ...) {
             galiParam[[i]] <- get(inputAsign[[i]], envir = TaskRun.ENV)
           }
         })
-        ## 执行子任务，覆盖当前输出值
-        assign(myoutput,
-               do.call(taskScript, args = galiParam, quote = TRUE, envir = TaskRun.ENV),
-               envir = TaskRun.ENV)
+        ## 将输出值保存在"result"
+        curResult <<- do.call(taskScript, args = galiParam, quote = TRUE, envir = TaskRun.ENV)
       } else {
         ## 提取子任务定义参数
         names(params) |> purrr::walk(function(i) {
@@ -282,26 +283,19 @@ task_run0 <- function(taskItems, runMode = "in-process", ...) {
         })
         ##
         if(scriptType == "string") {
-          ## 简易执行
-          assign(myoutput,
-                 parse(text = taskScript) |> eval(envir = TaskRun.ENV),
-                 envir = TaskRun.ENV)
+          curResult <<- parse(text = taskScript) |> eval(envir = TaskRun.ENV)
         } else if(scriptType == "empty") {
           ## 一般用于设置环境参数
         } else if(scriptType == "queue") {
           eval(taskScript, envir = TaskRun.ENV)
         } else if(scriptType == "expr") {
-          assign(myoutput,
-                 eval(taskScript, envir = TaskRun.ENV),
-                 envir = TaskRun.ENV)
+          curResult <<- eval(taskScript, envir = TaskRun.ENV)
         } else if(scriptType == "file") {
           pathScripts <- get_path(get("@task", envir = TaskRun.ENV)$scriptsTopic, taskScript)
           if(!fs::file_exists(pathScripts)) {
             stop("No such script file: ", pathScripts)
           }
-          assign(myoutput,
-                 parse(file = pathScripts) |> eval(envir = TaskRun.ENV),
-                 envir = TaskRun.ENV)
+          curResult <<- parse(file = pathScripts) |> eval(envir = TaskRun.ENV)
         } else if(scriptType == "dir") {
           pathScripts <- get_path(get("@task", envir = TaskRun.ENV)$scriptsTopic, taskScript)
           if(!fs::dir_exists(pathScripts)) {
@@ -312,22 +306,22 @@ task_run0 <- function(taskItems, runMode = "in-process", ...) {
             stop("None R file existing in scripts dir: ", pathScripts)
           }
           allFiles |> sort() |> purrr::walk(function(p) {
-            assign(myoutput,
-                   parse(file = p) |> eval(envir = TaskRun.ENV),
-                   envir = TaskRun.ENV)
+            curResult <<- parse(file = p) |> eval(envir = TaskRun.ENV)
           })
         } else {
           warning("UNKNOWN ScriptType: ", scriptType)
         }        
       }
       ## 覆盖或创建输出目标
-      if("list" %in% class(outputAsign)) {
+      if("list" %in% class(curResult)) {
         names(outputAsign) |> purrr::walk(function(i) {
-          assign(i, myoutput[[i]], envir = TaskRun.ENV)
+          if(outputAsign[[i]] %in% names(curResult)) {
+            assign(i, curResult[[outputAsign[[i]]]], envir = TaskRun.ENV)
+          }
         })
       }
     })
-    get("@result", envir = TaskRun.ENV)
+    curResult
   }
   
   if(runMode == "r") {
