@@ -4,7 +4,7 @@
 \alias{gali_ds_collect}
 \title{立即执行数据收集（结束惰性计算）}
 \usage{
-gali_ds_collect(d = NULL)
+gali_ds_collect(`@ds`)
 }
 \description{
 立即执行数据收集（结束惰性计算）

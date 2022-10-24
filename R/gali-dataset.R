@@ -10,18 +10,15 @@ gali_read <- function(e_dsName, b_noDeleted = TRUE) {
 #' @title 写入数据集
 #' @family gali-dataset function
 #' @export
-gali_write <- function(d = NULL, e_dsName) {
-  (d %empty% get("@output", envir = globalenv())) |>
-    collect() |>
-    ds_write(e_dsName)
+gali_write <- function(`@ds`, e_dsName) {
+  `@ds` |> collect() |> ds_write(e_dsName)
 }
 
 #' @title 立即执行数据收集（结束惰性计算）
 #' @family gali-dataset function
 #' @export
-gali_ds_collect <- function(d = NULL) {
-  (d %empty% get("@output", envir = globalenv())) |>
-    collect()
+gali_ds_collect <- function(`@ds`) {
+  `@ds` |> collect()
 }
 
 ## 行操作 ----
@@ -52,13 +49,13 @@ gali_ds_collect <- function(d = NULL) {
 #' @param taskTopic 任务定义的主题文件夹
 #' @family gali-dataset function
 #' @export
-gali_ds_filter <- function(d = NULL, s_column, o_name, fv_value = list(NULL)) {
+gali_ds_filter <- function(`@ds`, s_column, o_name, fv_value = list(NULL)) {
   ## 校验参数合法性
   if(stringr::str_detect(o_name, "(>|<|>=|<=|==|!=|%in%|%nin%|%regex%|%not-regex%)", negate = TRUE)) {
     stop("Invalid filter OP: ", o_name)
   }
 
-  mydata <- d %empty% get("@output", envir = globalenv())
+  mydata <- `@ds`
   ## 创建任务表达式
   if(o_name %in% c(">", "<", ">=", "<=", "==", "!=", "%in%")) {
     mydata |> filter(do.call(!!sym(o_name), args = list(!!sym(s_column), unlist(fv_value))))
@@ -89,31 +86,33 @@ gali_ds_filter <- function(d = NULL, s_column, o_name, fv_value = list(NULL)) {
 #' @title 头部数据
 #' @family gali-dataset function
 #' @export
-gali_ds_head <- function(d = NULL, i_n = 10) {
-  d %empty% get("@output", envir = globalenv()) |> head(i_n)
+gali_ds_head <- function(`@ds`, i_n = 10) {
+  `@ds` |> head(i_n)
 }
 
 #' @title 尾部数据
 #' @family gali-dataset function
 #' @export
-gali_ds_tail <- function(d = NULL, i_n = 10) {
-  d %empty% get("@output", envir = globalenv()) |> tail(i_n)
+gali_ds_tail <- function(`@ds`, i_n = 10) {
+  `@ds` |> tail(i_n)
 }
 
 #' @title 按最大值取N条记录
 #' @family gali-dataset function
 #' @export
-gali_ds_n_max <- function(d = NULL, s_orderColumn, i_n = 10, b_with_ties = FALSE) {
-  mydata <- d %empty% get("@output", envir = globalenv()) |> collect()
-  mydata |> slice_max(order_by = mydata[[s_orderColumn]], n = i_n, with_ties = b_with_ties)
+gali_ds_n_max <- function(`@ds`, s_orderColumn, i_n = 10, b_with_ties = FALSE) {
+  mydata <- `@ds` |> collect()
+  mydata |>
+    slice_max(order_by = mydata[[s_orderColumn]], n = i_n, with_ties = b_with_ties)
 }
 
 #' @title 按最小值取N条记录
 #' @family gali-dataset function
 #' @export
-gali_ds_n_min <- function(d = NULL, s_orderColumn, i_n = 10, b_with_ties = FALSE) {
-  mydata <- d %empty% get("@output", envir = globalenv()) |> collect()
-  mydata |> slice_min(order_by = mydata[[s_orderColumn]], n = i_n, with_ties = b_with_ties)
+gali_ds_n_min <- function(`@ds`, s_orderColumn, i_n = 10, b_with_ties = FALSE) {
+  mydata <- `@ds` |> collect()
+  mydata |>
+    slice_min(order_by = mydata[[s_orderColumn]], n = i_n, with_ties = b_with_ties)
 }
 
 ## 行排序----
@@ -121,12 +120,11 @@ gali_ds_n_min <- function(d = NULL, s_orderColumn, i_n = 10, b_with_ties = FALSE
 #' @title 行排序
 #' @family gali-dataset function
 #' @export
-gali_ds_arrange <- function(d = NULL, sv_columns = list(), b_desc = FALSE, b_by_group = FALSE) {
-  mydata <- d %empty% get("@output", envir = globalenv())
+gali_ds_arrange <- function(`@ds`, sv_columns = list(), b_desc = FALSE, b_by_group = FALSE) {
   if(b_desc) {
-    mydata |> arrange(desc(!!!syms(sv_columns)), .by_group = b_by_group)
+    `@ds` |> arrange(desc(!!!syms(sv_columns)), .by_group = b_by_group)
   } else {
-    mydata |> arrange(!!!syms(sv_columns), .by_group = b_by_group)
+    `@ds` |> arrange(!!!syms(sv_columns), .by_group = b_by_group)
   }
 }
 
@@ -135,8 +133,8 @@ gali_ds_arrange <- function(d = NULL, sv_columns = list(), b_desc = FALSE, b_by_
 #' @title 选择列，支持惰性计算
 #' @family gali-dataset function
 #' @export
-gali_ds_select <- function(d = NULL, sv_columns = list(), b_everything = FALSE, s_regex = NULL) {
-  d %empty% get("@output", envir = globalenv()) |>
+gali_ds_select <- function(`@ds`, sv_columns = list(), b_everything = FALSE, s_regex = NULL) {
+  `@ds` |>
     select(contains(sv_columns |> unlist()),
            matches(s_regex %empty% "^mamaxiannichifanman$"), if(b_everything) everything() else NULL)
 }
@@ -144,8 +142,8 @@ gali_ds_select <- function(d = NULL, sv_columns = list(), b_everything = FALSE, 
 #' @title 列改名
 #' @family gali-dataset function
 #' @export
-gali_ds_rename <- function(d = NULL, s_newName, s_oldName) {
-  mydata <- d %empty% get("@output", envir = globalenv()) |> collect()
+gali_ds_rename <- function(`@ds`, s_newName, s_oldName) {
+  mydata <- `@ds` |> collect()
   names(mydata)[names(mydata) == s_oldName] <- s_newName
   mydata
 }
@@ -153,8 +151,8 @@ gali_ds_rename <- function(d = NULL, s_newName, s_oldName) {
 #' @title 计数统计
 #' @family gali-dataset function
 #' @export
-gali_ds_count <- function(d = NULL, sv_columns = c(), b_sort = FALSE, s_name = "n") {
-  d %empty% get("@output", envir = globalenv()) |>
+gali_ds_count <- function(`@ds`, sv_columns = c(), b_sort = FALSE, s_name = "n") {
+  `@ds` |>
     select(sv_columns) |>
     collect() |>
     count(!!!syms(sv_columns), sort = b_sort, name = s_name)
@@ -163,8 +161,6 @@ gali_ds_count <- function(d = NULL, sv_columns = c(), b_sort = FALSE, s_name = "
 #' @title 计数统计，并将结果追加到原数据集
 #' @family gali-dataset function
 #' @export
-gali_ds_add_count <- function(d = NULL, sv_columns = c(), b_sort = FALSE, s_name = "n") {
-  d %empty% get("@output", envir = globalenv()) |>
-    collect() |>
-    add_count(!!!syms(sv_columns), sort = b_sort, name = s_name)
+gali_ds_add_count <- function(`@ds`, sv_columns = c(), b_sort = FALSE, s_name = "n") {
+  `@ds` |> collect() |> add_count(!!!syms(sv_columns), sort = b_sort, name = s_name)
 }

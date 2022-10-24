@@ -4,7 +4,7 @@
 \alias{gali_ds_tail}
 \title{尾部数据}
 \usage{
-gali_ds_tail(d = NULL, i_n = 10)
+gali_ds_tail(`@ds`, i_n = 10)
 }
 \description{
 尾部数据

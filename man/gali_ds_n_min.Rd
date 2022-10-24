@@ -4,7 +4,7 @@
 \alias{gali_ds_n_min}
 \title{按最小值取N条记录}
 \usage{
-gali_ds_n_min(d = NULL, s_orderColumn, i_n = 10, b_with_ties = FALSE)
+gali_ds_n_min(`@ds`, s_orderColumn, i_n = 10, b_with_ties = FALSE)
 }
 \description{
 按最小值取N条记录

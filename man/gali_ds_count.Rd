@@ -4,7 +4,7 @@
 \alias{gali_ds_count}
 \title{计数统计}
 \usage{
-gali_ds_count(d = NULL, sv_columns = c(), b_sort = FALSE, s_name = "n")
+gali_ds_count(`@ds`, sv_columns = c(), b_sort = FALSE, s_name = "n")
 }
 \description{
 计数统计

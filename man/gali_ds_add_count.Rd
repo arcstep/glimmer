@@ -4,7 +4,7 @@
 \alias{gali_ds_add_count}
 \title{计数统计，并将结果追加到原数据集}
 \usage{
-gali_ds_add_count(d = NULL, sv_columns = c(), b_sort = FALSE, s_name = "n")
+gali_ds_add_count(`@ds`, sv_columns = c(), b_sort = FALSE, s_name = "n")
 }
 \description{
 计数统计，并将结果追加到原数据集

@@ -4,7 +4,7 @@
 \alias{gali_ds_head}
 \title{头部数据}
 \usage{
-gali_ds_head(d = NULL, i_n = 10)
+gali_ds_head(`@ds`, i_n = 10)
 }
 \description{
 头部数据

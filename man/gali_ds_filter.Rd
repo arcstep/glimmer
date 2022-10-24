@@ -4,7 +4,7 @@
 \alias{gali_ds_filter}
 \title{定义数据过滤任务}
 \usage{
-gali_ds_filter(d = NULL, s_column, o_name, fv_value = list(NULL))
+gali_ds_filter(`@ds`, s_column, o_name, fv_value = list(NULL))
 }
 \arguments{
 \item{s_column}{列名}

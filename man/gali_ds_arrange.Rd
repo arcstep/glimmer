@@ -4,12 +4,7 @@
 \alias{gali_ds_arrange}
 \title{行排序}
 \usage{
-gali_ds_arrange(
-  d = NULL,
-  sv_columns = list(),
-  b_desc = FALSE,
-  b_by_group = FALSE
-)
+gali_ds_arrange(`@ds`, sv_columns = list(), b_desc = FALSE, b_by_group = FALSE)
 }
 \description{
 行排序

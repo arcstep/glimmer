@@ -4,7 +4,7 @@
 \alias{gali_ds_rename}
 \title{列改名}
 \usage{
-gali_ds_rename(d = NULL, s_newName, s_oldName)
+gali_ds_rename(`@ds`, s_newName, s_oldName)
 }
 \description{
 列改名

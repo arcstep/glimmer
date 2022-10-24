@@ -5,7 +5,7 @@
 \title{选择列，支持惰性计算}
 \usage{
 gali_ds_select(
-  d = NULL,
+  `@ds`,
   sv_columns = list(),
   b_everything = FALSE,
   s_regex = NULL

@@ -4,7 +4,7 @@
 \alias{gali_ds_n_max}
 \title{按最大值取N条记录}
 \usage{
-gali_ds_n_max(d = NULL, s_orderColumn, i_n = 10, b_with_ties = FALSE)
+gali_ds_n_max(`@ds`, s_orderColumn, i_n = 10, b_with_ties = FALSE)
 }
 \description{
 按最大值取N条记录

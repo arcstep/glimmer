@@ -28,12 +28,13 @@ test_that("<gali_write>", {
 
   task_create("cars/gali_read") |>
     task_gali_add("gali_write", params = list(e_dsName = "车数据")) |>
-    task_run(`@result` = m |> slice(1:10))
+    task_run(`@ds` = m |> slice(1:10))
   ds_read0("车数据") |> collect() |> nrow() |>
     testthat::expect_equal(10)
   
-  task_create("cars/gali_read") |>
-    task_gali_add("gali_write", params = list(e_dsName = "车数据", `@result` = m |> slice(5:15))) |>
+  task_create("cars/gali_read2") |>
+    task_empty_add(params = list(`@ds` = m |> slice(5:15))) |>
+    task_gali_add("gali_write", params = list(e_dsName = "车数据")) |>
     task_run()
   ds_read0("车数据") |> collect() |> nrow() |>
     testthat::expect_equal(15)
@@ -288,6 +289,6 @@ test_that("<gali_rename>", {
     names()
   ("MY_DISP" %in% resp) |> testthat::expect_true()
   ("中国队" %in% resp) |> testthat::expect_true()
-  
+
   temp_remove()
 })

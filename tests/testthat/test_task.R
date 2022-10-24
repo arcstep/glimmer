@@ -191,7 +191,6 @@ test_that("<task_run>: func", {
     testthat::expect_equal(mtcars$disp |> min())
   
   temp_remove()
-  
 })
 
 test_that("<task_run>: gali", {
@@ -239,7 +238,6 @@ test_that("<task_run>: gali", {
     testthat::expect_equal(1)
   
   temp_remove()
-  
 })
 
 test_that("运行任务：异常情况", {
