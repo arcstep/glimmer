@@ -94,6 +94,11 @@ task_item_add <- function(
 #' @export
 task_gali_add <- purrr::partial(task_item_add, type = "gali")
 
+#' @title 为任务增加函数子任务
+#' @family task-define function
+#' @export
+task_func_add <- purrr::partial(task_item_add, type = "func")
+
 #' @title 为任务增加字符串脚本子任务
 #' @family task-define function
 #' @export
@@ -291,8 +296,9 @@ task_run0 <- function(taskItems, withEnv, runMode, ...) {
     ## 将结果保存在curResult
     curResult <- NULL
     ## 逐项执行子任务
-    taskItems |> purrr::pwalk(function(script, params, type, inputAsign, outputAsign) {
-      if(type %in% c("gali", "function")) {
+    taskItems |> tibble::rowid_to_column("rowId") |>
+      purrr::pwalk(function(rowId, script, params, type, inputAsign, outputAsign) {
+      if(type %in% c("gali", "func")) {
         ## 提取函数定义参数，无法匹配的参数
         myparam <- formalArgs(script)
         funcParam <- params[myparam[myparam %in% names(params)]] %empty% list()
@@ -301,15 +307,31 @@ task_run0 <- function(taskItems, withEnv, runMode, ...) {
         names(envParam) |> purrr::walk(function(i) {
           assign(i, params[[i]], envir = TaskRun.ENV)
         })
+        ## 按照gali函数的规则赋值输入、输出
+        gali <- get_funs_gali(matchName = paste0("^", script, "$"), funs = script)
+        if(nrow(gali) == 1) {
+          if(gali$input != "-" && gali$input %nin% names(inputAsign)) {
+            inputAsign[[gali$input]] <- gali$input
+          }
+          if(gali$output != "-" && is.null(outputAsign |> unlist())) {
+            outputAsign <- gali$output
+          }
+        }
         ## 使用环境内变量覆盖入参
-        names(inputAsign) |> purrr::walk(function(i) {
+        names(inputAsign |> unlist()) |> purrr::walk(function(i) {
           ## 如果映射目标不存在，就忽略
           if(i %in% myparam && inputAsign[[i]] %in% ls(TaskRun.ENV)) {
             funcParam[[i]] <<- get(inputAsign[[i]], envir = TaskRun.ENV)
+          } else {
+            warning("item ", rowId, ": ", type, "/", script, " >> Input Asign had been Ignored: ", i)
           }
         })
         ## 将输出值保存在"result"
-        curResult <<- do.call(script, args = funcParam, envir = TaskRun.ENV)
+        tryCatch({
+          curResult <<- do.call(script, args = funcParam, envir = TaskRun.ENV)
+        }, error = function(e) {
+          stop(e, "item ", rowId, ": ", type, "/", script)
+        })
       } else {
         ## 提取子任务定义参数
         names(params) |> purrr::walk(function(i) {

@@ -4,7 +4,7 @@
 \alias{get_funs_gali}
 \title{所有gali函数}
 \usage{
-get_funs_gali(matchName = ".*", pos = "package:glimmer")
+get_funs_gali(matchName = ".*", funs = lsf.str("package:glimmer"))
 }
 \description{
 所有gali函数

@@ -38,15 +38,15 @@ test_that("定义任务：string类型", {
 
   task_item_add(taskId = "A", script = "ls()", type = "string")
   task_read("A")$items |> nrow() |>
-    testthat::expect_equal(1)
+    testthat::expect_equal(2)
   
   task_item_add(taskId = "A", script = "ls()", params = list(batchFoler = NULL), type = "string")
   task_read("A")$items |> nrow() |>
-    testthat::expect_equal(2)
+    testthat::expect_equal(3)
   
   task_item_add(taskId = "A", script = "ls()", params = list(batchFoler = "schedual_1001", data = 1:3), type = "string")
   task_read("A")$items |> nrow() |>
-    testthat::expect_equal(3)
+    testthat::expect_equal(4)
   
   temp_remove()
 })
@@ -58,7 +58,7 @@ test_that("定义任务：file类型，且使用管道风格", {
     task_item_add(script = "A/a.R", type = "file") |>
     task_item_add(script = "result <- (x |> filter(age > 6))", type = "string")
   task_read("B")$items |> nrow() |>
-    testthat::expect_equal(2)
+    testthat::expect_equal(3)
   
   temp_remove()
 })
@@ -69,14 +69,15 @@ test_that("定义任务：dir类型", {
   task_create(taskId = "C") |>
     task_item_add(script = "A", type = "dir")
   task_read("C")$items |> nrow() |>
-    testthat::expect_equal(1)
+    testthat::expect_equal(2)
 
   temp_remove()
 })
 
 test_that("<task_run>: withEnv", {
   sample_init()
-  task_create("mytask") |> task_run(withEnv = T) |> names()
+  task_create("mytask") |> task_run(withEnv = T) |> names() |>
+    testthat::expect_identical(c("result", "env"))
 })
 
 test_that("<task_run>: string|expr|empty", {
@@ -148,35 +149,29 @@ test_that("<task_run>: file|dir", {
   temp_remove()
 })
 
-test_that("<task_run>: function", {
+test_that("<task_run>: func", {
   sample_init()
-  ## 无参数
-  mycars <- function() { mtcars |> as_tibble() }
-  mycyl <- function(i_cyl = 4) { mtcars |> as_tibble() |> filter(cyl == i_cyl) }
-  myarrange <- function(d, sv_columns) {
-    d |> arrange(!!!syms(sv_columns))
-  }
-  
+
   ## 默认参数
   task_create(taskId = "fun01") |>
-    task_item_add(type = "function", script = "mycars") |>
+    task_func_add("mycars") |>
     task_run() |> nrow() |>
     testthat::expect_equal(nrow(mtcars))
 
   ## 设置参数
   task_create(taskId = "fun02") |>
-    task_item_add(type = "function", script = "mycyl") |>
+    task_item_add(type = "func", script = "mycyl") |>
     task_run() |> nrow() |>
     testthat::expect_equal(nrow(mtcars |> filter(cyl == 4)))
   
   task_create(taskId = "fun02") |>
-    task_item_add(type = "function", script = "mycyl", params = list(i_cyl = 6)) |>
+    task_item_add(type = "func", script = "mycyl", params = list(i_cyl = 6)) |>
     task_run() |> nrow() |>
     testthat::expect_equal(nrow(mtcars |> filter(cyl == 6)))
   
   ## 出参映射
   task_create(taskId = "fun03") |>
-    task_item_add(type = "function", script = "mycyl", params = list(i_cyl = 6), outputAsign = "car6") |>
+    task_item_add(type = "func", script = "mycyl", params = list(i_cyl = 6), outputAsign = "car6") |>
     task_item_add(type = "string", script = "car6 |> head(5)") |>
     task_run() |> nrow() |>
     testthat::expect_equal(5)
@@ -184,14 +179,14 @@ test_that("<task_run>: function", {
   ## 入参映射
   task_create(taskId = "fun04") |>
     task_item_add(type = "empty", params = list(selectedCyl = 6)) |>
-    task_item_add(type = "function", script = "mycyl", inputAsign = list(i_cyl = "selectedCyl")) |>
+    task_item_add(type = "func", script = "mycyl", inputAsign = list(i_cyl = "selectedCyl")) |>
     task_run() |> nrow() |>
     testthat::expect_equal(nrow(mtcars |> filter(cyl == 6)))
   
   ## 管道计算
   (task_create(taskId = "fun04") |>
-    task_item_add(type = "function", script = "mycars", outputAsign = "@ds") |>
-    task_item_add(type = "function", script = "myarrange", params = list(sv_columns = "disp"), inputAsign = list(d = "@ds")) |>
+    task_item_add(type = "func", script = "mycars", outputAsign = "@ds") |>
+    task_item_add(type = "func", script = "myarrange", params = list(sv_columns = "disp"), inputAsign = list(d = "@ds")) |>
     task_run())$disp[[1]] |>
     testthat::expect_equal(mtcars$disp |> min())
   
@@ -201,39 +196,47 @@ test_that("<task_run>: function", {
 
 test_that("<task_run>: gali", {
   sample_init()
-  
-  ##
-  gali_import_1 <- function() { mtcars |> as_tibble() }
-  task_create(taskId = "g01") |>
-    task_gali_add("gali_import_1") |>
-    task_expr_add(expression({`@ds`})) |>
+
+  ## 默认参数
+  task_create(taskId = "fun01") |>
+    task_gali_add("gali_import_cars") |>
     task_run() |> nrow() |>
     testthat::expect_equal(nrow(mtcars))
   
-  ##
-  assign(
-    "gali_myarrange",
-    function(d = NULL, sv_columns) {
-      (d %empty% get(s_OUTPUT)) |>
-        arrange(!!!syms(sv_columns))},
-    envir = globalenv())
-  task_create(taskId = "Gali_02") |>
-    task_gali_add("gali_myfunc1") |>
-    task_gali_add("gali_myarrange", params = list(s_OUTPUT = "@result", sv_columns = "disp"))
-  task_run("Gali_02")$disp[[1]] |>
-    testthat::expect_equal(min(mtcars$disp))
+  ## 管道连接
+  task_create(taskId = "fun02") |>
+    task_gali_add("gali_import_cars") |>
+    task_gali_add("gali_ds_filter_cyl") |>
+    task_run() |> nrow() |>
+    testthat::expect_equal(nrow(mtcars |> filter(cyl == 4)))
   
-  task_create(taskId = "Gali_03") |>
-    task_gali_add("gali_myarrange",
-                  params = list("s_OUTPUT" = "x", "x" = mtcars, sv_columns = "disp"))
-  task_run("Gali_03")$disp[[1]] |>
-    testthat::expect_equal(min(mtcars$disp))
+  task_create(taskId = "fun02") |>
+    task_gali_add("gali_import_cars") |>
+    task_gali_add(script = "gali_ds_filter_cyl", params = list(i_cyl = 6)) |>
+    task_run() |> nrow() |>
+    testthat::expect_equal(nrow(mtcars |> filter(cyl == 6)))
   
-  task_create(taskId = "Gali_04", list("@result" = mtcars)) |>
-    task_gali_add("gali_myarrange",
-                  params = list(sv_columns = "disp"))
-  task_run("Gali_04")$disp[[1]] |>
-    testthat::expect_equal(min(mtcars$disp))
+  ## 显式使用映射参数
+  task_create(taskId = "fun03") |>
+    task_gali_add("gali_import_cars") |>
+    task_gali_add(script = "gali_ds_filter_cyl", params = list(i_cyl = 6)) |>
+    task_string_add(script = "`@ds` |> head(5)") |>
+    task_run() |> nrow() |>
+    testthat::expect_equal(5)
+  
+  task_create(taskId = "fun03") |>
+    task_gali_add("gali_import_cars") |>
+    task_gali_add(script = "gali_ds_filter_cyl", params = list(i_cyl = 6), outputAsign = "car6") |>
+    task_string_add(script = "car6 |> head(5)") |>
+    task_run() |> nrow() |>
+    testthat::expect_equal(5)
+
+  task_create(taskId = "fun03") |>
+    task_gali_add("gali_import_cars", outputAsign = "mycars") |>
+    task_string_add(script = "mycars |> head(5)", inputAsign = "mycars", outputAsign = "mycars") |>
+    task_gali_add(script = "gali_ds_filter_cyl", params = list(i_cyl = 4), inputAsign = list("@ds" = "mycars")) |>
+    task_run() |> nrow() |>
+    testthat::expect_equal(1)
   
   temp_remove()
   

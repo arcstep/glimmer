@@ -40,6 +40,7 @@ Other task-define function:
 \code{\link{task_empty_add}()},
 \code{\link{task_expr_add}()},
 \code{\link{task_file_add}()},
+\code{\link{task_func_add}()},
 \code{\link{task_gali_add}()},
 \code{\link{task_id}()},
 \code{\link{task_read}()},

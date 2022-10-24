@@ -202,7 +202,7 @@ get_params <- function(funcName) {
 
 #' @title 查询函数
 #' @export
-get_funs <- function(prefix = ".*", pos = "package:glimmer") {
+get_funs <- function(prefix = ".*", funs = lsf.str("package:glimmer")) {
   p <- tribble(
     ~type, ~input, ~output, ~tips,
     "import", "-", "@ds", "导入数据到内存",
@@ -216,16 +216,15 @@ get_funs <- function(prefix = ".*", pos = "package:glimmer") {
     "trace", "@plot", "@plot", "增加plotly绘制层",
     "DT", "@ds", "@DT", "绘制DT数据表"
   )
-  x <- lsf.str(pos)
-  tibble(funcName = x[x |> stringr::str_detect(prefix)]) |>
+  tibble(funcName = funs[funs |> stringr::str_detect(prefix)]) |>
     mutate(type = stringr::str_remove(funcName, prefix) |> stringr::str_remove("(?<=)_.+")) |>
     left_join(p, by = "type")
 }
 
 #' @title 所有gali函数
 #' @export
-get_funs_gali <- function(matchName = ".*", pos = "package:glimmer") {
-  get_funs("^gali_", pos) |>
+get_funs_gali <- function(matchName = ".*", funs = lsf.str("package:glimmer")) {
+  get_funs("^gali_", funs) |>
     filter(stringr::str_detect(funcName, matchName))
 }
 

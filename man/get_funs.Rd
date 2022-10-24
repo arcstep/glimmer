@@ -4,7 +4,7 @@
 \alias{get_funs}
 \title{查询函数}
 \usage{
-get_funs(prefix = ".*", pos = "package:glimmer")
+get_funs(prefix = ".*", funs = lsf.str("package:glimmer"))
 }
 \description{
 查询函数

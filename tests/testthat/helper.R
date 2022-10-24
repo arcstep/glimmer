@@ -6,6 +6,20 @@ library(lubridate, warn.conflicts = FALSE)
 
 rootPath <- tempdir()
 
+## 普通函数准备
+mycars <- function() { mtcars |> as_tibble() }
+mycyl <- function(i_cyl = 4) { mtcars |> as_tibble() |> filter(cyl == i_cyl) }
+myarrange <- function(d, sv_columns) {
+  d |> arrange(!!!rlang::syms(sv_columns))
+}
+## gali函数准备
+gali_import_cars <- function() { mtcars |> as_tibble() }
+gali_ds_filter_cyl <- function(`@ds`, i_cyl = 4) { `@ds` |> as_tibble() |> filter(cyl == i_cyl) }
+gali_ds_as_sort <- function(`@ds`, sv_columns) {
+  `@ds` |> arrange(!!!syms(sv_columns))
+}
+
+
 sample_dataset_init <- function() {
   config_init(rootPath)
 
@@ -26,43 +40,43 @@ sample_task_define <- function() {
   ))
   ## simple
   task_create(taskId = "build_cars", taskType = "__BUILD__") |>
-    task_item_add(taskScript = "BUILD/cars.R", scriptType = "file", touchFiles = F)
+    task_item_add(script = "BUILD/cars.R", type = "file", touchFiles = F)
 
   ## tast test
   task_create(taskId = "task_sample_simple") |>
-    task_item_add(taskScript = "SIMPLE/a.R", scriptType = "file", touchFiles = F) |>
-    task_item_add(taskScript = "result <- (x |> filter(age > 6))", scriptType = "string", touchFiles = F)
+    task_item_add(script = "SIMPLE/a.R", type = "file", touchFiles = F) |>
+    task_item_add(script = "result <- (x |> filter(age > 6))", type = "string", touchFiles = F)
 
   task_create(taskId = "task_sample_dir") |>
-    task_item_add(taskScript = "SIMPLE", scriptType = "dir", touchFiles = F)
+    task_item_add(script = "SIMPLE", type = "dir", touchFiles = F)
 
   task_create(taskId = "task_sample_define_param") |>
-    task_item_add(taskScript = "SIMPLE/a.R", scriptType = "file", touchFiles = F) |>
-    task_item_add(taskScript = "result <- (x |> filter(age > myage))", params = list(myage = 3), scriptType = "string", touchFiles = F)
+    task_item_add(script = "SIMPLE/a.R", type = "file", touchFiles = F) |>
+    task_item_add(script = "result <- (x |> filter(age > myage))", params = list(myage = 3), type = "string", touchFiles = F)
 
   task_create(taskId = "task_sample_runtime_param") |>
-    task_item_add(taskScript = "SIMPLE/a.R", scriptType = "file", touchFiles = F) |>
-    task_item_add(taskScript = "result <- (x |> filter(age > myage))", scriptType = "string", touchFiles = F)
+    task_item_add(script = "SIMPLE/a.R", type = "file", touchFiles = F) |>
+    task_item_add(script = "result <- (x |> filter(age > myage))", type = "string", touchFiles = F)
 
   task_create(taskId = "task_sample_error") |>
-    task_item_add(taskScript = "stop('I m an error!')", scriptType = "string", touchFiles = F)
+    task_item_add(script = "stop('I m an error!')", type = "string", touchFiles = F)
 
   ## 文件不存在
   task_create(taskId = "task_sample_file_not_exist") |>
-    task_item_add(taskScript = "NOT_EXISTING_FILE", scriptType = "file", touchFiles = F)
+    task_item_add(script = "NOT_EXISTING_FILE", type = "file", touchFiles = F)
 
   ## 目录不存在
   task_create(taskId = "task_sample_dir_not_exist") |>
-    task_item_add(taskScript = "NOT_EXISTING_DIR", scriptType = "dir", touchFiles = F)
+    task_item_add(script = "NOT_EXISTING_DIR", type = "dir", touchFiles = F)
 
   ## 空文件夹
   task_create(taskId = "task_sample_empty_dir") |>
-    task_item_add(taskScript = "EMPTY_FOLDER", scriptType = "dir", touchFiles = F)
+    task_item_add(script = "EMPTY_FOLDER", type = "dir", touchFiles = F)
 
   ## import test
   mytask_add <- function(taskId, scriptFile) {
     task_create(taskId = taskId, taskType = "__IMPORT__") |>
-      task_item_add(taskScript = scriptFile, scriptType = "file", touchFiles = F)
+      task_item_add(script = scriptFile, type = "file", touchFiles = F)
   }
   mytask_add("A/student", "IMPORT/student.R")
   mytask_add("A/score", "IMPORT/score.R")
