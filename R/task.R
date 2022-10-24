@@ -166,6 +166,27 @@ task_read <- function(taskId, taskTopic = "TASK_DEFINE") {
   }
 }
 
+#' @title 任务上线或下线
+#' @param taskId 任务标识
+#' @param taskTopic 保存任务定义的存储主题文件夹
+#' @family task-define function
+#' @export
+task_online <- function(taskId, online = TRUE, taskTopic = "TASK_DEFINE") {
+  if(length(taskId) != 1) {
+    stop("taskId length MUST be 1 >> ", taskId |> paste(collapse = ","))
+  }
+  path <- get_path(taskTopic, paste0(taskId, ".rds"))
+  if(fs::file_exists(path)) {
+    x <- readRDS(path)
+    x$online = online
+    x |> saveRDS(path)
+    message("Task <", taskTopic, "/", taskId, "> online: ", online, " !!")
+  } else {
+    warning("No Task Define: ", taskId)
+    list("task_path" = path)
+  }
+}
+
 #' @title 列举所有任务定义
 #' @param topic 主题域
 #' @family task-define function

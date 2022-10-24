@@ -19,6 +19,7 @@ Other task-define function:
 \code{\link{task_gali_add}()},
 \code{\link{task_id}()},
 \code{\link{task_item_add}()},
+\code{\link{task_online}()},
 \code{\link{task_read}()},
 \code{\link{task_run}()},
 \code{\link{task_search}()},
