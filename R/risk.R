@@ -69,6 +69,7 @@ risk_model_create <- function(dsName,
                 riskDataName = riskDataName,
                 riskTip = riskTip,
                 riskLevel = riskLevel)) |>
+    task_expr_add(expression({`@task`$taskId}), outputAsign = "s_modelId") |>
     task_gali_add("gali_read", list("e_dsName" = dsName))
 }
 
@@ -212,6 +213,6 @@ risk_data_write <- function(d, s_modelId) {
 #' @title 根据风险模型生成并写入疑点数据
 #' @family gali-risk function
 #' @export
-gali_write_risk <- function(d = NULL, s_modelId = NULL) {
-  risk_data_write(d %empty% get(s_OUTPUT), s_modelId %empty% get("taskId"))
+gali_write_risk <- function(`@ds`, s_modelId) {
+  risk_data_write(`@ds`, s_modelId)
 }

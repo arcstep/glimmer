@@ -93,6 +93,7 @@ sample_init <- function() {
   
   config_init(rootPath)
   import_init()
+  risk_data_init()
   task_queue_init()
   sample_dataset_init()
   

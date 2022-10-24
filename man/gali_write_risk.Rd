@@ -4,7 +4,7 @@
 \alias{gali_write_risk}
 \title{根据风险模型生成并写入疑点数据}
 \usage{
-gali_write_risk(d = NULL, s_modelId = NULL)
+gali_write_risk(`@ds`, s_modelId)
 }
 \description{
 根据风险模型生成并写入疑点数据

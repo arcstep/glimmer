@@ -1,8 +1,5 @@
 test_that("创建模型：一般情况", {
-  sample_config_init()
-  import_init()
-  task_queue_init()
-  risk_data_init()
+  sample_init()
   m <- mtcars |> as_tibble() |> rowid_to_column()
   ds_init("cars", data = m, type = "__BUILD__", keyColumns = "rowid", titleColumn = "cyl")
   m |> ds_write("cars")
@@ -19,7 +16,7 @@ test_that("创建模型：一般情况", {
   risk_model_create("cars", modelName = "risk/cyl-middle") |>
     task_gali_add("gali_ds_filter", list(s_column = "cyl", o_name = ">=", fv_value = 6)) |>
     task_gali_add("gali_ds_filter", list(s_column = "cyl", o_name = "<", fv_value = 8)) |>
-    task_gali_add("gali_write_risk") |>
+    task_gali_add("gali_write_risk", inputAsign = list(s_modelId = "s_modelId")) |>
     task_run()
   (risk_data_read() |> distinct(dataTitle))$dataTitle |>
     testthat::expect_equal("6")
@@ -28,10 +25,7 @@ test_that("创建模型：一般情况", {
 })
 
 test_that("创建模型：要求数据集有关键列和主题列", {
-  sample_config_init()
-  import_init()
-  task_queue_init()
-  risk_data_init()
+  sample_init()
   m <- mtcars |> as_tibble() |> rowid_to_column()
   ds_init("cars1", data = m, type = "__BUILD__", titleColumn = "cyl")
   ds_init("cars2", data = m, type = "__BUILD__", keyColumns = "rowid")
@@ -46,10 +40,7 @@ test_that("创建模型：要求数据集有关键列和主题列", {
 })
 
 test_that("疑点数据：清理未处理的疑点数据", {
-  sample_config_init()
-  import_init()
-  task_queue_init()
-  risk_data_init()
+  sample_init()
   m <- mtcars |> as_tibble() |> rowid_to_column()
   ds_init("cars", data = m, type = "__BUILD__", keyColumns = "rowid", titleColumn = "cyl")
   m |> ds_write("cars")
@@ -58,7 +49,7 @@ test_that("疑点数据：清理未处理的疑点数据", {
   risk_model_create("cars", modelName = "risk/cyl-middle") |>
     task_gali_add("gali_ds_filter", list(s_column = "cyl", o_name = ">=", fv_value = 6)) |>
     task_gali_add("gali_ds_filter", list(s_column = "cyl", o_name = "<", fv_value = 8)) |>
-    task_gali_add("gali_write_risk") |>
+    task_gali_add("gali_write_risk", inputAsign = list(s_modelId = "s_modelId")) |>
     task_run()
   
   risk_data_read() |> nrow() |>
@@ -70,7 +61,7 @@ test_that("疑点数据：清理未处理的疑点数据", {
 
   risk_model_create("cars", modelName = "risk/cyl-middle", tagName = "V2") |>
     task_gali_add("gali_ds_filter", list(s_column = "cyl", o_name = ">=", fv_value = 6)) |>
-    task_gali_add("gali_write_risk") |>
+    task_gali_add("gali_write_risk", inputAsign = list(s_modelId = "s_modelId")) |>
     task_run()
   
   risk_data_read() |> nrow() |>
