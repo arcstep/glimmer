@@ -159,6 +159,7 @@ all_param_type <- tribble(
   "i_", "int", "整数",
   "iv_", "int...", "整数序列",
   "f_", "float", "浮点数",
+  "f1_", "float", "0-1小数",
   "fv_", "float...", "数值序列",
   "ds_", "date_string", "日期字符串",
   "dts_", "datetime_string", "日期时间字符串",

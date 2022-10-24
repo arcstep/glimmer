@@ -1,3 +1,13 @@
+# 直方图
+
+    Code
+      plot_hist(mtcars, x = "mpg")
+
+# 散点图
+
+    Code
+      plot_marker(mtcars, x = "mpg", y = "disp", alpha = 0.6)
+
 # 饼图
 
     Code
@@ -27,16 +37,6 @@
 
     Code
       plot_area(summarise(group_by(mtcars, cyl), displ = mean(disp)), x = "cyl", y = "displ")
-
-# 散点图
-
-    Code
-      plot_marker(mtcars, x = "mpg", y = "disp", alpha = 0.6)
-
-# 直方图
-
-    Code
-      plot_hist(mtcars, x = "mpg")
 
 # 极坐标柱图
 
