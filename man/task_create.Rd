@@ -7,6 +7,7 @@
 task_create(
   taskId,
   online = FALSE,
+  items = NULL,
   taskType = "__UNKNOWN__",
   desc = "-",
   taskTopic = "TASK_DEFINE",

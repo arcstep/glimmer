@@ -7,6 +7,7 @@
 task_run(
   taskId,
   withQueue = FALSE,
+  withEnv = FALSE,
   taskTopic = "TASK_DEFINE",
   runMode = "in-process",
   ...

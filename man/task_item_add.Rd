@@ -12,7 +12,7 @@ task_item_add(
   outputAsign = list(NULL),
   touchFiles = TRUE,
   taskTopic = "TASK_DEFINE",
-  scriptType = "string"
+  scriptType = "empty"
 )
 }
 \arguments{
@@ -28,7 +28,7 @@ task_item_add(
 
 \item{taskTopic}{任务主题存储位置}
 
-\item{scriptType}{可以是string,file,dir, 或其他系统内置函数}
+\item{scriptType}{可以是string,expr,function,gali,file,dir,empty等}
 }
 \description{
 增加子任务

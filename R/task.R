@@ -8,6 +8,7 @@
 #' @family task-define function
 #' @export
 task_create <- function(taskId, online = FALSE,
+                        items = NULL,
                         taskType = "__UNKNOWN__", desc = "-",
                         taskTopic = "TASK_DEFINE", scriptsTopic = "TASK_SCRIPTS",
                         queueDataset = "__TASK_QUEUE__",importDataset = "__IMPORT_FILES__",
@@ -26,7 +27,14 @@ task_create <- function(taskId, online = FALSE,
     "importDataset" =importDataset,
     "cacheTopic" = cacheTopic,
     "importTopic" = importTopic,
-    "createdAt" = as_datetime(lubridate::now(), tz = "Asia/Shanghai") |> as.character()
+    "createdAt" = as_datetime(lubridate::now(), tz = "Asia/Shanghai") |> as.character(),
+    "items" = items %empty% tibble(
+      "scriptType" = "empty",
+      "taskScript" = "ls()",
+      "params" = list(NULL),
+      "inputAsign" = list(NULL),
+      "outputAsign" = list(NULL)
+    )
   )
   settings |> saveRDS(path)
   taskId
@@ -50,7 +58,7 @@ task_item_add <- function(
     outputAsign = list(NULL),
     touchFiles = TRUE,
     taskTopic = "TASK_DEFINE",
-    scriptType = "string") {
+    scriptType = "empty") {
   path <- get_path(taskTopic, paste0(taskId, ".rds"))
   if(fs::file_exists(path)) {
     ## 写入任务定义配置文件
@@ -184,6 +192,7 @@ task_id <- function(taskMatch = ".*", taskTopic = "TASK_DEFINE") {
 #' @export
 task_run <- function(taskId,
                      withQueue = FALSE,
+                     withEnv = FALSE,
                      taskTopic = "TASK_DEFINE",
                      runMode = "in-process", ...) {
   paramInfo <- list(...)
@@ -221,7 +230,7 @@ task_run <- function(taskId,
                            "yamlParams" = paramInfo |> yaml::as.yaml())),
       "inputAsign" = list(),
       "outputAsign" = list()
-    )    
+    )
     items <- rbind(
       item_run,
       task_read(taskId, taskMeta$taskTopic)$items,
@@ -233,7 +242,7 @@ task_run <- function(taskId,
   }
 
   tryCatch({
-    task_run0(items, runMode, `@task` = taskMeta, ...)
+    task_run0(items, runMode, withEnv = withEnv, `@task` = taskMeta, ...)
   }, error = function(e) {
     stop(
       e,
@@ -244,7 +253,7 @@ task_run <- function(taskId,
 }
 
 #
-task_run0 <- function(taskItems, runMode = "in-process", ...) {
+task_run0 <- function(taskItems, withEnv, runMode, ...) {
   taskToRun <- function(..., taskItems) {
     ## 子函数内定义一个设置返回值的函数，供内部使用
     TaskRun.ENV <- new.env(hash = TRUE)
@@ -313,15 +322,17 @@ task_run0 <- function(taskItems, runMode = "in-process", ...) {
         }        
       }
       ## 覆盖或创建输出目标
-      if("list" %in% class(curResult)) {
-        names(outputAsign) |> purrr::walk(function(i) {
-          if(outputAsign[[i]] %in% names(curResult)) {
-            assign(i, curResult[[outputAsign[[i]]]], envir = TaskRun.ENV)
-          }
-        })
-      }
+      outputAsign |> purrr::walk(function(i) {
+        if(is.character(i) && length(i) == 1) {
+          assign(i, curResult, envir = TaskRun.ENV)
+        }
+      })
     })
-    curResult
+    if(withEnv) {
+      list("result" = curResult, "env" = as.list(TaskRun.ENV))
+    } else {
+      curResult
+    }
   }
   
   if(runMode == "r") {

@@ -1,3 +1,34 @@
+test_that("定义任务：手工添加items", {
+  sample_init()
+  
+  ## 空任务
+  task_create(taskId = "mytask1") |>
+    task_run() |>
+    testthat::expect_equal(NULL)
+
+  ## 创建任务时添加items
+  task_create(taskId = "mytask2", items = tibble(
+    "scriptType" = "string",
+    "taskScript" = "ls()",
+    "params" = list(NULL),
+    "inputAsign" = list(NULL),
+    "outputAsign" = list(NULL)
+  )) |> task_run() |>
+    testthat::expect_equal("@task")
+
+  ## 
+  task_create(taskId = "mytask2", items = tibble(
+    "scriptType" = c("string", "expr"),
+    "taskScript" = c("ls()", expression(x)),
+    "params" = list(list("x" = 1:10), list(NULL)),
+    "inputAsign" = list(NULL),
+    "outputAsign" = list(NULL)
+  )) |> task_run() |>
+    testthat::expect_identical(1:10)
+
+  temp_remove()
+})
+
 test_that("定义任务：string类型", {
   sample_init()
 
@@ -43,6 +74,11 @@ test_that("定义任务：dir类型", {
   temp_remove()
 })
 
+test_that("<task_run>: withEnv", {
+  sample_init()
+  task_create("mytask") |> task_run(withEnv = T) |> names()
+})
+
 test_that("<task_run>: string|expr|empty", {
   sample_init()
   
@@ -81,9 +117,9 @@ test_that("<task_run>: string|expr|empty", {
                   params = list("a" = 3, "b" = 3)) |>
     task_item_add(scriptType = "expr",
                   taskScript = expression({list(x = a^2, y = b*2)}),
-                  outputAsign = list("m" = "x", "n" = "y")) |>
+                  outputAsign = c("m")) |>
     task_item_add(scriptType = "expr",
-                  taskScript = expression({m+n})) |>
+                  taskScript = expression({m$x+m$y})) |>
     task_run() |>
     testthat::expect_equal(3^2+3*2)
 
@@ -114,20 +150,20 @@ test_that("<task_run>: file|dir", {
 
 test_that("<task_run>: function", {
   sample_init()
-  ##
+  ## 无参数
   mycars <- function() { mtcars |> as_tibble() }
   mycyl <- function(i_cyl = 4) { mtcars |> as_tibble() |> filter(cyl == i_cyl) }
   myarrange <- function(d, sv_columns) {
     d |> arrange(!!!syms(sv_columns))
   }
   
-  ## 无参
+  ## 默认参数
   task_create(taskId = "fun01") |>
     task_item_add(scriptType = "function", taskScript = "mycars") |>
     task_run() |> nrow() |>
     testthat::expect_equal(nrow(mtcars))
 
-  ## 有参
+  ## 设置参数
   task_create(taskId = "fun02") |>
     task_item_add(scriptType = "function", taskScript = "mycyl") |>
     task_run() |> nrow() |>
