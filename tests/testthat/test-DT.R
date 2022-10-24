@@ -1,4 +1,4 @@
 test_that("简单的datatable", {
-  mtcars |> DT_table() |>
+  mtcars |> gali_DT() |>
     testthat::expect_snapshot()
 })

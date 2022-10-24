@@ -24,20 +24,20 @@ language = list(
 
 #' @title 数据表
 #' @examples 
-#' mtcars |> DT_table()
+#' mtcars |> gali_DT()
 #' @family lib-DT functions
 #' @export
-DT_table <- function(d,
-                    rownames = FALSE,
-                    selection = 'none',
-                    extensions = "Responsive",
-                    class = 'white-space: nowrap',
-                    options = list("responsive" = TRUE),
+gali_DT <- function(`@ds`,
+                    b_rownames = FALSE,
+                    e_selection = 'none',
+                    e_extensions = "Responsive",
+                    e_class = 'white-space: nowrap',
+                    e_options = list("responsive" = TRUE),
                     ...) {
-  xoptions <- options
+  xoptions <- e_options
   xoptions$language = language
-  d |> collect() |>
-    DT::datatable(rownames = rownames, selection = selection,
-      extensions = extensions, class = class, options = xoptions, ...)
+  `@ds` |> collect() |>
+    DT::datatable(rownames = b_rownames, selection = e_selection,
+      extensions = e_extensions, class = e_class, options = xoptions, ...)
 }
 
