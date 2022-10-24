@@ -75,7 +75,7 @@ sample_task_define <- function() {
 
   ## import test
   mytask_add <- function(taskId, scriptFile) {
-    task_create(taskId = taskId, taskType = "__IMPORT__") |>
+    task_create(taskId = taskId, online = TRUE, taskType = "__IMPORT__") |>
       task_item_add(script = scriptFile, type = "file", touchFiles = F)
   }
   mytask_add("A/student", "IMPORT/student.R")
@@ -94,6 +94,7 @@ sample_init <- function() {
   config_init(rootPath)
   import_init()
   task_queue_init()
+  sample_dataset_init()
   
   sample_files_prepare()
 }

@@ -1,10 +1,5 @@
 test_that("<import_changed> 扫描新素材变化", {
-  sample_config_init()
-  import_changed() |>
-    testthat::expect_warning("No Batch Folder need to Import")
-  
-  ## 准备素材后检验
-  sample_import_files()
+  sample_init()
   import_changed() |> nrow() |>
     testthat::expect_equal(5)
   
@@ -40,15 +35,7 @@ test_that("<import_changed> 扫描新素材变化", {
 })
 
 test_that("<import_scan> 过滤要导入的文件", {
-  sample_config_init()
-  import_init()
-  
-  ## 空数据库
-  import_search() |> nrow() |>
-    testthat::expect_equal(0)
-  
-  ## 准备导入素材，扫描
-  sample_import_files()
+  sample_init()
   import_scan()
   import_search() |> nrow() |>
     testthat::expect_equal(5)
@@ -71,13 +58,7 @@ test_that("<import_scan> 过滤要导入的文件", {
 })
 
 test_that("<import_run> 导入流程", {
-  sample_config_init()
-  import_init()
-  task_queue_init()
-  sample_import_files()
-  sample_dataset_init()
-
-  ## 列举所有素材
+  sample_init()
   import_scan()
   files <- import_search()
   files |> nrow() |>
