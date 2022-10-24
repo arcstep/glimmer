@@ -6,29 +6,29 @@
 \usage{
 task_item_add(
   taskId,
-  taskScript = "ls()",
+  script = "ls()",
   params = list(NULL),
   inputAsign = list(NULL),
   outputAsign = list(NULL),
   touchFiles = TRUE,
   taskTopic = "TASK_DEFINE",
-  scriptType = "empty"
+  type = "empty"
 )
 }
 \arguments{
 \item{taskId}{任务标识}
 
-\item{taskScript}{子任务的执行路径}
+\item{script}{子任务的执行路径}
 
 \item{params}{执行脚本的参数映射}
 
-\item{inputAsign}{将执行环境内变量赋值给入参}
+\item{inputAsign}{针对function和gali类型，使用执行环境内变量映射入参}
 
-\item{outputAsign}{将函数输出复制该执行环境内的变量}
+\item{outputAsign}{保存子任务输出}
 
 \item{taskTopic}{任务主题存储位置}
 
-\item{scriptType}{可以是string,expr,function,gali,file,dir,empty等}
+\item{type}{可以是string,expr,function,gali,file,dir,empty等}
 }
 \description{
 增加子任务
@@ -36,10 +36,15 @@ task_item_add(
 \seealso{
 Other task-define function: 
 \code{\link{task_create}()},
+\code{\link{task_dir_add}()},
+\code{\link{task_empty_add}()},
+\code{\link{task_expr_add}()},
+\code{\link{task_file_add}()},
 \code{\link{task_gali_add}()},
 \code{\link{task_id}()},
 \code{\link{task_read}()},
 \code{\link{task_run}()},
-\code{\link{task_search}()}
+\code{\link{task_search}()},
+\code{\link{task_string_add}()}
 }
 \concept{task-define function}

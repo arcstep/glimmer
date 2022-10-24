@@ -12,10 +12,15 @@ task_id(taskMatch = ".*", taskTopic = "TASK_DEFINE")
 \seealso{
 Other task-define function: 
 \code{\link{task_create}()},
+\code{\link{task_dir_add}()},
+\code{\link{task_empty_add}()},
+\code{\link{task_expr_add}()},
+\code{\link{task_file_add}()},
 \code{\link{task_gali_add}()},
 \code{\link{task_item_add}()},
 \code{\link{task_read}()},
 \code{\link{task_run}()},
-\code{\link{task_search}()}
+\code{\link{task_search}()},
+\code{\link{task_string_add}()}
 }
 \concept{task-define function}

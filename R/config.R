@@ -205,16 +205,16 @@ get_params <- function(funcName) {
 get_funs <- function(prefix = ".*", pos = "package:glimmer") {
   p <- tribble(
     ~type, ~input, ~output, ~tips,
-    "import", "-", "@tibble", "导入数据到内存",
-    "export", "@tibble", "-", "导出数据到磁盘",
+    "import", "-", "@ds", "导入数据到内存",
+    "export", "@ds", "-", "导出数据到磁盘",
     "create", "-", "-", "创建元数据",
     "search", "-", "-", "列举元数据",
-    "read", "@dsName", "@tibble", "读取Parquet文件组数据集",
-    "write", "@tibble", "@dsName", "保存Parquet文件组数据集",
-    "ds", "@tibble", "@tibble", "处理矩形数据",
-    "plot", "@tibble", "@plotly", "绘制plotly图表",
-    "trace", "@plotly", "@plotly", "增加plotly绘制层",
-    "DT", "@tibble", "@DT", "绘制DT数据表"
+    "read", "@dsName", "@ds", "读取Parquet文件组数据集",
+    "write", "@ds", "@dsName", "保存Parquet文件组数据集",
+    "ds", "@ds", "@ds", "处理矩形数据",
+    "plot", "@ds", "@plot", "绘制plotly图表",
+    "trace", "@plot", "@plot", "增加plotly绘制层",
+    "DT", "@ds", "@DT", "绘制DT数据表"
   )
   x <- lsf.str(pos)
   tibble(funcName = x[x |> stringr::str_detect(prefix)]) |>

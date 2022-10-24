@@ -8,8 +8,8 @@ test_that("定义任务：手工添加items", {
 
   ## 创建任务时添加items
   task_create(taskId = "mytask2", items = tibble(
-    "scriptType" = "string",
-    "taskScript" = "ls()",
+    "type" = "string",
+    "script" = "ls()",
     "params" = list(NULL),
     "inputAsign" = list(NULL),
     "outputAsign" = list(NULL)
@@ -18,8 +18,8 @@ test_that("定义任务：手工添加items", {
 
   ## 
   task_create(taskId = "mytask2", items = tibble(
-    "scriptType" = c("string", "expr"),
-    "taskScript" = c("ls()", expression(x)),
+    "type" = c("string", "expr"),
+    "script" = c("ls()", expression(x)),
     "params" = list(list("x" = 1:10), list(NULL)),
     "inputAsign" = list(NULL),
     "outputAsign" = list(NULL)
@@ -36,15 +36,15 @@ test_that("定义任务：string类型", {
   task_read("A")$taskType |>
     testthat::expect_equal("__UNKNOWN__")
 
-  task_item_add(taskId = "A", taskScript = "ls()", scriptType = "string")
+  task_item_add(taskId = "A", script = "ls()", type = "string")
   task_read("A")$items |> nrow() |>
     testthat::expect_equal(1)
   
-  task_item_add(taskId = "A", taskScript = "ls()", params = list(batchFoler = NULL), scriptType = "string")
+  task_item_add(taskId = "A", script = "ls()", params = list(batchFoler = NULL), type = "string")
   task_read("A")$items |> nrow() |>
     testthat::expect_equal(2)
   
-  task_item_add(taskId = "A", taskScript = "ls()", params = list(batchFoler = "schedual_1001", data = 1:3), scriptType = "string")
+  task_item_add(taskId = "A", script = "ls()", params = list(batchFoler = "schedual_1001", data = 1:3), type = "string")
   task_read("A")$items |> nrow() |>
     testthat::expect_equal(3)
   
@@ -55,8 +55,8 @@ test_that("定义任务：file类型，且使用管道风格", {
   sample_init()
 
   task_create(taskId = "B") |>
-    task_item_add(taskScript = "A/a.R", scriptType = "file") |>
-    task_item_add(taskScript = "result <- (x |> filter(age > 6))", scriptType = "string")
+    task_item_add(script = "A/a.R", type = "file") |>
+    task_item_add(script = "result <- (x |> filter(age > 6))", type = "string")
   task_read("B")$items |> nrow() |>
     testthat::expect_equal(2)
   
@@ -67,7 +67,7 @@ test_that("定义任务：dir类型", {
   sample_init()
 
   task_create(taskId = "C") |>
-    task_item_add(taskScript = "A", scriptType = "dir")
+    task_item_add(script = "A", type = "dir")
   task_read("C")$items |> nrow() |>
     testthat::expect_equal(1)
 
@@ -84,42 +84,42 @@ test_that("<task_run>: string|expr|empty", {
   
   ## 空的执行环境中
   task_create(taskId = "A-str") |>
-    task_item_add(taskScript = "ls()", scriptType = "string") |>
+    task_item_add(script = "ls()", type = "string") |>
     task_run() |>
     testthat::expect_equal("@task")
 
   task_create(taskId = "A-expr") |>
-    task_item_add(taskScript = expression({ls()}), scriptType = "expr") |>
+    task_item_add(script = expression({ls()}), type = "expr") |>
     task_run() |>
     testthat::expect_equal("@task")
   
   ## 获取执行环境中的变量
   (task_create(taskId = "A-expr") |>
-    task_item_add(taskScript = expression({`@task`}), scriptType = "expr") |>
+    task_item_add(script = expression({`@task`}), type = "expr") |>
     task_run())$online |>
     testthat::expect_false()
 
   ## 设置执行环境变量
   task_create(taskId = "A-expr") |>
-    task_item_add(scriptType = "expr", taskScript = expression({myname})) |>
+    task_item_add(type = "expr", script = expression({myname})) |>
     task_run(myname = "xueyile") |>
     testthat::expect_equal("xueyile")
   
   task_create(taskId = "A-expr") |>
-      task_item_add(scriptType = "empty", params = list("myname" = "xueyile")) |>
-      task_item_add(scriptType = "expr", taskScript = expression({myname})) |>
+      task_item_add(type = "empty", params = list("myname" = "xueyile")) |>
+      task_item_add(type = "expr", script = expression({myname})) |>
       task_run() |>
     testthat::expect_equal("xueyile")
   
   ## 映射输出
   task_create(taskId = "C-expr") |>
-    task_item_add(scriptType = "empty",
+    task_item_add(type = "empty",
                   params = list("a" = 3, "b" = 3)) |>
-    task_item_add(scriptType = "expr",
-                  taskScript = expression({list(x = a^2, y = b*2)}),
+    task_item_add(type = "expr",
+                  script = expression({list(x = a^2, y = b*2)}),
                   outputAsign = c("m")) |>
-    task_item_add(scriptType = "expr",
-                  taskScript = expression({m$x+m$y})) |>
+    task_item_add(type = "expr",
+                  script = expression({m$x+m$y})) |>
     task_run() |>
     testthat::expect_equal(3^2+3*2)
 
@@ -159,20 +159,41 @@ test_that("<task_run>: function", {
   
   ## 默认参数
   task_create(taskId = "fun01") |>
-    task_item_add(scriptType = "function", taskScript = "mycars") |>
+    task_item_add(type = "function", script = "mycars") |>
     task_run() |> nrow() |>
     testthat::expect_equal(nrow(mtcars))
 
   ## 设置参数
   task_create(taskId = "fun02") |>
-    task_item_add(scriptType = "function", taskScript = "mycyl") |>
+    task_item_add(type = "function", script = "mycyl") |>
     task_run() |> nrow() |>
     testthat::expect_equal(nrow(mtcars |> filter(cyl == 4)))
   
   task_create(taskId = "fun02") |>
-    task_item_add(scriptType = "function", taskScript = "mycyl", params = list(i_cyl = 6)) |>
+    task_item_add(type = "function", script = "mycyl", params = list(i_cyl = 6)) |>
     task_run() |> nrow() |>
     testthat::expect_equal(nrow(mtcars |> filter(cyl == 6)))
+  
+  ## 出参映射
+  task_create(taskId = "fun03") |>
+    task_item_add(type = "function", script = "mycyl", params = list(i_cyl = 6), outputAsign = "car6") |>
+    task_item_add(type = "string", script = "car6 |> head(5)") |>
+    task_run() |> nrow() |>
+    testthat::expect_equal(5)
+  
+  ## 入参映射
+  task_create(taskId = "fun04") |>
+    task_item_add(type = "empty", params = list(selectedCyl = 6)) |>
+    task_item_add(type = "function", script = "mycyl", inputAsign = list(i_cyl = "selectedCyl")) |>
+    task_run() |> nrow() |>
+    testthat::expect_equal(nrow(mtcars |> filter(cyl == 6)))
+  
+  ## 管道计算
+  (task_create(taskId = "fun04") |>
+    task_item_add(type = "function", script = "mycars", outputAsign = "@ds") |>
+    task_item_add(type = "function", script = "myarrange", params = list(sv_columns = "disp"), inputAsign = list(d = "@ds")) |>
+    task_run())$disp[[1]] |>
+    testthat::expect_equal(mtcars$disp |> min())
   
   temp_remove()
   
@@ -182,13 +203,11 @@ test_that("<task_run>: gali", {
   sample_init()
   
   ##
-  assign(
-    "gali_myfunc1",
-    function() { mtcars |> as_tibble() },
-    envir = globalenv())
-  task_create(taskId = "Gali_01") |>
-    task_gali_add("gali_myfunc1")
-  task_run("Gali_01") |> nrow() |>
+  gali_import_1 <- function() { mtcars |> as_tibble() }
+  task_create(taskId = "g01") |>
+    task_gali_add("gali_import_1") |>
+    task_expr_add(expression({`@ds`})) |>
+    task_run() |> nrow() |>
     testthat::expect_equal(nrow(mtcars))
   
   ##

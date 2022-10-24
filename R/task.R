@@ -29,8 +29,8 @@ task_create <- function(taskId, online = FALSE,
     "importTopic" = importTopic,
     "createdAt" = as_datetime(lubridate::now(), tz = "Asia/Shanghai") |> as.character(),
     "items" = items %empty% tibble(
-      "scriptType" = "empty",
-      "taskScript" = "ls()",
+      "type" = "empty",
+      "script" = "ls()",
       "params" = list(NULL),
       "inputAsign" = list(NULL),
       "outputAsign" = list(NULL)
@@ -42,30 +42,30 @@ task_create <- function(taskId, online = FALSE,
 
 #' @title 增加子任务
 #' @param taskId 任务标识
-#' @param taskScript 子任务的执行路径
+#' @param script 子任务的执行路径
 #' @param params 执行脚本的参数映射
-#' @param inputAsign 将执行环境内变量赋值给入参
-#' @param outputAsign 将函数输出复制该执行环境内的变量
-#' @param scriptType 可以是string,expr,function,gali,file,dir,empty等
+#' @param inputAsign 针对function和gali类型，使用执行环境内变量映射入参
+#' @param outputAsign 保存子任务输出
+#' @param type 可以是string,expr,function,gali,file,dir,empty等
 #' @param taskTopic 任务主题存储位置
 #' @family task-define function
 #' @export
 task_item_add <- function(
     taskId,
-    taskScript = "ls()",
+    script = "ls()",
     params = list(NULL),
     inputAsign = list(NULL),
     outputAsign = list(NULL),
     touchFiles = TRUE,
     taskTopic = "TASK_DEFINE",
-    scriptType = "empty") {
+    type = "empty") {
   path <- get_path(taskTopic, paste0(taskId, ".rds"))
   if(fs::file_exists(path)) {
     ## 写入任务定义配置文件
     meta <- readRDS(path)
     item <- tibble(
-      "scriptType" = scriptType,
-      "taskScript" = taskScript,
+      "type" = type,
+      "script" = script,
       "params" = list(params),
       "inputAsign" = list(inputAsign),
       "outputAsign" = list(outputAsign)
@@ -78,8 +78,8 @@ task_item_add <- function(
     meta |> saveRDS(path)
     ## 使用模板创建脚本
     if(touchFiles) {
-      if(scriptType == "file") task_script_file_create(taskScript)
-      if(scriptType == "dir") task_script_dir_create(taskScript)
+      if(type == "file") task_script_file_create(script)
+      if(type == "dir") task_script_dir_create(script)
     }
     ##
     ## 支持管道定义
@@ -92,7 +92,32 @@ task_item_add <- function(
 #' @title 为任务增加gali函数子任务
 #' @family task-define function
 #' @export
-task_gali_add <- purrr::partial(task_item_add, scriptType = "gali")
+task_gali_add <- purrr::partial(task_item_add, type = "gali")
+
+#' @title 为任务增加字符串脚本子任务
+#' @family task-define function
+#' @export
+task_string_add <- purrr::partial(task_item_add, type = "string")
+
+#' @title 为任务增加文件脚本子任务
+#' @family task-define function
+#' @export
+task_file_add <- purrr::partial(task_item_add, type = "file")
+
+#' @title 为任务增加目录脚本子任务
+#' @family task-define function
+#' @export
+task_dir_add <- purrr::partial(task_item_add, type = "dir")
+
+#' @title 为任务增加表达式脚本子任务
+#' @family task-define function
+#' @export
+task_expr_add <- purrr::partial(task_item_add, type = "expr")
+
+#' @title 为任务增加空任务
+#' @family task-define function
+#' @export
+task_empty_add <- purrr::partial(task_item_add, type = "empty")
 
 #' @title 创建脚本文件
 task_script_file_create <- function(scriptFile, scriptsTopic = "TASK_SCRIPTS") {
@@ -202,8 +227,8 @@ task_run <- function(taskId,
   ## 支持队列日志
   if(withQueue) {
     item_run <- tibble(
-      "scriptType" = "queue",
-      "taskScript" = expression({
+      "type" = "queue",
+      "script" = expression({
         ## expression in task-run
         item <- task_queue_item(
           id = batchId,
@@ -217,8 +242,8 @@ task_run <- function(taskId,
       "outputAsign" = list()
     )
     item_done <- tibble(
-      "scriptType" = "queue",
-      "taskScript" = expression({
+      "type" = "queue",
+      "script" = expression({
         ## expression in task-run
         item <- task_queue_search(dsName = `@task`$queueDataset, cacheTopic = `@task`$cacheTopic) |>
           filter(id == batchId) |>
@@ -266,10 +291,10 @@ task_run0 <- function(taskItems, withEnv, runMode, ...) {
     ## 将结果保存在curResult
     curResult <- NULL
     ## 逐项执行子任务
-    taskItems |> purrr::pwalk(function(taskScript, params, scriptType, inputAsign, outputAsign) {
-      if(scriptType %in% c("gali", "function")) {
+    taskItems |> purrr::pwalk(function(script, params, type, inputAsign, outputAsign) {
+      if(type %in% c("gali", "function")) {
         ## 提取函数定义参数，无法匹配的参数
-        myparam <- formalArgs(taskScript)
+        myparam <- formalArgs(script)
         funcParam <- params[myparam[myparam %in% names(params)]] %empty% list()
         ## 设置执行环境变量值
         envParam <- params[names(params) %nin% myparam] %empty% list()
@@ -280,33 +305,33 @@ task_run0 <- function(taskItems, withEnv, runMode, ...) {
         names(inputAsign) |> purrr::walk(function(i) {
           ## 如果映射目标不存在，就忽略
           if(i %in% myparam && inputAsign[[i]] %in% ls(TaskRun.ENV)) {
-            funcParam[[i]] <- get(inputAsign[[i]], envir = TaskRun.ENV)
+            funcParam[[i]] <<- get(inputAsign[[i]], envir = TaskRun.ENV)
           }
         })
         ## 将输出值保存在"result"
-        curResult <<- do.call(taskScript, args = funcParam, envir = TaskRun.ENV)
+        curResult <<- do.call(script, args = funcParam, envir = TaskRun.ENV)
       } else {
         ## 提取子任务定义参数
         names(params) |> purrr::walk(function(i) {
           assign(i, params[[i]], envir = TaskRun.ENV)
         })
         ##
-        if(scriptType == "string") {
-          curResult <<- parse(text = taskScript) |> eval(envir = TaskRun.ENV)
-        } else if(scriptType == "empty") {
+        if(type == "string") {
+          curResult <<- parse(text = script) |> eval(envir = TaskRun.ENV)
+        } else if(type == "empty") {
           ## 一般用于设置环境参数
-        } else if(scriptType == "queue") {
-          eval(taskScript, envir = TaskRun.ENV)
-        } else if(scriptType == "expr") {
-          curResult <<- eval(taskScript, envir = TaskRun.ENV)
-        } else if(scriptType == "file") {
-          pathScripts <- get_path(get("@task", envir = TaskRun.ENV)$scriptsTopic, taskScript)
-          if(!fs::file_exists(pathScripts)) {
-            stop("No such script file: ", pathScripts)
+        } else if(type == "queue") {
+          eval(script, envir = TaskRun.ENV)
+        } else if(type == "expr") {
+          curResult <<- eval(script, envir = TaskRun.ENV)
+        } else if(type == "file") {
+          pathScript <- get_path(get("@task", envir = TaskRun.ENV)$scriptsTopic, script)
+          if(!fs::file_exists(pathScript)) {
+            stop("No such script file: ", pathScript)
           }
-          curResult <<- parse(file = pathScripts) |> eval(envir = TaskRun.ENV)
-        } else if(scriptType == "dir") {
-          pathScripts <- get_path(get("@task", envir = TaskRun.ENV)$scriptsTopic, taskScript)
+          curResult <<- parse(file = pathScript) |> eval(envir = TaskRun.ENV)
+        } else if(type == "dir") {
+          pathScripts <- get_path(get("@task", envir = TaskRun.ENV)$scriptsTopic, script)
           if(!fs::dir_exists(pathScripts)) {
             stop("No such script dir: ", pathScripts)
           }
@@ -318,7 +343,7 @@ task_run0 <- function(taskItems, withEnv, runMode, ...) {
             curResult <<- parse(file = p) |> eval(envir = TaskRun.ENV)
           })
         } else {
-          warning("UNKNOWN ScriptType: ", scriptType)
+          warning("UNKNOWN ScriptType: ", type)
         }        
       }
       ## 覆盖或创建输出目标
