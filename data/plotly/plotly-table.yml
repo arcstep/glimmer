@@ -1,0 +1,627 @@
+animatable: no
+attributes:
+  cells:
+    align:
+      arrayOk: yes
+      description: Sets the horizontal alignment of the `text` within the box. Has
+        an effect only if `text` spans two or more lines (i.e. `text` contains one
+        or more <br> HTML tags) or if an explicit width is set to override the text
+        width.
+      dflt: center
+      editType: calc
+      valType: enumerated
+      values:
+      - left
+      - center
+      - right
+    alignsrc:
+      description: Sets the source reference on Chart Studio Cloud for  align .
+      editType: none
+      valType: string
+    editType: calc
+    fill:
+      color:
+        arrayOk: yes
+        description: Sets the cell fill color. It accepts either a specific color
+          or an array of colors or a 2D array of colors.
+        dflt: white
+        editType: calc
+        valType: color
+      colorsrc:
+        description: Sets the source reference on Chart Studio Cloud for  color .
+        editType: none
+        valType: string
+      editType: calc
+      role: object
+    font:
+      color:
+        arrayOk: yes
+        editType: calc
+        valType: color
+      colorsrc:
+        description: Sets the source reference on Chart Studio Cloud for  color .
+        editType: none
+        valType: string
+      description: ''
+      editType: calc
+      family:
+        arrayOk: yes
+        description: HTML font family - the typeface that will be applied by the web
+          browser. The web browser will only be able to apply a font if it is available
+          on the system which it operates. Provide multiple font families, separated
+          by commas, to indicate the preference in which to apply fonts if they aren't
+          available on the system. The Chart Studio Cloud (at https://chart-studio.plotly.com
+          or on-premise) generates images on a server, where only a select number
+          of fonts are installed and supported. These include *Arial*, *Balto*, *Courier
+          New*, *Droid Sans*,, *Droid Serif*, *Droid Sans Mono*, *Gravitas One*, *Old
+          Standard TT*, *Open Sans*, *Overpass*, *PT Sans Narrow*, *Raleway*, *Times
+          New Roman*.
+        editType: calc
+        noBlank: yes
+        strict: yes
+        valType: string
+      familysrc:
+        description: Sets the source reference on Chart Studio Cloud for  family .
+        editType: none
+        valType: string
+      role: object
+      size:
+        arrayOk: yes
+        editType: calc
+        min: 1
+        valType: number
+      sizesrc:
+        description: Sets the source reference on Chart Studio Cloud for  size .
+        editType: none
+        valType: string
+    format:
+      description: 'Sets the cell value formatting rule using d3 formatting mini-languages
+        which are very similar to those in Python. For numbers, see: https://github.com/d3/d3-format/tree/v1.4.5#d3-format.'
+      dflt: []
+      editType: calc
+      valType: data_array
+    formatsrc:
+      description: Sets the source reference on Chart Studio Cloud for  format .
+      editType: none
+      valType: string
+    height:
+      description: The height of cells.
+      dflt: 20
+      editType: calc
+      valType: number
+    line:
+      color:
+        arrayOk: yes
+        dflt: grey
+        editType: calc
+        valType: color
+      colorsrc:
+        description: Sets the source reference on Chart Studio Cloud for  color .
+        editType: none
+        valType: string
+      editType: calc
+      role: object
+      width:
+        arrayOk: yes
+        dflt: 1
+        editType: calc
+        valType: number
+      widthsrc:
+        description: Sets the source reference on Chart Studio Cloud for  width .
+        editType: none
+        valType: string
+    prefix:
+      arrayOk: yes
+      description: Prefix for cell values.
+      dflt: ~
+      editType: calc
+      valType: string
+    prefixsrc:
+      description: Sets the source reference on Chart Studio Cloud for  prefix .
+      editType: none
+      valType: string
+    role: object
+    suffix:
+      arrayOk: yes
+      description: Suffix for cell values.
+      dflt: ~
+      editType: calc
+      valType: string
+    suffixsrc:
+      description: Sets the source reference on Chart Studio Cloud for  suffix .
+      editType: none
+      valType: string
+    values:
+      description: Cell values. `values[m][n]` represents the value of the `n`th point
+        in column `m`, therefore the `values[m]` vector length for all columns must
+        be the same (longer vectors will be truncated). Each value must be a finite
+        number or a string.
+      dflt: []
+      editType: calc
+      valType: data_array
+    valuessrc:
+      description: Sets the source reference on Chart Studio Cloud for  values .
+      editType: none
+      valType: string
+  columnorder:
+    description: Specifies the rendered order of the data columns; for example, a
+      value `2` at position `0` means that column index `0` in the data will be rendered
+      as the third column, as columns have an index base of zero.
+    editType: calc
+    valType: data_array
+  columnordersrc:
+    description: Sets the source reference on Chart Studio Cloud for  columnorder
+      .
+    editType: none
+    valType: string
+  columnwidth:
+    arrayOk: yes
+    description: The width of columns expressed as a ratio. Columns fill the available
+      width in proportion of their specified column widths.
+    dflt: ~
+    editType: calc
+    valType: number
+  columnwidthsrc:
+    description: Sets the source reference on Chart Studio Cloud for  columnwidth
+      .
+    editType: none
+    valType: string
+  customdata:
+    description: Assigns extra data each datum. This may be useful when listening
+      to hover, click and selection events. Note that, *scatter* traces also appends
+      customdata items in the markers DOM elements
+    editType: calc
+    valType: data_array
+  customdatasrc:
+    description: Sets the source reference on Chart Studio Cloud for  customdata .
+    editType: none
+    valType: string
+  domain:
+    column:
+      description: If there is a layout grid, use the domain for this column in the
+        grid for this table trace .
+      dflt: 0
+      editType: calc
+      min: 0
+      valType: integer
+    editType: calc
+    role: object
+    row:
+      description: If there is a layout grid, use the domain for this row in the grid
+        for this table trace .
+      dflt: 0
+      editType: calc
+      min: 0
+      valType: integer
+    x:
+      description: Sets the horizontal domain of this table trace (in plot fraction).
+      dflt:
+      - 0
+      - 1
+      editType: calc
+      items:
+        editType:
+        - calc
+        - calc
+        max:
+        - 1
+        - 1
+        min:
+        - 0
+        - 0
+        valType:
+        - number
+        - number
+      valType: info_array
+    'y':
+      description: Sets the vertical domain of this table trace (in plot fraction).
+      dflt:
+      - 0
+      - 1
+      editType: calc
+      items:
+        editType:
+        - calc
+        - calc
+        max:
+        - 1
+        - 1
+        min:
+        - 0
+        - 0
+        valType:
+        - number
+        - number
+      valType: info_array
+  editType: calc
+  header:
+    align:
+      arrayOk: yes
+      description: Sets the horizontal alignment of the `text` within the box. Has
+        an effect only if `text` spans two or more lines (i.e. `text` contains one
+        or more <br> HTML tags) or if an explicit width is set to override the text
+        width.
+      dflt: center
+      editType: calc
+      valType: enumerated
+      values:
+      - left
+      - center
+      - right
+    alignsrc:
+      description: Sets the source reference on Chart Studio Cloud for  align .
+      editType: none
+      valType: string
+    editType: calc
+    fill:
+      color:
+        arrayOk: yes
+        description: Sets the cell fill color. It accepts either a specific color
+          or an array of colors or a 2D array of colors.
+        dflt: white
+        editType: calc
+        valType: color
+      colorsrc:
+        description: Sets the source reference on Chart Studio Cloud for  color .
+        editType: none
+        valType: string
+      editType: calc
+      role: object
+    font:
+      color:
+        arrayOk: yes
+        editType: calc
+        valType: color
+      colorsrc:
+        description: Sets the source reference on Chart Studio Cloud for  color .
+        editType: none
+        valType: string
+      description: ''
+      editType: calc
+      family:
+        arrayOk: yes
+        description: HTML font family - the typeface that will be applied by the web
+          browser. The web browser will only be able to apply a font if it is available
+          on the system which it operates. Provide multiple font families, separated
+          by commas, to indicate the preference in which to apply fonts if they aren't
+          available on the system. The Chart Studio Cloud (at https://chart-studio.plotly.com
+          or on-premise) generates images on a server, where only a select number
+          of fonts are installed and supported. These include *Arial*, *Balto*, *Courier
+          New*, *Droid Sans*,, *Droid Serif*, *Droid Sans Mono*, *Gravitas One*, *Old
+          Standard TT*, *Open Sans*, *Overpass*, *PT Sans Narrow*, *Raleway*, *Times
+          New Roman*.
+        editType: calc
+        noBlank: yes
+        strict: yes
+        valType: string
+      familysrc:
+        description: Sets the source reference on Chart Studio Cloud for  family .
+        editType: none
+        valType: string
+      role: object
+      size:
+        arrayOk: yes
+        editType: calc
+        min: 1
+        valType: number
+      sizesrc:
+        description: Sets the source reference on Chart Studio Cloud for  size .
+        editType: none
+        valType: string
+    format:
+      description: 'Sets the cell value formatting rule using d3 formatting mini-languages
+        which are very similar to those in Python. For numbers, see: https://github.com/d3/d3-format/tree/v1.4.5#d3-format.'
+      dflt: []
+      editType: calc
+      valType: data_array
+    formatsrc:
+      description: Sets the source reference on Chart Studio Cloud for  format .
+      editType: none
+      valType: string
+    height:
+      description: The height of cells.
+      dflt: 28
+      editType: calc
+      valType: number
+    line:
+      color:
+        arrayOk: yes
+        dflt: grey
+        editType: calc
+        valType: color
+      colorsrc:
+        description: Sets the source reference on Chart Studio Cloud for  color .
+        editType: none
+        valType: string
+      editType: calc
+      role: object
+      width:
+        arrayOk: yes
+        dflt: 1
+        editType: calc
+        valType: number
+      widthsrc:
+        description: Sets the source reference on Chart Studio Cloud for  width .
+        editType: none
+        valType: string
+    prefix:
+      arrayOk: yes
+      description: Prefix for cell values.
+      dflt: ~
+      editType: calc
+      valType: string
+    prefixsrc:
+      description: Sets the source reference on Chart Studio Cloud for  prefix .
+      editType: none
+      valType: string
+    role: object
+    suffix:
+      arrayOk: yes
+      description: Suffix for cell values.
+      dflt: ~
+      editType: calc
+      valType: string
+    suffixsrc:
+      description: Sets the source reference on Chart Studio Cloud for  suffix .
+      editType: none
+      valType: string
+    values:
+      description: Header cell values. `values[m][n]` represents the value of the
+        `n`th point in column `m`, therefore the `values[m]` vector length for all
+        columns must be the same (longer vectors will be truncated). Each value must
+        be a finite number or a string.
+      dflt: []
+      editType: calc
+      valType: data_array
+    valuessrc:
+      description: Sets the source reference on Chart Studio Cloud for  values .
+      editType: none
+      valType: string
+  hoverinfo:
+    arrayOk: yes
+    description: Determines which trace information appear on hover. If `none` or
+      `skip` are set, no information is displayed upon hovering. But, if `none` is
+      set, click and hover events are still fired.
+    dflt: all
+    editType: none
+    extras:
+    - all
+    - none
+    - skip
+    flags:
+    - x
+    - 'y'
+    - z
+    - text
+    - name
+    valType: flaglist
+  hoverinfosrc:
+    description: Sets the source reference on Chart Studio Cloud for  hoverinfo .
+    editType: none
+    valType: string
+  hoverlabel:
+    align:
+      arrayOk: yes
+      description: Sets the horizontal alignment of the text content within hover
+        label box. Has an effect only if the hover label text spans more two or more
+        lines
+      dflt: auto
+      editType: none
+      valType: enumerated
+      values:
+      - left
+      - right
+      - auto
+    alignsrc:
+      description: Sets the source reference on Chart Studio Cloud for  align .
+      editType: none
+      valType: string
+    bgcolor:
+      arrayOk: yes
+      description: Sets the background color of the hover labels for this trace
+      editType: none
+      valType: color
+    bgcolorsrc:
+      description: Sets the source reference on Chart Studio Cloud for  bgcolor .
+      editType: none
+      valType: string
+    bordercolor:
+      arrayOk: yes
+      description: Sets the border color of the hover labels for this trace.
+      editType: none
+      valType: color
+    bordercolorsrc:
+      description: Sets the source reference on Chart Studio Cloud for  bordercolor
+        .
+      editType: none
+      valType: string
+    editType: none
+    font:
+      color:
+        arrayOk: yes
+        editType: none
+        valType: color
+      colorsrc:
+        description: Sets the source reference on Chart Studio Cloud for  color .
+        editType: none
+        valType: string
+      description: Sets the font used in hover labels.
+      editType: none
+      family:
+        arrayOk: yes
+        description: HTML font family - the typeface that will be applied by the web
+          browser. The web browser will only be able to apply a font if it is available
+          on the system which it operates. Provide multiple font families, separated
+          by commas, to indicate the preference in which to apply fonts if they aren't
+          available on the system. The Chart Studio Cloud (at https://chart-studio.plotly.com
+          or on-premise) generates images on a server, where only a select number
+          of fonts are installed and supported. These include *Arial*, *Balto*, *Courier
+          New*, *Droid Sans*,, *Droid Serif*, *Droid Sans Mono*, *Gravitas One*, *Old
+          Standard TT*, *Open Sans*, *Overpass*, *PT Sans Narrow*, *Raleway*, *Times
+          New Roman*.
+        editType: none
+        noBlank: yes
+        strict: yes
+        valType: string
+      familysrc:
+        description: Sets the source reference on Chart Studio Cloud for  family .
+        editType: none
+        valType: string
+      role: object
+      size:
+        arrayOk: yes
+        editType: none
+        min: 1
+        valType: number
+      sizesrc:
+        description: Sets the source reference on Chart Studio Cloud for  size .
+        editType: none
+        valType: string
+    namelength:
+      arrayOk: yes
+      description: Sets the default length (in number of characters) of the trace
+        name in the hover labels for all traces. -1 shows the whole name regardless
+        of length. 0-3 shows the first 0-3 characters, and an integer >3 will show
+        the whole name if it is less than that many characters, but if it is longer,
+        will truncate to `namelength - 3` characters and add an ellipsis.
+      dflt: 15
+      editType: none
+      min: -1
+      valType: integer
+    namelengthsrc:
+      description: Sets the source reference on Chart Studio Cloud for  namelength
+        .
+      editType: none
+      valType: string
+    role: object
+  ids:
+    description: Assigns id labels to each datum. These ids for object constancy of
+      data points during animation. Should be an array of strings, not numbers or
+      any other type.
+    editType: calc
+    valType: data_array
+  idssrc:
+    description: Sets the source reference on Chart Studio Cloud for  ids .
+    editType: none
+    valType: string
+  legendgrouptitle:
+    editType: style
+    font:
+      color:
+        editType: style
+        valType: color
+      description: Sets this legend group's title font.
+      editType: style
+      family:
+        description: HTML font family - the typeface that will be applied by the web
+          browser. The web browser will only be able to apply a font if it is available
+          on the system which it operates. Provide multiple font families, separated
+          by commas, to indicate the preference in which to apply fonts if they aren't
+          available on the system. The Chart Studio Cloud (at https://chart-studio.plotly.com
+          or on-premise) generates images on a server, where only a select number
+          of fonts are installed and supported. These include *Arial*, *Balto*, *Courier
+          New*, *Droid Sans*,, *Droid Serif*, *Droid Sans Mono*, *Gravitas One*, *Old
+          Standard TT*, *Open Sans*, *Overpass*, *PT Sans Narrow*, *Raleway*, *Times
+          New Roman*.
+        editType: style
+        noBlank: yes
+        strict: yes
+        valType: string
+      role: object
+      size:
+        editType: style
+        min: 1
+        valType: number
+    role: object
+    text:
+      description: Sets the title of the legend group.
+      dflt: ''
+      editType: style
+      valType: string
+  legendrank:
+    description: Sets the legend rank for this trace. Items and groups with smaller
+      ranks are presented on top/left side while with `*reversed* `legend.traceorder`
+      they are on bottom/right side. The default legendrank is 1000, so that you can
+      use ranks less than 1000 to place certain items before all unranked items, and
+      ranks greater than 1000 to go after all unranked items.
+    dflt: 1000
+    editType: style
+    valType: number
+  meta:
+    arrayOk: yes
+    description: Assigns extra meta information associated with this trace that can
+      be used in various text attributes. Attributes such as trace `name`, graph,
+      axis and colorbar `title.text`, annotation `text` `rangeselector`, `updatemenues`
+      and `sliders` `label` text all support `meta`. To access the trace `meta` values
+      in an attribute in the same trace, simply use `%{meta[i]}` where `i` is the
+      index or key of the `meta` item in question. To access trace `meta` in layout
+      attributes, use `%{data[n[.meta[i]}` where `i` is the index or key of the `meta`
+      and `n` is the trace index.
+    editType: plot
+    valType: any
+  metasrc:
+    description: Sets the source reference on Chart Studio Cloud for  meta .
+    editType: none
+    valType: string
+  name:
+    description: Sets the trace name. The trace name appear as the legend item and
+      on hover.
+    editType: style
+    valType: string
+  stream:
+    editType: calc
+    maxpoints:
+      description: Sets the maximum number of points to keep on the plots from an
+        incoming stream. If `maxpoints` is set to *50*, only the newest 50 points
+        will be displayed on the plot.
+      dflt: 500
+      editType: calc
+      max: 10000
+      min: 0
+      valType: number
+    role: object
+    token:
+      description: The stream id number links a data trace on a plot with a stream.
+        See https://chart-studio.plotly.com/settings for more details.
+      editType: calc
+      noBlank: yes
+      strict: yes
+      valType: string
+  type: table
+  uid:
+    description: Assign an id to this trace, Use this to provide object constancy
+      between traces during animations and transitions.
+    editType: plot
+    valType: string
+  uirevision:
+    description: 'Controls persistence of some user-driven changes to the trace: `constraintrange`
+      in `parcoords` traces, as well as some `editable: true` modifications such as
+      `name` and `colorbar.title`. Defaults to `layout.uirevision`. Note that other
+      user-driven trace attribute changes are controlled by `layout` attributes: `trace.visible`
+      is controlled by `layout.legend.uirevision`, `selectedpoints` is controlled
+      by `layout.selectionrevision`, and `colorbar.(x|y)` (accessible with `config:
+      {editable: true}`) is controlled by `layout.editrevision`. Trace changes are
+      tracked by `uid`, which only falls back on trace index if no `uid` is provided.
+      So if your app can add/remove traces before the end of the `data` array, such
+      that the same trace has a different index, you can still preserve user-driven
+      changes if you give each trace a `uid` that stays with it as it moves.'
+    editType: none
+    valType: any
+  visible:
+    description: Determines whether or not this trace is visible. If *legendonly*,
+      the trace is not drawn, but can appear as a legend item (provided that the legend
+      itself is visible).
+    dflt: yes
+    editType: calc
+    valType: enumerated
+    values:
+    - 'TRUE'
+    - 'FALSE'
+    - legendonly
+categories: noOpacity
+meta:
+  description: Table view for detailed data viewing. The data are arranged in a grid
+    of rows and columns. Most styling can be specified for columns, rows or individual
+    cells. Table is using a column-major order, ie. the grid is represented as a vector
+    of column vectors.
+type: table

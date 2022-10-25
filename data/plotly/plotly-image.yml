@@ -1,0 +1,423 @@
+animatable: no
+attributes:
+  colormodel:
+    description: Color model used to map the numerical color components described
+      in `z` into colors. If `source` is specified, this attribute will be set to
+      `rgba256` otherwise it defaults to `rgb`.
+    editType: calc
+    valType: enumerated
+    values:
+    - rgb
+    - rgba
+    - rgba256
+    - hsl
+    - hsla
+  customdata:
+    description: Assigns extra data each datum. This may be useful when listening
+      to hover, click and selection events. Note that, *scatter* traces also appends
+      customdata items in the markers DOM elements
+    editType: calc
+    valType: data_array
+  customdatasrc:
+    description: Sets the source reference on Chart Studio Cloud for  customdata .
+    editType: none
+    valType: string
+  dx:
+    description: Set the pixel's horizontal size.
+    dflt: 1
+    editType: calc
+    valType: number
+  dy:
+    description: Set the pixel's vertical size
+    dflt: 1
+    editType: calc
+    valType: number
+  hoverinfo:
+    arrayOk: yes
+    description: Determines which trace information appear on hover. If `none` or
+      `skip` are set, no information is displayed upon hovering. But, if `none` is
+      set, click and hover events are still fired.
+    dflt: x+y+z+text+name
+    editType: none
+    extras:
+    - all
+    - none
+    - skip
+    flags:
+    - x
+    - 'y'
+    - z
+    - color
+    - name
+    - text
+    valType: flaglist
+  hoverinfosrc:
+    description: Sets the source reference on Chart Studio Cloud for  hoverinfo .
+    editType: none
+    valType: string
+  hoverlabel:
+    align:
+      arrayOk: yes
+      description: Sets the horizontal alignment of the text content within hover
+        label box. Has an effect only if the hover label text spans more two or more
+        lines
+      dflt: auto
+      editType: none
+      valType: enumerated
+      values:
+      - left
+      - right
+      - auto
+    alignsrc:
+      description: Sets the source reference on Chart Studio Cloud for  align .
+      editType: none
+      valType: string
+    bgcolor:
+      arrayOk: yes
+      description: Sets the background color of the hover labels for this trace
+      editType: none
+      valType: color
+    bgcolorsrc:
+      description: Sets the source reference on Chart Studio Cloud for  bgcolor .
+      editType: none
+      valType: string
+    bordercolor:
+      arrayOk: yes
+      description: Sets the border color of the hover labels for this trace.
+      editType: none
+      valType: color
+    bordercolorsrc:
+      description: Sets the source reference on Chart Studio Cloud for  bordercolor
+        .
+      editType: none
+      valType: string
+    editType: none
+    font:
+      color:
+        arrayOk: yes
+        editType: none
+        valType: color
+      colorsrc:
+        description: Sets the source reference on Chart Studio Cloud for  color .
+        editType: none
+        valType: string
+      description: Sets the font used in hover labels.
+      editType: none
+      family:
+        arrayOk: yes
+        description: HTML font family - the typeface that will be applied by the web
+          browser. The web browser will only be able to apply a font if it is available
+          on the system which it operates. Provide multiple font families, separated
+          by commas, to indicate the preference in which to apply fonts if they aren't
+          available on the system. The Chart Studio Cloud (at https://chart-studio.plotly.com
+          or on-premise) generates images on a server, where only a select number
+          of fonts are installed and supported. These include *Arial*, *Balto*, *Courier
+          New*, *Droid Sans*,, *Droid Serif*, *Droid Sans Mono*, *Gravitas One*, *Old
+          Standard TT*, *Open Sans*, *Overpass*, *PT Sans Narrow*, *Raleway*, *Times
+          New Roman*.
+        editType: none
+        noBlank: yes
+        strict: yes
+        valType: string
+      familysrc:
+        description: Sets the source reference on Chart Studio Cloud for  family .
+        editType: none
+        valType: string
+      role: object
+      size:
+        arrayOk: yes
+        editType: none
+        min: 1
+        valType: number
+      sizesrc:
+        description: Sets the source reference on Chart Studio Cloud for  size .
+        editType: none
+        valType: string
+    namelength:
+      arrayOk: yes
+      description: Sets the default length (in number of characters) of the trace
+        name in the hover labels for all traces. -1 shows the whole name regardless
+        of length. 0-3 shows the first 0-3 characters, and an integer >3 will show
+        the whole name if it is less than that many characters, but if it is longer,
+        will truncate to `namelength - 3` characters and add an ellipsis.
+      dflt: 15
+      editType: none
+      min: -1
+      valType: integer
+    namelengthsrc:
+      description: Sets the source reference on Chart Studio Cloud for  namelength
+        .
+      editType: none
+      valType: string
+    role: object
+  hovertemplate:
+    arrayOk: yes
+    description: 'Template string used for rendering the information that appear on
+      hover box. Note that this will override `hoverinfo`. Variables are inserted
+      using %{variable}, for example "y: %{y}" as well as %{xother}, {%_xother}, {%_xother_},
+      {%xother_}. When showing info for several points, *xother* will be added to
+      those with different x positions from the first point. An underscore before
+      or after *(x|y)other* will add a space on that side, only when this field is
+      shown. Numbers are formatted using d3-format''s syntax %{variable:d3-format},
+      for example "Price: %{y:$.2f}". https://github.com/d3/d3-format/tree/v1.4.5#d3-format
+      for details on the formatting syntax. Dates are formatted using d3-time-format''s
+      syntax %{variable|d3-time-format}, for example "Day: %{2019-01-01|%A}". https://github.com/d3/d3-time-format/tree/v2.2.3#locale_format
+      for details on the date formatting syntax. The variables available in `hovertemplate`
+      are the ones emitted as event data described at this link https://plotly.com/javascript/plotlyjs-events/#event-data.
+      Additionally, every attributes that can be specified per-point (the ones that
+      are `arrayOk: true`) are available. variables `z`, `color` and `colormodel`.
+      Anything contained in tag `<extra>` is displayed in the secondary box, for example
+      "<extra>{fullData.name}</extra>". To hide the secondary box completely, use
+      an empty tag `<extra></extra>`.'
+    dflt: ''
+    editType: none
+    valType: string
+  hovertemplatesrc:
+    description: Sets the source reference on Chart Studio Cloud for  hovertemplate
+      .
+    editType: none
+    valType: string
+  hovertext:
+    description: Same as `text`.
+    editType: plot
+    valType: data_array
+  hovertextsrc:
+    description: Sets the source reference on Chart Studio Cloud for  hovertext .
+    editType: none
+    valType: string
+  ids:
+    description: Assigns id labels to each datum. These ids for object constancy of
+      data points during animation. Should be an array of strings, not numbers or
+      any other type.
+    editType: calc
+    valType: data_array
+  idssrc:
+    description: Sets the source reference on Chart Studio Cloud for  ids .
+    editType: none
+    valType: string
+  legendgrouptitle:
+    editType: style
+    font:
+      color:
+        editType: style
+        valType: color
+      description: Sets this legend group's title font.
+      editType: style
+      family:
+        description: HTML font family - the typeface that will be applied by the web
+          browser. The web browser will only be able to apply a font if it is available
+          on the system which it operates. Provide multiple font families, separated
+          by commas, to indicate the preference in which to apply fonts if they aren't
+          available on the system. The Chart Studio Cloud (at https://chart-studio.plotly.com
+          or on-premise) generates images on a server, where only a select number
+          of fonts are installed and supported. These include *Arial*, *Balto*, *Courier
+          New*, *Droid Sans*,, *Droid Serif*, *Droid Sans Mono*, *Gravitas One*, *Old
+          Standard TT*, *Open Sans*, *Overpass*, *PT Sans Narrow*, *Raleway*, *Times
+          New Roman*.
+        editType: style
+        noBlank: yes
+        strict: yes
+        valType: string
+      role: object
+      size:
+        editType: style
+        min: 1
+        valType: number
+    role: object
+    text:
+      description: Sets the title of the legend group.
+      dflt: ''
+      editType: style
+      valType: string
+  legendrank:
+    description: Sets the legend rank for this trace. Items and groups with smaller
+      ranks are presented on top/left side while with `*reversed* `legend.traceorder`
+      they are on bottom/right side. The default legendrank is 1000, so that you can
+      use ranks less than 1000 to place certain items before all unranked items, and
+      ranks greater than 1000 to go after all unranked items.
+    dflt: 1000
+    editType: style
+    valType: number
+  meta:
+    arrayOk: yes
+    description: Assigns extra meta information associated with this trace that can
+      be used in various text attributes. Attributes such as trace `name`, graph,
+      axis and colorbar `title.text`, annotation `text` `rangeselector`, `updatemenues`
+      and `sliders` `label` text all support `meta`. To access the trace `meta` values
+      in an attribute in the same trace, simply use `%{meta[i]}` where `i` is the
+      index or key of the `meta` item in question. To access trace `meta` in layout
+      attributes, use `%{data[n[.meta[i]}` where `i` is the index or key of the `meta`
+      and `n` is the trace index.
+    editType: plot
+    valType: any
+  metasrc:
+    description: Sets the source reference on Chart Studio Cloud for  meta .
+    editType: none
+    valType: string
+  name:
+    description: Sets the trace name. The trace name appear as the legend item and
+      on hover.
+    editType: style
+    valType: string
+  opacity:
+    description: Sets the opacity of the trace.
+    dflt: 1
+    editType: style
+    max: 1
+    min: 0
+    valType: number
+  source:
+    description: Specifies the data URI of the image to be visualized. The URI consists
+      of "data:image/[<media subtype>][;base64],<data>"
+    editType: calc
+    valType: string
+  stream:
+    editType: calc
+    maxpoints:
+      description: Sets the maximum number of points to keep on the plots from an
+        incoming stream. If `maxpoints` is set to *50*, only the newest 50 points
+        will be displayed on the plot.
+      dflt: 500
+      editType: calc
+      max: 10000
+      min: 0
+      valType: number
+    role: object
+    token:
+      description: The stream id number links a data trace on a plot with a stream.
+        See https://chart-studio.plotly.com/settings for more details.
+      editType: calc
+      noBlank: yes
+      strict: yes
+      valType: string
+  text:
+    description: Sets the text elements associated with each z value.
+    editType: plot
+    valType: data_array
+  textsrc:
+    description: Sets the source reference on Chart Studio Cloud for  text .
+    editType: none
+    valType: string
+  type: image
+  uid:
+    description: Assign an id to this trace, Use this to provide object constancy
+      between traces during animations and transitions.
+    editType: plot
+    valType: string
+  uirevision:
+    description: 'Controls persistence of some user-driven changes to the trace: `constraintrange`
+      in `parcoords` traces, as well as some `editable: true` modifications such as
+      `name` and `colorbar.title`. Defaults to `layout.uirevision`. Note that other
+      user-driven trace attribute changes are controlled by `layout` attributes: `trace.visible`
+      is controlled by `layout.legend.uirevision`, `selectedpoints` is controlled
+      by `layout.selectionrevision`, and `colorbar.(x|y)` (accessible with `config:
+      {editable: true}`) is controlled by `layout.editrevision`. Trace changes are
+      tracked by `uid`, which only falls back on trace index if no `uid` is provided.
+      So if your app can add/remove traces before the end of the `data` array, such
+      that the same trace has a different index, you can still preserve user-driven
+      changes if you give each trace a `uid` that stays with it as it moves.'
+    editType: none
+    valType: any
+  visible:
+    description: Determines whether or not this trace is visible. If *legendonly*,
+      the trace is not drawn, but can appear as a legend item (provided that the legend
+      itself is visible).
+    dflt: yes
+    editType: calc
+    valType: enumerated
+    values:
+    - 'TRUE'
+    - 'FALSE'
+    - legendonly
+  x0:
+    description: Set the image's x position.
+    dflt: 0
+    editType: calc+clearAxisTypes
+    valType: any
+  xaxis:
+    description: Sets a reference between this trace's x coordinates and a 2D cartesian
+      x axis. If *x* (the default value), the x coordinates refer to `layout.xaxis`.
+      If *x2*, the x coordinates refer to `layout.xaxis2`, and so on.
+    dflt: x
+    editType: calc+clearAxisTypes
+    valType: subplotid
+  y0:
+    description: Set the image's y position.
+    dflt: 0
+    editType: calc+clearAxisTypes
+    valType: any
+  yaxis:
+    description: Sets a reference between this trace's y coordinates and a 2D cartesian
+      y axis. If *y* (the default value), the y coordinates refer to `layout.yaxis`.
+      If *y2*, the y coordinates refer to `layout.yaxis2`, and so on.
+    dflt: 'y'
+    editType: calc+clearAxisTypes
+    valType: subplotid
+  z:
+    description: A 2-dimensional array in which each element is an array of 3 or 4
+      numbers representing a color.
+    editType: calc
+    valType: data_array
+  zmax:
+    description: Array defining the higher bound for each color component. Note that
+      the default value will depend on the colormodel. For the `rgb` colormodel, it
+      is [255, 255, 255]. For the `rgba` colormodel, it is [255, 255, 255, 1]. For
+      the `rgba256` colormodel, it is [255, 255, 255, 255]. For the `hsl` colormodel,
+      it is [360, 100, 100]. For the `hsla` colormodel, it is [360, 100, 100, 1].
+    editType: calc
+    items:
+      editType:
+      - calc
+      - calc
+      - calc
+      - calc
+      valType:
+      - number
+      - number
+      - number
+      - number
+    valType: info_array
+  zmin:
+    description: Array defining the lower bound for each color component. Note that
+      the default value will depend on the colormodel. For the `rgb` colormodel, it
+      is [0, 0, 0]. For the `rgba` colormodel, it is [0, 0, 0, 0]. For the `rgba256`
+      colormodel, it is [0, 0, 0, 0]. For the `hsl` colormodel, it is [0, 0, 0]. For
+      the `hsla` colormodel, it is [0, 0, 0, 0].
+    editType: calc
+    items:
+      editType:
+      - calc
+      - calc
+      - calc
+      - calc
+      valType:
+      - number
+      - number
+      - number
+      - number
+    valType: info_array
+  zsmooth:
+    description: Picks a smoothing algorithm used to smooth `z` data. This only applies
+      for image traces that use the `source` attribute.
+    dflt: no
+    editType: plot
+    valType: enumerated
+    values:
+    - fast
+    - 'FALSE'
+  zsrc:
+    description: Sets the source reference on Chart Studio Cloud for  z .
+    editType: none
+    valType: string
+categories:
+- cartesian
+- svg
+- 2dMap
+- noSortingByValue
+meta:
+  description: 'Display an image, i.e. data on a 2D regular raster. By default, when
+    an image is displayed in a subplot, its y axis will be reversed (ie. `autorange:
+    ''reversed''`), constrained to the domain (ie. `constrain: ''domain''`) and it
+    will have the same scale as its x axis (ie. `scaleanchor: ''x,`) in order for
+    pixels to be rendered as squares.'
+type: image

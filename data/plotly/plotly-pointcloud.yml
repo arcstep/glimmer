@@ -1,0 +1,430 @@
+animatable: no
+attributes:
+  customdata:
+    description: Assigns extra data each datum. This may be useful when listening
+      to hover, click and selection events. Note that, *scatter* traces also appends
+      customdata items in the markers DOM elements
+    editType: calc
+    valType: data_array
+  customdatasrc:
+    description: Sets the source reference on Chart Studio Cloud for  customdata .
+    editType: none
+    valType: string
+  hoverinfo:
+    arrayOk: yes
+    description: Determines which trace information appear on hover. If `none` or
+      `skip` are set, no information is displayed upon hovering. But, if `none` is
+      set, click and hover events are still fired.
+    dflt: all
+    editType: none
+    extras:
+    - all
+    - none
+    - skip
+    flags:
+    - x
+    - 'y'
+    - z
+    - text
+    - name
+    valType: flaglist
+  hoverinfosrc:
+    description: Sets the source reference on Chart Studio Cloud for  hoverinfo .
+    editType: none
+    valType: string
+  hoverlabel:
+    align:
+      arrayOk: yes
+      description: Sets the horizontal alignment of the text content within hover
+        label box. Has an effect only if the hover label text spans more two or more
+        lines
+      dflt: auto
+      editType: none
+      valType: enumerated
+      values:
+      - left
+      - right
+      - auto
+    alignsrc:
+      description: Sets the source reference on Chart Studio Cloud for  align .
+      editType: none
+      valType: string
+    bgcolor:
+      arrayOk: yes
+      description: Sets the background color of the hover labels for this trace
+      editType: none
+      valType: color
+    bgcolorsrc:
+      description: Sets the source reference on Chart Studio Cloud for  bgcolor .
+      editType: none
+      valType: string
+    bordercolor:
+      arrayOk: yes
+      description: Sets the border color of the hover labels for this trace.
+      editType: none
+      valType: color
+    bordercolorsrc:
+      description: Sets the source reference on Chart Studio Cloud for  bordercolor
+        .
+      editType: none
+      valType: string
+    editType: none
+    font:
+      color:
+        arrayOk: yes
+        editType: none
+        valType: color
+      colorsrc:
+        description: Sets the source reference on Chart Studio Cloud for  color .
+        editType: none
+        valType: string
+      description: Sets the font used in hover labels.
+      editType: none
+      family:
+        arrayOk: yes
+        description: HTML font family - the typeface that will be applied by the web
+          browser. The web browser will only be able to apply a font if it is available
+          on the system which it operates. Provide multiple font families, separated
+          by commas, to indicate the preference in which to apply fonts if they aren't
+          available on the system. The Chart Studio Cloud (at https://chart-studio.plotly.com
+          or on-premise) generates images on a server, where only a select number
+          of fonts are installed and supported. These include *Arial*, *Balto*, *Courier
+          New*, *Droid Sans*,, *Droid Serif*, *Droid Sans Mono*, *Gravitas One*, *Old
+          Standard TT*, *Open Sans*, *Overpass*, *PT Sans Narrow*, *Raleway*, *Times
+          New Roman*.
+        editType: none
+        noBlank: yes
+        strict: yes
+        valType: string
+      familysrc:
+        description: Sets the source reference on Chart Studio Cloud for  family .
+        editType: none
+        valType: string
+      role: object
+      size:
+        arrayOk: yes
+        editType: none
+        min: 1
+        valType: number
+      sizesrc:
+        description: Sets the source reference on Chart Studio Cloud for  size .
+        editType: none
+        valType: string
+    namelength:
+      arrayOk: yes
+      description: Sets the default length (in number of characters) of the trace
+        name in the hover labels for all traces. -1 shows the whole name regardless
+        of length. 0-3 shows the first 0-3 characters, and an integer >3 will show
+        the whole name if it is less than that many characters, but if it is longer,
+        will truncate to `namelength - 3` characters and add an ellipsis.
+      dflt: 15
+      editType: none
+      min: -1
+      valType: integer
+    namelengthsrc:
+      description: Sets the source reference on Chart Studio Cloud for  namelength
+        .
+      editType: none
+      valType: string
+    role: object
+  ids:
+    description: Assigns id labels to each datum. These ids for object constancy of
+      data points during animation. Should be an array of strings, not numbers or
+      any other type.
+    editType: calc
+    valType: data_array
+  idssrc:
+    description: Sets the source reference on Chart Studio Cloud for  ids .
+    editType: none
+    valType: string
+  indices:
+    description: A sequential value, 0..n, supply it to avoid creating this array
+      inside plotting. If specified, it must be a typed `Int32Array` array. Its length
+      must be equal to or greater than the number of points. For the best performance
+      and memory use, create one large `indices` typed array that is guaranteed to
+      be at least as long as the largest number of points during use, and reuse it
+      on each `Plotly.restyle()` call.
+    editType: calc
+    valType: data_array
+  indicessrc:
+    description: Sets the source reference on Chart Studio Cloud for  indices .
+    editType: none
+    valType: string
+  legendgroup:
+    description: Sets the legend group for this trace. Traces part of the same legend
+      group hide/show at the same time when toggling legend items.
+    dflt: ''
+    editType: style
+    valType: string
+  legendgrouptitle:
+    editType: style
+    font:
+      color:
+        editType: style
+        valType: color
+      description: Sets this legend group's title font.
+      editType: style
+      family:
+        description: HTML font family - the typeface that will be applied by the web
+          browser. The web browser will only be able to apply a font if it is available
+          on the system which it operates. Provide multiple font families, separated
+          by commas, to indicate the preference in which to apply fonts if they aren't
+          available on the system. The Chart Studio Cloud (at https://chart-studio.plotly.com
+          or on-premise) generates images on a server, where only a select number
+          of fonts are installed and supported. These include *Arial*, *Balto*, *Courier
+          New*, *Droid Sans*,, *Droid Serif*, *Droid Sans Mono*, *Gravitas One*, *Old
+          Standard TT*, *Open Sans*, *Overpass*, *PT Sans Narrow*, *Raleway*, *Times
+          New Roman*.
+        editType: style
+        noBlank: yes
+        strict: yes
+        valType: string
+      role: object
+      size:
+        editType: style
+        min: 1
+        valType: number
+    role: object
+    text:
+      description: Sets the title of the legend group.
+      dflt: ''
+      editType: style
+      valType: string
+  legendrank:
+    description: Sets the legend rank for this trace. Items and groups with smaller
+      ranks are presented on top/left side while with `*reversed* `legend.traceorder`
+      they are on bottom/right side. The default legendrank is 1000, so that you can
+      use ranks less than 1000 to place certain items before all unranked items, and
+      ranks greater than 1000 to go after all unranked items.
+    dflt: 1000
+    editType: style
+    valType: number
+  marker:
+    blend:
+      description: Determines if colors are blended together for a translucency effect
+        in case `opacity` is specified as a value less then `1`. Setting `blend` to
+        `true` reduces zoom/pan speed if used with large numbers of points.
+      dflt: ~
+      editType: calc
+      valType: boolean
+    border:
+      arearatio:
+        description: Specifies what fraction of the marker area is covered with the
+          border.
+        dflt: 0
+        editType: calc
+        max: 1
+        min: 0
+        valType: number
+      color:
+        arrayOk: no
+        description: Sets the stroke color. It accepts a specific color. If the color
+          is not fully opaque and there are hundreds of thousands of points, it may
+          cause slower zooming and panning.
+        editType: calc
+        valType: color
+      editType: calc
+      role: object
+    color:
+      arrayOk: no
+      description: Sets the marker fill color. It accepts a specific color.If the
+        color is not fully opaque and there are hundreds of thousandsof points, it
+        may cause slower zooming and panning.
+      editType: calc
+      valType: color
+    editType: calc
+    opacity:
+      arrayOk: no
+      description: Sets the marker opacity. The default value is `1` (fully opaque).
+        If the markers are not fully opaque and there are hundreds of thousands of
+        points, it may cause slower zooming and panning. Opacity fades the color even
+        if `blend` is left on `false` even if there is no translucency effect in that
+        case.
+      dflt: 1
+      editType: calc
+      max: 1
+      min: 0
+      valType: number
+    role: object
+    sizemax:
+      description: Sets the maximum size (in px) of the rendered marker points. Effective
+        when the `pointcloud` shows only few points.
+      dflt: 20
+      editType: calc
+      min: 0.1
+      valType: number
+    sizemin:
+      description: Sets the minimum size (in px) of the rendered marker points, effective
+        when the `pointcloud` shows a million or more points.
+      dflt: 0.5
+      editType: calc
+      max: 2
+      min: 0.1
+      valType: number
+  meta:
+    arrayOk: yes
+    description: Assigns extra meta information associated with this trace that can
+      be used in various text attributes. Attributes such as trace `name`, graph,
+      axis and colorbar `title.text`, annotation `text` `rangeselector`, `updatemenues`
+      and `sliders` `label` text all support `meta`. To access the trace `meta` values
+      in an attribute in the same trace, simply use `%{meta[i]}` where `i` is the
+      index or key of the `meta` item in question. To access trace `meta` in layout
+      attributes, use `%{data[n[.meta[i]}` where `i` is the index or key of the `meta`
+      and `n` is the trace index.
+    editType: plot
+    valType: any
+  metasrc:
+    description: Sets the source reference on Chart Studio Cloud for  meta .
+    editType: none
+    valType: string
+  name:
+    description: Sets the trace name. The trace name appear as the legend item and
+      on hover.
+    editType: style
+    valType: string
+  opacity:
+    description: Sets the opacity of the trace.
+    dflt: 1
+    editType: style
+    max: 1
+    min: 0
+    valType: number
+  showlegend:
+    description: Determines whether or not an item corresponding to this trace is
+      shown in the legend.
+    dflt: yes
+    editType: style
+    valType: boolean
+  stream:
+    editType: calc
+    maxpoints:
+      description: Sets the maximum number of points to keep on the plots from an
+        incoming stream. If `maxpoints` is set to *50*, only the newest 50 points
+        will be displayed on the plot.
+      dflt: 500
+      editType: calc
+      max: 10000
+      min: 0
+      valType: number
+    role: object
+    token:
+      description: The stream id number links a data trace on a plot with a stream.
+        See https://chart-studio.plotly.com/settings for more details.
+      editType: calc
+      noBlank: yes
+      strict: yes
+      valType: string
+  text:
+    arrayOk: yes
+    description: Sets text elements associated with each (x,y) pair. If a single string,
+      the same string appears over all the data points. If an array of string, the
+      items are mapped in order to the this trace's (x,y) coordinates. If trace `hoverinfo`
+      contains a *text* flag and *hovertext* is not set, these elements will be seen
+      in the hover labels.
+    dflt: ''
+    editType: calc
+    valType: string
+  textsrc:
+    description: Sets the source reference on Chart Studio Cloud for  text .
+    editType: none
+    valType: string
+  type: pointcloud
+  uid:
+    description: Assign an id to this trace, Use this to provide object constancy
+      between traces during animations and transitions.
+    editType: plot
+    valType: string
+  uirevision:
+    description: 'Controls persistence of some user-driven changes to the trace: `constraintrange`
+      in `parcoords` traces, as well as some `editable: true` modifications such as
+      `name` and `colorbar.title`. Defaults to `layout.uirevision`. Note that other
+      user-driven trace attribute changes are controlled by `layout` attributes: `trace.visible`
+      is controlled by `layout.legend.uirevision`, `selectedpoints` is controlled
+      by `layout.selectionrevision`, and `colorbar.(x|y)` (accessible with `config:
+      {editable: true}`) is controlled by `layout.editrevision`. Trace changes are
+      tracked by `uid`, which only falls back on trace index if no `uid` is provided.
+      So if your app can add/remove traces before the end of the `data` array, such
+      that the same trace has a different index, you can still preserve user-driven
+      changes if you give each trace a `uid` that stays with it as it moves.'
+    editType: none
+    valType: any
+  visible:
+    description: Determines whether or not this trace is visible. If *legendonly*,
+      the trace is not drawn, but can appear as a legend item (provided that the legend
+      itself is visible).
+    dflt: yes
+    editType: calc
+    valType: enumerated
+    values:
+    - 'TRUE'
+    - 'FALSE'
+    - legendonly
+  x:
+    description: Sets the x coordinates.
+    editType: calc+clearAxisTypes
+    valType: data_array
+  xaxis:
+    description: Sets a reference between this trace's x coordinates and a 2D cartesian
+      x axis. If *x* (the default value), the x coordinates refer to `layout.xaxis`.
+      If *x2*, the x coordinates refer to `layout.xaxis2`, and so on.
+    dflt: x
+    editType: calc+clearAxisTypes
+    valType: subplotid
+  xbounds:
+    description: Specify `xbounds` in the shape of `[xMin, xMax] to avoid looping
+      through the `xy` typed array. Use it in conjunction with `xy` and `ybounds`
+      for the performance benefits.
+    editType: calc
+    valType: data_array
+  xboundssrc:
+    description: Sets the source reference on Chart Studio Cloud for  xbounds .
+    editType: none
+    valType: string
+  xsrc:
+    description: Sets the source reference on Chart Studio Cloud for  x .
+    editType: none
+    valType: string
+  xy:
+    description: Faster alternative to specifying `x` and `y` separately. If supplied,
+      it must be a typed `Float32Array` array that represents points such that `xy[i
+      * 2] = x[i]` and `xy[i * 2 + 1] = y[i]`
+    editType: calc
+    valType: data_array
+  xysrc:
+    description: Sets the source reference on Chart Studio Cloud for  xy .
+    editType: none
+    valType: string
+  'y':
+    description: Sets the y coordinates.
+    editType: calc+clearAxisTypes
+    valType: data_array
+  yaxis:
+    description: Sets a reference between this trace's y coordinates and a 2D cartesian
+      y axis. If *y* (the default value), the y coordinates refer to `layout.yaxis`.
+      If *y2*, the y coordinates refer to `layout.yaxis2`, and so on.
+    dflt: 'y'
+    editType: calc+clearAxisTypes
+    valType: subplotid
+  ybounds:
+    description: Specify `ybounds` in the shape of `[yMin, yMax] to avoid looping
+      through the `xy` typed array. Use it in conjunction with `xy` and `xbounds`
+      for the performance benefits.
+    editType: calc
+    valType: data_array
+  yboundssrc:
+    description: Sets the source reference on Chart Studio Cloud for  ybounds .
+    editType: none
+    valType: string
+  ysrc:
+    description: Sets the source reference on Chart Studio Cloud for  y .
+    editType: none
+    valType: string
+categories:
+- gl
+- gl2d
+- showLegend
+meta:
+  description: '*pointcloud* trace is deprecated! Please consider switching to the
+    *scattergl* trace type. The data visualized as a point cloud set in `x` and `y`
+    using the WebGl plotting engine.'
+type: pointcloud

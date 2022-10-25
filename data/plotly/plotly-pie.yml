@@ -1,0 +1,843 @@
+animatable: no
+attributes:
+  _deprecated:
+    title:
+      description: Deprecated in favor of `title.text`. Note that value of `title`
+        is no longer a simple *string* but a set of sub-attributes.
+      dflt: ''
+      editType: calc
+      valType: string
+    titlefont:
+      color:
+        arrayOk: yes
+        editType: plot
+        valType: color
+      description: Deprecated in favor of `title.font`.
+      editType: plot
+      family:
+        arrayOk: yes
+        description: HTML font family - the typeface that will be applied by the web
+          browser. The web browser will only be able to apply a font if it is available
+          on the system which it operates. Provide multiple font families, separated
+          by commas, to indicate the preference in which to apply fonts if they aren't
+          available on the system. The Chart Studio Cloud (at https://chart-studio.plotly.com
+          or on-premise) generates images on a server, where only a select number
+          of fonts are installed and supported. These include *Arial*, *Balto*, *Courier
+          New*, *Droid Sans*,, *Droid Serif*, *Droid Sans Mono*, *Gravitas One*, *Old
+          Standard TT*, *Open Sans*, *Overpass*, *PT Sans Narrow*, *Raleway*, *Times
+          New Roman*.
+        editType: plot
+        noBlank: yes
+        strict: yes
+        valType: string
+      size:
+        arrayOk: yes
+        editType: plot
+        min: 1
+        valType: number
+    titleposition:
+      description: Deprecated in favor of `title.position`.
+      editType: calc
+      valType: enumerated
+      values:
+      - top left
+      - top center
+      - top right
+      - middle center
+      - bottom left
+      - bottom center
+      - bottom right
+  automargin:
+    description: Determines whether outside text labels can push the margins.
+    dflt: no
+    editType: plot
+    valType: boolean
+  customdata:
+    description: Assigns extra data each datum. This may be useful when listening
+      to hover, click and selection events. Note that, *scatter* traces also appends
+      customdata items in the markers DOM elements
+    editType: calc
+    valType: data_array
+  customdatasrc:
+    description: Sets the source reference on Chart Studio Cloud for  customdata .
+    editType: none
+    valType: string
+  direction:
+    description: Specifies the direction at which succeeding sectors follow one another.
+    dflt: counterclockwise
+    editType: calc
+    valType: enumerated
+    values:
+    - clockwise
+    - counterclockwise
+  dlabel:
+    description: Sets the label step. See `label0` for more info.
+    dflt: 1
+    editType: calc
+    valType: number
+  domain:
+    column:
+      description: If there is a layout grid, use the domain for this column in the
+        grid for this pie trace .
+      dflt: 0
+      editType: calc
+      min: 0
+      valType: integer
+    editType: calc
+    role: object
+    row:
+      description: If there is a layout grid, use the domain for this row in the grid
+        for this pie trace .
+      dflt: 0
+      editType: calc
+      min: 0
+      valType: integer
+    x:
+      description: Sets the horizontal domain of this pie trace (in plot fraction).
+      dflt:
+      - 0
+      - 1
+      editType: calc
+      items:
+        editType:
+        - calc
+        - calc
+        max:
+        - 1
+        - 1
+        min:
+        - 0
+        - 0
+        valType:
+        - number
+        - number
+      valType: info_array
+    'y':
+      description: Sets the vertical domain of this pie trace (in plot fraction).
+      dflt:
+      - 0
+      - 1
+      editType: calc
+      items:
+        editType:
+        - calc
+        - calc
+        max:
+        - 1
+        - 1
+        min:
+        - 0
+        - 0
+        valType:
+        - number
+        - number
+      valType: info_array
+  hole:
+    description: Sets the fraction of the radius to cut out of the pie. Use this to
+      make a donut chart.
+    dflt: 0
+    editType: calc
+    max: 1
+    min: 0
+    valType: number
+  hoverinfo:
+    arrayOk: yes
+    description: Determines which trace information appear on hover. If `none` or
+      `skip` are set, no information is displayed upon hovering. But, if `none` is
+      set, click and hover events are still fired.
+    dflt: all
+    editType: none
+    extras:
+    - all
+    - none
+    - skip
+    flags:
+    - label
+    - text
+    - value
+    - percent
+    - name
+    valType: flaglist
+  hoverinfosrc:
+    description: Sets the source reference on Chart Studio Cloud for  hoverinfo .
+    editType: none
+    valType: string
+  hoverlabel:
+    align:
+      arrayOk: yes
+      description: Sets the horizontal alignment of the text content within hover
+        label box. Has an effect only if the hover label text spans more two or more
+        lines
+      dflt: auto
+      editType: none
+      valType: enumerated
+      values:
+      - left
+      - right
+      - auto
+    alignsrc:
+      description: Sets the source reference on Chart Studio Cloud for  align .
+      editType: none
+      valType: string
+    bgcolor:
+      arrayOk: yes
+      description: Sets the background color of the hover labels for this trace
+      editType: none
+      valType: color
+    bgcolorsrc:
+      description: Sets the source reference on Chart Studio Cloud for  bgcolor .
+      editType: none
+      valType: string
+    bordercolor:
+      arrayOk: yes
+      description: Sets the border color of the hover labels for this trace.
+      editType: none
+      valType: color
+    bordercolorsrc:
+      description: Sets the source reference on Chart Studio Cloud for  bordercolor
+        .
+      editType: none
+      valType: string
+    editType: none
+    font:
+      color:
+        arrayOk: yes
+        editType: none
+        valType: color
+      colorsrc:
+        description: Sets the source reference on Chart Studio Cloud for  color .
+        editType: none
+        valType: string
+      description: Sets the font used in hover labels.
+      editType: none
+      family:
+        arrayOk: yes
+        description: HTML font family - the typeface that will be applied by the web
+          browser. The web browser will only be able to apply a font if it is available
+          on the system which it operates. Provide multiple font families, separated
+          by commas, to indicate the preference in which to apply fonts if they aren't
+          available on the system. The Chart Studio Cloud (at https://chart-studio.plotly.com
+          or on-premise) generates images on a server, where only a select number
+          of fonts are installed and supported. These include *Arial*, *Balto*, *Courier
+          New*, *Droid Sans*,, *Droid Serif*, *Droid Sans Mono*, *Gravitas One*, *Old
+          Standard TT*, *Open Sans*, *Overpass*, *PT Sans Narrow*, *Raleway*, *Times
+          New Roman*.
+        editType: none
+        noBlank: yes
+        strict: yes
+        valType: string
+      familysrc:
+        description: Sets the source reference on Chart Studio Cloud for  family .
+        editType: none
+        valType: string
+      role: object
+      size:
+        arrayOk: yes
+        editType: none
+        min: 1
+        valType: number
+      sizesrc:
+        description: Sets the source reference on Chart Studio Cloud for  size .
+        editType: none
+        valType: string
+    namelength:
+      arrayOk: yes
+      description: Sets the default length (in number of characters) of the trace
+        name in the hover labels for all traces. -1 shows the whole name regardless
+        of length. 0-3 shows the first 0-3 characters, and an integer >3 will show
+        the whole name if it is less than that many characters, but if it is longer,
+        will truncate to `namelength - 3` characters and add an ellipsis.
+      dflt: 15
+      editType: none
+      min: -1
+      valType: integer
+    namelengthsrc:
+      description: Sets the source reference on Chart Studio Cloud for  namelength
+        .
+      editType: none
+      valType: string
+    role: object
+  hovertemplate:
+    arrayOk: yes
+    description: 'Template string used for rendering the information that appear on
+      hover box. Note that this will override `hoverinfo`. Variables are inserted
+      using %{variable}, for example "y: %{y}" as well as %{xother}, {%_xother}, {%_xother_},
+      {%xother_}. When showing info for several points, *xother* will be added to
+      those with different x positions from the first point. An underscore before
+      or after *(x|y)other* will add a space on that side, only when this field is
+      shown. Numbers are formatted using d3-format''s syntax %{variable:d3-format},
+      for example "Price: %{y:$.2f}". https://github.com/d3/d3-format/tree/v1.4.5#d3-format
+      for details on the formatting syntax. Dates are formatted using d3-time-format''s
+      syntax %{variable|d3-time-format}, for example "Day: %{2019-01-01|%A}". https://github.com/d3/d3-time-format/tree/v2.2.3#locale_format
+      for details on the date formatting syntax. The variables available in `hovertemplate`
+      are the ones emitted as event data described at this link https://plotly.com/javascript/plotlyjs-events/#event-data.
+      Additionally, every attributes that can be specified per-point (the ones that
+      are `arrayOk: true`) are available. variables `label`, `color`, `value`, `percent`
+      and `text`. Anything contained in tag `<extra>` is displayed in the secondary
+      box, for example "<extra>{fullData.name}</extra>". To hide the secondary box
+      completely, use an empty tag `<extra></extra>`.'
+    dflt: ''
+    editType: none
+    valType: string
+  hovertemplatesrc:
+    description: Sets the source reference on Chart Studio Cloud for  hovertemplate
+      .
+    editType: none
+    valType: string
+  hovertext:
+    arrayOk: yes
+    description: Sets hover text elements associated with each sector. If a single
+      string, the same string appears for all data points. If an array of string,
+      the items are mapped in order of this trace's sectors. To be seen, trace `hoverinfo`
+      must contain a *text* flag.
+    dflt: ''
+    editType: style
+    valType: string
+  hovertextsrc:
+    description: Sets the source reference on Chart Studio Cloud for  hovertext .
+    editType: none
+    valType: string
+  ids:
+    description: Assigns id labels to each datum. These ids for object constancy of
+      data points during animation. Should be an array of strings, not numbers or
+      any other type.
+    editType: calc
+    valType: data_array
+  idssrc:
+    description: Sets the source reference on Chart Studio Cloud for  ids .
+    editType: none
+    valType: string
+  insidetextfont:
+    color:
+      arrayOk: yes
+      editType: plot
+      valType: color
+    colorsrc:
+      description: Sets the source reference on Chart Studio Cloud for  color .
+      editType: none
+      valType: string
+    description: Sets the font used for `textinfo` lying inside the sector.
+    editType: plot
+    family:
+      arrayOk: yes
+      description: HTML font family - the typeface that will be applied by the web
+        browser. The web browser will only be able to apply a font if it is available
+        on the system which it operates. Provide multiple font families, separated
+        by commas, to indicate the preference in which to apply fonts if they aren't
+        available on the system. The Chart Studio Cloud (at https://chart-studio.plotly.com
+        or on-premise) generates images on a server, where only a select number of
+        fonts are installed and supported. These include *Arial*, *Balto*, *Courier
+        New*, *Droid Sans*,, *Droid Serif*, *Droid Sans Mono*, *Gravitas One*, *Old
+        Standard TT*, *Open Sans*, *Overpass*, *PT Sans Narrow*, *Raleway*, *Times
+        New Roman*.
+      editType: plot
+      noBlank: yes
+      strict: yes
+      valType: string
+    familysrc:
+      description: Sets the source reference on Chart Studio Cloud for  family .
+      editType: none
+      valType: string
+    role: object
+    size:
+      arrayOk: yes
+      editType: plot
+      min: 1
+      valType: number
+    sizesrc:
+      description: Sets the source reference on Chart Studio Cloud for  size .
+      editType: none
+      valType: string
+  insidetextorientation:
+    description: Controls the orientation of the text inside chart sectors. When set
+      to *auto*, text may be oriented in any direction in order to be as big as possible
+      in the middle of a sector. The *horizontal* option orients text to be parallel
+      with the bottom of the chart, and may make text smaller in order to achieve
+      that goal. The *radial* option orients text along the radius of the sector.
+      The *tangential* option orients text perpendicular to the radius of the sector.
+    dflt: auto
+    editType: plot
+    valType: enumerated
+    values:
+    - horizontal
+    - radial
+    - tangential
+    - auto
+  label0:
+    description: Alternate to `labels`. Builds a numeric set of labels. Use with `dlabel`
+      where `label0` is the starting label and `dlabel` the step.
+    dflt: 0
+    editType: calc
+    valType: number
+  labels:
+    description: Sets the sector labels. If `labels` entries are duplicated, we sum
+      associated `values` or simply count occurrences if `values` is not provided.
+      For other array attributes (including color) we use the first non-empty entry
+      among all occurrences of the label.
+    editType: calc
+    valType: data_array
+  labelssrc:
+    description: Sets the source reference on Chart Studio Cloud for  labels .
+    editType: none
+    valType: string
+  legendgroup:
+    description: Sets the legend group for this trace. Traces part of the same legend
+      group hide/show at the same time when toggling legend items.
+    dflt: ''
+    editType: style
+    valType: string
+  legendgrouptitle:
+    editType: style
+    font:
+      color:
+        editType: style
+        valType: color
+      description: Sets this legend group's title font.
+      editType: style
+      family:
+        description: HTML font family - the typeface that will be applied by the web
+          browser. The web browser will only be able to apply a font if it is available
+          on the system which it operates. Provide multiple font families, separated
+          by commas, to indicate the preference in which to apply fonts if they aren't
+          available on the system. The Chart Studio Cloud (at https://chart-studio.plotly.com
+          or on-premise) generates images on a server, where only a select number
+          of fonts are installed and supported. These include *Arial*, *Balto*, *Courier
+          New*, *Droid Sans*,, *Droid Serif*, *Droid Sans Mono*, *Gravitas One*, *Old
+          Standard TT*, *Open Sans*, *Overpass*, *PT Sans Narrow*, *Raleway*, *Times
+          New Roman*.
+        editType: style
+        noBlank: yes
+        strict: yes
+        valType: string
+      role: object
+      size:
+        editType: style
+        min: 1
+        valType: number
+    role: object
+    text:
+      description: Sets the title of the legend group.
+      dflt: ''
+      editType: style
+      valType: string
+  legendrank:
+    description: Sets the legend rank for this trace. Items and groups with smaller
+      ranks are presented on top/left side while with `*reversed* `legend.traceorder`
+      they are on bottom/right side. The default legendrank is 1000, so that you can
+      use ranks less than 1000 to place certain items before all unranked items, and
+      ranks greater than 1000 to go after all unranked items.
+    dflt: 1000
+    editType: style
+    valType: number
+  marker:
+    colors:
+      description: Sets the color of each sector. If not specified, the default trace
+        color set is used to pick the sector colors.
+      editType: calc
+      valType: data_array
+    colorssrc:
+      description: Sets the source reference on Chart Studio Cloud for  colors .
+      editType: none
+      valType: string
+    editType: calc
+    line:
+      color:
+        arrayOk: yes
+        description: Sets the color of the line enclosing each sector.
+        dflt: '#444'
+        editType: style
+        valType: color
+      colorsrc:
+        description: Sets the source reference on Chart Studio Cloud for  color .
+        editType: none
+        valType: string
+      editType: calc
+      role: object
+      width:
+        arrayOk: yes
+        description: Sets the width (in px) of the line enclosing each sector.
+        dflt: 0
+        editType: style
+        min: 0
+        valType: number
+      widthsrc:
+        description: Sets the source reference on Chart Studio Cloud for  width .
+        editType: none
+        valType: string
+    role: object
+  meta:
+    arrayOk: yes
+    description: Assigns extra meta information associated with this trace that can
+      be used in various text attributes. Attributes such as trace `name`, graph,
+      axis and colorbar `title.text`, annotation `text` `rangeselector`, `updatemenues`
+      and `sliders` `label` text all support `meta`. To access the trace `meta` values
+      in an attribute in the same trace, simply use `%{meta[i]}` where `i` is the
+      index or key of the `meta` item in question. To access trace `meta` in layout
+      attributes, use `%{data[n[.meta[i]}` where `i` is the index or key of the `meta`
+      and `n` is the trace index.
+    editType: plot
+    valType: any
+  metasrc:
+    description: Sets the source reference on Chart Studio Cloud for  meta .
+    editType: none
+    valType: string
+  name:
+    description: Sets the trace name. The trace name appear as the legend item and
+      on hover.
+    editType: style
+    valType: string
+  opacity:
+    description: Sets the opacity of the trace.
+    dflt: 1
+    editType: style
+    max: 1
+    min: 0
+    valType: number
+  outsidetextfont:
+    color:
+      arrayOk: yes
+      editType: plot
+      valType: color
+    colorsrc:
+      description: Sets the source reference on Chart Studio Cloud for  color .
+      editType: none
+      valType: string
+    description: Sets the font used for `textinfo` lying outside the sector.
+    editType: plot
+    family:
+      arrayOk: yes
+      description: HTML font family - the typeface that will be applied by the web
+        browser. The web browser will only be able to apply a font if it is available
+        on the system which it operates. Provide multiple font families, separated
+        by commas, to indicate the preference in which to apply fonts if they aren't
+        available on the system. The Chart Studio Cloud (at https://chart-studio.plotly.com
+        or on-premise) generates images on a server, where only a select number of
+        fonts are installed and supported. These include *Arial*, *Balto*, *Courier
+        New*, *Droid Sans*,, *Droid Serif*, *Droid Sans Mono*, *Gravitas One*, *Old
+        Standard TT*, *Open Sans*, *Overpass*, *PT Sans Narrow*, *Raleway*, *Times
+        New Roman*.
+      editType: plot
+      noBlank: yes
+      strict: yes
+      valType: string
+    familysrc:
+      description: Sets the source reference on Chart Studio Cloud for  family .
+      editType: none
+      valType: string
+    role: object
+    size:
+      arrayOk: yes
+      editType: plot
+      min: 1
+      valType: number
+    sizesrc:
+      description: Sets the source reference on Chart Studio Cloud for  size .
+      editType: none
+      valType: string
+  pull:
+    arrayOk: yes
+    description: Sets the fraction of larger radius to pull the sectors out from the
+      center. This can be a constant to pull all slices apart from each other equally
+      or an array to highlight one or more slices.
+    dflt: 0
+    editType: calc
+    max: 1
+    min: 0
+    valType: number
+  pullsrc:
+    description: Sets the source reference on Chart Studio Cloud for  pull .
+    editType: none
+    valType: string
+  rotation:
+    description: Instead of the first slice starting at 12 o'clock, rotate to some
+      other angle.
+    dflt: 0
+    editType: calc
+    max: 360
+    min: -360
+    valType: number
+  scalegroup:
+    description: If there are multiple pie charts that should be sized according to
+      their totals, link them by providing a non-empty group id here shared by every
+      trace in the same group.
+    dflt: ''
+    editType: calc
+    valType: string
+  showlegend:
+    description: Determines whether or not an item corresponding to this trace is
+      shown in the legend.
+    dflt: yes
+    editType: style
+    valType: boolean
+  sort:
+    description: Determines whether or not the sectors are reordered from largest
+      to smallest.
+    dflt: yes
+    editType: calc
+    valType: boolean
+  stream:
+    editType: calc
+    maxpoints:
+      description: Sets the maximum number of points to keep on the plots from an
+        incoming stream. If `maxpoints` is set to *50*, only the newest 50 points
+        will be displayed on the plot.
+      dflt: 500
+      editType: calc
+      max: 10000
+      min: 0
+      valType: number
+    role: object
+    token:
+      description: The stream id number links a data trace on a plot with a stream.
+        See https://chart-studio.plotly.com/settings for more details.
+      editType: calc
+      noBlank: yes
+      strict: yes
+      valType: string
+  text:
+    description: Sets text elements associated with each sector. If trace `textinfo`
+      contains a *text* flag, these elements will be seen on the chart. If trace `hoverinfo`
+      contains a *text* flag and *hovertext* is not set, these elements will be seen
+      in the hover labels.
+    editType: plot
+    valType: data_array
+  textfont:
+    color:
+      arrayOk: yes
+      editType: plot
+      valType: color
+    colorsrc:
+      description: Sets the source reference on Chart Studio Cloud for  color .
+      editType: none
+      valType: string
+    description: Sets the font used for `textinfo`.
+    editType: plot
+    family:
+      arrayOk: yes
+      description: HTML font family - the typeface that will be applied by the web
+        browser. The web browser will only be able to apply a font if it is available
+        on the system which it operates. Provide multiple font families, separated
+        by commas, to indicate the preference in which to apply fonts if they aren't
+        available on the system. The Chart Studio Cloud (at https://chart-studio.plotly.com
+        or on-premise) generates images on a server, where only a select number of
+        fonts are installed and supported. These include *Arial*, *Balto*, *Courier
+        New*, *Droid Sans*,, *Droid Serif*, *Droid Sans Mono*, *Gravitas One*, *Old
+        Standard TT*, *Open Sans*, *Overpass*, *PT Sans Narrow*, *Raleway*, *Times
+        New Roman*.
+      editType: plot
+      noBlank: yes
+      strict: yes
+      valType: string
+    familysrc:
+      description: Sets the source reference on Chart Studio Cloud for  family .
+      editType: none
+      valType: string
+    role: object
+    size:
+      arrayOk: yes
+      editType: plot
+      min: 1
+      valType: number
+    sizesrc:
+      description: Sets the source reference on Chart Studio Cloud for  size .
+      editType: none
+      valType: string
+  textinfo:
+    description: Determines which trace information appear on the graph.
+    editType: calc
+    extras: none
+    flags:
+    - label
+    - text
+    - value
+    - percent
+    valType: flaglist
+  textposition:
+    arrayOk: yes
+    description: Specifies the location of the `textinfo`.
+    dflt: auto
+    editType: plot
+    valType: enumerated
+    values:
+    - inside
+    - outside
+    - auto
+    - none
+  textpositionsrc:
+    description: Sets the source reference on Chart Studio Cloud for  textposition
+      .
+    editType: none
+    valType: string
+  textsrc:
+    description: Sets the source reference on Chart Studio Cloud for  text .
+    editType: none
+    valType: string
+  texttemplate:
+    arrayOk: yes
+    description: 'Template string used for rendering the information text that appear
+      on points. Note that this will override `textinfo`. Variables are inserted using
+      %{variable}, for example "y: %{y}". Numbers are formatted using d3-format''s
+      syntax %{variable:d3-format}, for example "Price: %{y:$.2f}". https://github.com/d3/d3-format/tree/v1.4.5#d3-format
+      for details on the formatting syntax. Dates are formatted using d3-time-format''s
+      syntax %{variable|d3-time-format}, for example "Day: %{2019-01-01|%A}". https://github.com/d3/d3-time-format/tree/v2.2.3#locale_format
+      for details on the date formatting syntax. Every attributes that can be specified
+      per-point (the ones that are `arrayOk: true`) are available. variables `label`,
+      `color`, `value`, `percent` and `text`.'
+    dflt: ''
+    editType: plot
+    valType: string
+  texttemplatesrc:
+    description: Sets the source reference on Chart Studio Cloud for  texttemplate
+      .
+    editType: none
+    valType: string
+  title:
+    editType: plot
+    font:
+      color:
+        arrayOk: yes
+        editType: plot
+        valType: color
+      colorsrc:
+        description: Sets the source reference on Chart Studio Cloud for  color .
+        editType: none
+        valType: string
+      description: Sets the font used for `title`. Note that the title's font used
+        to be set by the now deprecated `titlefont` attribute.
+      editType: plot
+      family:
+        arrayOk: yes
+        description: HTML font family - the typeface that will be applied by the web
+          browser. The web browser will only be able to apply a font if it is available
+          on the system which it operates. Provide multiple font families, separated
+          by commas, to indicate the preference in which to apply fonts if they aren't
+          available on the system. The Chart Studio Cloud (at https://chart-studio.plotly.com
+          or on-premise) generates images on a server, where only a select number
+          of fonts are installed and supported. These include *Arial*, *Balto*, *Courier
+          New*, *Droid Sans*,, *Droid Serif*, *Droid Sans Mono*, *Gravitas One*, *Old
+          Standard TT*, *Open Sans*, *Overpass*, *PT Sans Narrow*, *Raleway*, *Times
+          New Roman*.
+        editType: plot
+        noBlank: yes
+        strict: yes
+        valType: string
+      familysrc:
+        description: Sets the source reference on Chart Studio Cloud for  family .
+        editType: none
+        valType: string
+      role: object
+      size:
+        arrayOk: yes
+        editType: plot
+        min: 1
+        valType: number
+      sizesrc:
+        description: Sets the source reference on Chart Studio Cloud for  size .
+        editType: none
+        valType: string
+    position:
+      description: Specifies the location of the `title`. Note that the title's position
+        used to be set by the now deprecated `titleposition` attribute.
+      editType: plot
+      valType: enumerated
+      values:
+      - top left
+      - top center
+      - top right
+      - middle center
+      - bottom left
+      - bottom center
+      - bottom right
+    role: object
+    text:
+      description: Sets the title of the chart. If it is empty, no title is displayed.
+        Note that before the existence of `title.text`, the title's contents used
+        to be defined as the `title` attribute itself. This behavior has been deprecated.
+      dflt: ''
+      editType: plot
+      valType: string
+  transforms:
+    items:
+      transform:
+        description: 'WARNING: All transforms are deprecated and may be removed from
+          the API in next major version. An array of operations that manipulate the
+          trace data, for example filtering or sorting the data arrays.'
+        editType: calc
+        role: object
+    role: object
+  type: pie
+  uid:
+    description: Assign an id to this trace, Use this to provide object constancy
+      between traces during animations and transitions.
+    editType: plot
+    valType: string
+  uirevision:
+    description: 'Controls persistence of some user-driven changes to the trace: `constraintrange`
+      in `parcoords` traces, as well as some `editable: true` modifications such as
+      `name` and `colorbar.title`. Defaults to `layout.uirevision`. Note that other
+      user-driven trace attribute changes are controlled by `layout` attributes: `trace.visible`
+      is controlled by `layout.legend.uirevision`, `selectedpoints` is controlled
+      by `layout.selectionrevision`, and `colorbar.(x|y)` (accessible with `config:
+      {editable: true}`) is controlled by `layout.editrevision`. Trace changes are
+      tracked by `uid`, which only falls back on trace index if no `uid` is provided.
+      So if your app can add/remove traces before the end of the `data` array, such
+      that the same trace has a different index, you can still preserve user-driven
+      changes if you give each trace a `uid` that stays with it as it moves.'
+    editType: none
+    valType: any
+  values:
+    description: Sets the values of the sectors. If omitted, we count occurrences
+      of each label.
+    editType: calc
+    valType: data_array
+  valuessrc:
+    description: Sets the source reference on Chart Studio Cloud for  values .
+    editType: none
+    valType: string
+  visible:
+    description: Determines whether or not this trace is visible. If *legendonly*,
+      the trace is not drawn, but can appear as a legend item (provided that the legend
+      itself is visible).
+    dflt: yes
+    editType: calc
+    valType: enumerated
+    values:
+    - 'TRUE'
+    - 'FALSE'
+    - legendonly
+categories:
+- pie-like
+- pie
+- showLegend
+layoutAttributes:
+  extendpiecolors:
+    description: If `true`, the pie slice colors (whether given by `piecolorway` or
+      inherited from `colorway`) will be extended to three times its original length
+      by first repeating every color 20% lighter then each color 20% darker. This
+      is intended to reduce the likelihood of reusing the same color when you have
+      many slices, but you can set `false` to disable. Colors provided in the trace,
+      using `marker.colors`, are never extended.
+    dflt: yes
+    editType: calc
+    valType: boolean
+  hiddenlabels:
+    description: hiddenlabels is the funnelarea & pie chart analog of visible:'legendonly'
+      but it can contain many labels, and can simultaneously hide slices from several
+      pies/funnelarea charts
+    editType: calc
+    valType: data_array
+  hiddenlabelssrc:
+    description: Sets the source reference on Chart Studio Cloud for  hiddenlabels
+      .
+    editType: none
+    valType: string
+  piecolorway:
+    description: Sets the default pie slice colors. Defaults to the main `colorway`
+      used for trace colors. If you specify a new list here it can still be extended
+      with lighter and darker colors, see `extendpiecolors`.
+    editType: calc
+    valType: colorlist
+meta:
+  description: A data visualized by the sectors of the pie is set in `values`. The
+    sector labels are set in `labels`. The sector colors are set in `marker.colors`
+type: pie

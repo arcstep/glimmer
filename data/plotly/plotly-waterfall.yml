@@ -1,0 +1,906 @@
+animatable: no
+attributes:
+  alignmentgroup:
+    description: Set several traces linked to the same position axis or matching axes
+      to the same alignmentgroup. This controls whether bars compute their positional
+      range dependently or independently.
+    dflt: ''
+    editType: calc
+    valType: string
+  base:
+    arrayOk: no
+    description: Sets where the bar base is drawn (in position axis units).
+    dflt: ~
+    editType: calc
+    valType: number
+  cliponaxis:
+    description: Determines whether the text nodes are clipped about the subplot axes.
+      To show the text nodes above axis lines and tick labels, make sure to set `xaxis.layer`
+      and `yaxis.layer` to *below traces*.
+    dflt: yes
+    editType: plot
+    valType: boolean
+  connector:
+    editType: plot
+    line:
+      color:
+        description: Sets the line color.
+        dflt: '#444'
+        editType: style
+        valType: color
+      dash:
+        description: Sets the dash style of lines. Set to a dash type string (*solid*,
+          *dot*, *dash*, *longdash*, *dashdot*, or *longdashdot*) or a dash length
+          list in px (eg *5px,10px,2px,2px*).
+        dflt: solid
+        editType: style
+        valType: string
+        values:
+        - solid
+        - dot
+        - dash
+        - longdash
+        - dashdot
+        - longdashdot
+      editType: plot
+      role: object
+      width:
+        description: Sets the line width (in px).
+        dflt: 2
+        editType: plot
+        min: 0
+        valType: number
+    mode:
+      description: Sets the shape of connector lines.
+      dflt: between
+      editType: plot
+      valType: enumerated
+      values:
+      - spanning
+      - between
+    role: object
+    visible:
+      description: 'Determines if connector lines are drawn. '
+      dflt: yes
+      editType: plot
+      valType: boolean
+  constraintext:
+    description: Constrain the size of text inside or outside a bar to be no larger
+      than the bar itself.
+    dflt: both
+    editType: calc
+    valType: enumerated
+    values:
+    - inside
+    - outside
+    - both
+    - none
+  customdata:
+    description: Assigns extra data each datum. This may be useful when listening
+      to hover, click and selection events. Note that, *scatter* traces also appends
+      customdata items in the markers DOM elements
+    editType: calc
+    valType: data_array
+  customdatasrc:
+    description: Sets the source reference on Chart Studio Cloud for  customdata .
+    editType: none
+    valType: string
+  decreasing:
+    editType: style
+    marker:
+      color:
+        arrayOk: no
+        description: Sets the marker color of all decreasing values.
+        editType: style
+        valType: color
+      editType: style
+      line:
+        color:
+          arrayOk: no
+          description: Sets the line color of all decreasing values.
+          editType: style
+          valType: color
+        editType: style
+        role: object
+        width:
+          arrayOk: no
+          description: Sets the line width of all decreasing values.
+          dflt: 0
+          editType: style
+          min: 0
+          valType: number
+      role: object
+    role: object
+  dx:
+    description: Sets the x coordinate step. See `x0` for more info.
+    dflt: 1
+    editType: calc
+    valType: number
+  dy:
+    description: Sets the y coordinate step. See `y0` for more info.
+    dflt: 1
+    editType: calc
+    valType: number
+  hoverinfo:
+    arrayOk: yes
+    description: Determines which trace information appear on hover. If `none` or
+      `skip` are set, no information is displayed upon hovering. But, if `none` is
+      set, click and hover events are still fired.
+    dflt: all
+    editType: none
+    extras:
+    - all
+    - none
+    - skip
+    flags:
+    - name
+    - x
+    - 'y'
+    - text
+    - initial
+    - delta
+    - final
+    valType: flaglist
+  hoverinfosrc:
+    description: Sets the source reference on Chart Studio Cloud for  hoverinfo .
+    editType: none
+    valType: string
+  hoverlabel:
+    align:
+      arrayOk: yes
+      description: Sets the horizontal alignment of the text content within hover
+        label box. Has an effect only if the hover label text spans more two or more
+        lines
+      dflt: auto
+      editType: none
+      valType: enumerated
+      values:
+      - left
+      - right
+      - auto
+    alignsrc:
+      description: Sets the source reference on Chart Studio Cloud for  align .
+      editType: none
+      valType: string
+    bgcolor:
+      arrayOk: yes
+      description: Sets the background color of the hover labels for this trace
+      editType: none
+      valType: color
+    bgcolorsrc:
+      description: Sets the source reference on Chart Studio Cloud for  bgcolor .
+      editType: none
+      valType: string
+    bordercolor:
+      arrayOk: yes
+      description: Sets the border color of the hover labels for this trace.
+      editType: none
+      valType: color
+    bordercolorsrc:
+      description: Sets the source reference on Chart Studio Cloud for  bordercolor
+        .
+      editType: none
+      valType: string
+    editType: none
+    font:
+      color:
+        arrayOk: yes
+        editType: none
+        valType: color
+      colorsrc:
+        description: Sets the source reference on Chart Studio Cloud for  color .
+        editType: none
+        valType: string
+      description: Sets the font used in hover labels.
+      editType: none
+      family:
+        arrayOk: yes
+        description: HTML font family - the typeface that will be applied by the web
+          browser. The web browser will only be able to apply a font if it is available
+          on the system which it operates. Provide multiple font families, separated
+          by commas, to indicate the preference in which to apply fonts if they aren't
+          available on the system. The Chart Studio Cloud (at https://chart-studio.plotly.com
+          or on-premise) generates images on a server, where only a select number
+          of fonts are installed and supported. These include *Arial*, *Balto*, *Courier
+          New*, *Droid Sans*,, *Droid Serif*, *Droid Sans Mono*, *Gravitas One*, *Old
+          Standard TT*, *Open Sans*, *Overpass*, *PT Sans Narrow*, *Raleway*, *Times
+          New Roman*.
+        editType: none
+        noBlank: yes
+        strict: yes
+        valType: string
+      familysrc:
+        description: Sets the source reference on Chart Studio Cloud for  family .
+        editType: none
+        valType: string
+      role: object
+      size:
+        arrayOk: yes
+        editType: none
+        min: 1
+        valType: number
+      sizesrc:
+        description: Sets the source reference on Chart Studio Cloud for  size .
+        editType: none
+        valType: string
+    namelength:
+      arrayOk: yes
+      description: Sets the default length (in number of characters) of the trace
+        name in the hover labels for all traces. -1 shows the whole name regardless
+        of length. 0-3 shows the first 0-3 characters, and an integer >3 will show
+        the whole name if it is less than that many characters, but if it is longer,
+        will truncate to `namelength - 3` characters and add an ellipsis.
+      dflt: 15
+      editType: none
+      min: -1
+      valType: integer
+    namelengthsrc:
+      description: Sets the source reference on Chart Studio Cloud for  namelength
+        .
+      editType: none
+      valType: string
+    role: object
+  hovertemplate:
+    arrayOk: yes
+    description: 'Template string used for rendering the information that appear on
+      hover box. Note that this will override `hoverinfo`. Variables are inserted
+      using %{variable}, for example "y: %{y}" as well as %{xother}, {%_xother}, {%_xother_},
+      {%xother_}. When showing info for several points, *xother* will be added to
+      those with different x positions from the first point. An underscore before
+      or after *(x|y)other* will add a space on that side, only when this field is
+      shown. Numbers are formatted using d3-format''s syntax %{variable:d3-format},
+      for example "Price: %{y:$.2f}". https://github.com/d3/d3-format/tree/v1.4.5#d3-format
+      for details on the formatting syntax. Dates are formatted using d3-time-format''s
+      syntax %{variable|d3-time-format}, for example "Day: %{2019-01-01|%A}". https://github.com/d3/d3-time-format/tree/v2.2.3#locale_format
+      for details on the date formatting syntax. The variables available in `hovertemplate`
+      are the ones emitted as event data described at this link https://plotly.com/javascript/plotlyjs-events/#event-data.
+      Additionally, every attributes that can be specified per-point (the ones that
+      are `arrayOk: true`) are available. variables `initial`, `delta` and `final`.
+      Anything contained in tag `<extra>` is displayed in the secondary box, for example
+      "<extra>{fullData.name}</extra>". To hide the secondary box completely, use
+      an empty tag `<extra></extra>`.'
+    dflt: ''
+    editType: none
+    valType: string
+  hovertemplatesrc:
+    description: Sets the source reference on Chart Studio Cloud for  hovertemplate
+      .
+    editType: none
+    valType: string
+  hovertext:
+    arrayOk: yes
+    description: Sets hover text elements associated with each (x,y) pair. If a single
+      string, the same string appears over all the data points. If an array of string,
+      the items are mapped in order to the this trace's (x,y) coordinates. To be seen,
+      trace `hoverinfo` must contain a *text* flag.
+    dflt: ''
+    editType: style
+    valType: string
+  hovertextsrc:
+    description: Sets the source reference on Chart Studio Cloud for  hovertext .
+    editType: none
+    valType: string
+  ids:
+    description: Assigns id labels to each datum. These ids for object constancy of
+      data points during animation. Should be an array of strings, not numbers or
+      any other type.
+    editType: calc
+    valType: data_array
+  idssrc:
+    description: Sets the source reference on Chart Studio Cloud for  ids .
+    editType: none
+    valType: string
+  increasing:
+    editType: style
+    marker:
+      color:
+        arrayOk: no
+        description: Sets the marker color of all increasing values.
+        editType: style
+        valType: color
+      editType: style
+      line:
+        color:
+          arrayOk: no
+          description: Sets the line color of all increasing values.
+          editType: style
+          valType: color
+        editType: style
+        role: object
+        width:
+          arrayOk: no
+          description: Sets the line width of all increasing values.
+          dflt: 0
+          editType: style
+          min: 0
+          valType: number
+      role: object
+    role: object
+  insidetextanchor:
+    description: Determines if texts are kept at center or start/end points in `textposition`
+      *inside* mode.
+    dflt: end
+    editType: plot
+    valType: enumerated
+    values:
+    - end
+    - middle
+    - start
+  insidetextfont:
+    color:
+      arrayOk: yes
+      editType: style
+      valType: color
+    colorsrc:
+      description: Sets the source reference on Chart Studio Cloud for  color .
+      editType: none
+      valType: string
+    description: Sets the font used for `text` lying inside the bar.
+    editType: calc
+    family:
+      arrayOk: yes
+      description: HTML font family - the typeface that will be applied by the web
+        browser. The web browser will only be able to apply a font if it is available
+        on the system which it operates. Provide multiple font families, separated
+        by commas, to indicate the preference in which to apply fonts if they aren't
+        available on the system. The Chart Studio Cloud (at https://chart-studio.plotly.com
+        or on-premise) generates images on a server, where only a select number of
+        fonts are installed and supported. These include *Arial*, *Balto*, *Courier
+        New*, *Droid Sans*,, *Droid Serif*, *Droid Sans Mono*, *Gravitas One*, *Old
+        Standard TT*, *Open Sans*, *Overpass*, *PT Sans Narrow*, *Raleway*, *Times
+        New Roman*.
+      editType: calc
+      noBlank: yes
+      strict: yes
+      valType: string
+    familysrc:
+      description: Sets the source reference on Chart Studio Cloud for  family .
+      editType: none
+      valType: string
+    role: object
+    size:
+      arrayOk: yes
+      editType: calc
+      min: 1
+      valType: number
+    sizesrc:
+      description: Sets the source reference on Chart Studio Cloud for  size .
+      editType: none
+      valType: string
+  legendgroup:
+    description: Sets the legend group for this trace. Traces part of the same legend
+      group hide/show at the same time when toggling legend items.
+    dflt: ''
+    editType: style
+    valType: string
+  legendgrouptitle:
+    editType: style
+    font:
+      color:
+        editType: style
+        valType: color
+      description: Sets this legend group's title font.
+      editType: style
+      family:
+        description: HTML font family - the typeface that will be applied by the web
+          browser. The web browser will only be able to apply a font if it is available
+          on the system which it operates. Provide multiple font families, separated
+          by commas, to indicate the preference in which to apply fonts if they aren't
+          available on the system. The Chart Studio Cloud (at https://chart-studio.plotly.com
+          or on-premise) generates images on a server, where only a select number
+          of fonts are installed and supported. These include *Arial*, *Balto*, *Courier
+          New*, *Droid Sans*,, *Droid Serif*, *Droid Sans Mono*, *Gravitas One*, *Old
+          Standard TT*, *Open Sans*, *Overpass*, *PT Sans Narrow*, *Raleway*, *Times
+          New Roman*.
+        editType: style
+        noBlank: yes
+        strict: yes
+        valType: string
+      role: object
+      size:
+        editType: style
+        min: 1
+        valType: number
+    role: object
+    text:
+      description: Sets the title of the legend group.
+      dflt: ''
+      editType: style
+      valType: string
+  legendrank:
+    description: Sets the legend rank for this trace. Items and groups with smaller
+      ranks are presented on top/left side while with `*reversed* `legend.traceorder`
+      they are on bottom/right side. The default legendrank is 1000, so that you can
+      use ranks less than 1000 to place certain items before all unranked items, and
+      ranks greater than 1000 to go after all unranked items.
+    dflt: 1000
+    editType: style
+    valType: number
+  measure:
+    description: An array containing types of values. By default the values are considered
+      as 'relative'. However; it is possible to use 'total' to compute the sums. Also
+      'absolute' could be applied to reset the computed total or to declare an initial
+      value where needed.
+    dflt: []
+    editType: calc
+    valType: data_array
+  measuresrc:
+    description: Sets the source reference on Chart Studio Cloud for  measure .
+    editType: none
+    valType: string
+  meta:
+    arrayOk: yes
+    description: Assigns extra meta information associated with this trace that can
+      be used in various text attributes. Attributes such as trace `name`, graph,
+      axis and colorbar `title.text`, annotation `text` `rangeselector`, `updatemenues`
+      and `sliders` `label` text all support `meta`. To access the trace `meta` values
+      in an attribute in the same trace, simply use `%{meta[i]}` where `i` is the
+      index or key of the `meta` item in question. To access trace `meta` in layout
+      attributes, use `%{data[n[.meta[i]}` where `i` is the index or key of the `meta`
+      and `n` is the trace index.
+    editType: plot
+    valType: any
+  metasrc:
+    description: Sets the source reference on Chart Studio Cloud for  meta .
+    editType: none
+    valType: string
+  name:
+    description: Sets the trace name. The trace name appear as the legend item and
+      on hover.
+    editType: style
+    valType: string
+  offset:
+    arrayOk: yes
+    description: Shifts the position where the bar is drawn (in position axis units).
+      In *group* barmode, traces that set *offset* will be excluded and drawn in *overlay*
+      mode instead.
+    dflt: ~
+    editType: calc
+    valType: number
+  offsetgroup:
+    description: Set several traces linked to the same position axis or matching axes
+      to the same offsetgroup where bars of the same position coordinate will line
+      up.
+    dflt: ''
+    editType: calc
+    valType: string
+  offsetsrc:
+    description: Sets the source reference on Chart Studio Cloud for  offset .
+    editType: none
+    valType: string
+  opacity:
+    description: Sets the opacity of the trace.
+    dflt: 1
+    editType: style
+    max: 1
+    min: 0
+    valType: number
+  orientation:
+    description: Sets the orientation of the bars. With *v* (*h*), the value of the
+      each bar spans along the vertical (horizontal).
+    editType: calc+clearAxisTypes
+    valType: enumerated
+    values:
+    - v
+    - h
+  outsidetextfont:
+    color:
+      arrayOk: yes
+      editType: style
+      valType: color
+    colorsrc:
+      description: Sets the source reference on Chart Studio Cloud for  color .
+      editType: none
+      valType: string
+    description: Sets the font used for `text` lying outside the bar.
+    editType: calc
+    family:
+      arrayOk: yes
+      description: HTML font family - the typeface that will be applied by the web
+        browser. The web browser will only be able to apply a font if it is available
+        on the system which it operates. Provide multiple font families, separated
+        by commas, to indicate the preference in which to apply fonts if they aren't
+        available on the system. The Chart Studio Cloud (at https://chart-studio.plotly.com
+        or on-premise) generates images on a server, where only a select number of
+        fonts are installed and supported. These include *Arial*, *Balto*, *Courier
+        New*, *Droid Sans*,, *Droid Serif*, *Droid Sans Mono*, *Gravitas One*, *Old
+        Standard TT*, *Open Sans*, *Overpass*, *PT Sans Narrow*, *Raleway*, *Times
+        New Roman*.
+      editType: calc
+      noBlank: yes
+      strict: yes
+      valType: string
+    familysrc:
+      description: Sets the source reference on Chart Studio Cloud for  family .
+      editType: none
+      valType: string
+    role: object
+    size:
+      arrayOk: yes
+      editType: calc
+      min: 1
+      valType: number
+    sizesrc:
+      description: Sets the source reference on Chart Studio Cloud for  size .
+      editType: none
+      valType: string
+  selectedpoints:
+    description: Array containing integer indices of selected points. Has an effect
+      only for traces that support selections. Note that an empty array means an empty
+      selection where the `unselected` are turned on for all points, whereas, any
+      other non-array values means no selection all where the `selected` and `unselected`
+      styles have no effect.
+    editType: calc
+    valType: any
+  showlegend:
+    description: Determines whether or not an item corresponding to this trace is
+      shown in the legend.
+    dflt: yes
+    editType: style
+    valType: boolean
+  stream:
+    editType: calc
+    maxpoints:
+      description: Sets the maximum number of points to keep on the plots from an
+        incoming stream. If `maxpoints` is set to *50*, only the newest 50 points
+        will be displayed on the plot.
+      dflt: 500
+      editType: calc
+      max: 10000
+      min: 0
+      valType: number
+    role: object
+    token:
+      description: The stream id number links a data trace on a plot with a stream.
+        See https://chart-studio.plotly.com/settings for more details.
+      editType: calc
+      noBlank: yes
+      strict: yes
+      valType: string
+  text:
+    arrayOk: yes
+    description: Sets text elements associated with each (x,y) pair. If a single string,
+      the same string appears over all the data points. If an array of string, the
+      items are mapped in order to the this trace's (x,y) coordinates. If trace `hoverinfo`
+      contains a *text* flag and *hovertext* is not set, these elements will be seen
+      in the hover labels.
+    dflt: ''
+    editType: calc
+    valType: string
+  textangle:
+    description: Sets the angle of the tick labels with respect to the bar. For example,
+      a `tickangle` of -90 draws the tick labels vertically. With *auto* the texts
+      may automatically be rotated to fit with the maximum size in bars.
+    dflt: auto
+    editType: plot
+    valType: angle
+  textfont:
+    color:
+      arrayOk: yes
+      editType: style
+      valType: color
+    colorsrc:
+      description: Sets the source reference on Chart Studio Cloud for  color .
+      editType: none
+      valType: string
+    description: Sets the font used for `text`.
+    editType: calc
+    family:
+      arrayOk: yes
+      description: HTML font family - the typeface that will be applied by the web
+        browser. The web browser will only be able to apply a font if it is available
+        on the system which it operates. Provide multiple font families, separated
+        by commas, to indicate the preference in which to apply fonts if they aren't
+        available on the system. The Chart Studio Cloud (at https://chart-studio.plotly.com
+        or on-premise) generates images on a server, where only a select number of
+        fonts are installed and supported. These include *Arial*, *Balto*, *Courier
+        New*, *Droid Sans*,, *Droid Serif*, *Droid Sans Mono*, *Gravitas One*, *Old
+        Standard TT*, *Open Sans*, *Overpass*, *PT Sans Narrow*, *Raleway*, *Times
+        New Roman*.
+      editType: calc
+      noBlank: yes
+      strict: yes
+      valType: string
+    familysrc:
+      description: Sets the source reference on Chart Studio Cloud for  family .
+      editType: none
+      valType: string
+    role: object
+    size:
+      arrayOk: yes
+      editType: calc
+      min: 1
+      valType: number
+    sizesrc:
+      description: Sets the source reference on Chart Studio Cloud for  size .
+      editType: none
+      valType: string
+  textinfo:
+    arrayOk: no
+    description: Determines which trace information appear on the graph. In the case
+      of having multiple waterfalls, totals are computed separately (per trace).
+    editType: plot
+    extras: none
+    flags:
+    - label
+    - text
+    - initial
+    - delta
+    - final
+    valType: flaglist
+  textposition:
+    arrayOk: yes
+    description: Specifies the location of the `text`. *inside* positions `text` inside,
+      next to the bar end (rotated and scaled if needed). *outside* positions `text`
+      outside, next to the bar end (scaled if needed), unless there is another bar
+      stacked on this one, then the text gets pushed inside. *auto* tries to position
+      `text` inside the bar, but if the bar is too small and no bar is stacked on
+      this one the text is moved outside. If *none*, no text appears.
+    dflt: auto
+    editType: calc
+    valType: enumerated
+    values:
+    - inside
+    - outside
+    - auto
+    - none
+  textpositionsrc:
+    description: Sets the source reference on Chart Studio Cloud for  textposition
+      .
+    editType: none
+    valType: string
+  textsrc:
+    description: Sets the source reference on Chart Studio Cloud for  text .
+    editType: none
+    valType: string
+  texttemplate:
+    arrayOk: yes
+    description: 'Template string used for rendering the information text that appear
+      on points. Note that this will override `textinfo`. Variables are inserted using
+      %{variable}, for example "y: %{y}". Numbers are formatted using d3-format''s
+      syntax %{variable:d3-format}, for example "Price: %{y:$.2f}". https://github.com/d3/d3-format/tree/v1.4.5#d3-format
+      for details on the formatting syntax. Dates are formatted using d3-time-format''s
+      syntax %{variable|d3-time-format}, for example "Day: %{2019-01-01|%A}". https://github.com/d3/d3-time-format/tree/v2.2.3#locale_format
+      for details on the date formatting syntax. Every attributes that can be specified
+      per-point (the ones that are `arrayOk: true`) are available. variables `initial`,
+      `delta`, `final` and `label`.'
+    dflt: ''
+    editType: plot
+    valType: string
+  texttemplatesrc:
+    description: Sets the source reference on Chart Studio Cloud for  texttemplate
+      .
+    editType: none
+    valType: string
+  totals:
+    editType: style
+    marker:
+      color:
+        arrayOk: no
+        description: Sets the marker color of all intermediate sums and total values.
+        editType: style
+        valType: color
+      editType: style
+      line:
+        color:
+          arrayOk: no
+          description: Sets the line color of all intermediate sums and total values.
+          editType: style
+          valType: color
+        editType: style
+        role: object
+        width:
+          arrayOk: no
+          description: Sets the line width of all intermediate sums and total values.
+          dflt: 0
+          editType: style
+          min: 0
+          valType: number
+      role: object
+    role: object
+  transforms:
+    items:
+      transform:
+        description: 'WARNING: All transforms are deprecated and may be removed from
+          the API in next major version. An array of operations that manipulate the
+          trace data, for example filtering or sorting the data arrays.'
+        editType: calc
+        role: object
+    role: object
+  type: waterfall
+  uid:
+    description: Assign an id to this trace, Use this to provide object constancy
+      between traces during animations and transitions.
+    editType: plot
+    valType: string
+  uirevision:
+    description: 'Controls persistence of some user-driven changes to the trace: `constraintrange`
+      in `parcoords` traces, as well as some `editable: true` modifications such as
+      `name` and `colorbar.title`. Defaults to `layout.uirevision`. Note that other
+      user-driven trace attribute changes are controlled by `layout` attributes: `trace.visible`
+      is controlled by `layout.legend.uirevision`, `selectedpoints` is controlled
+      by `layout.selectionrevision`, and `colorbar.(x|y)` (accessible with `config:
+      {editable: true}`) is controlled by `layout.editrevision`. Trace changes are
+      tracked by `uid`, which only falls back on trace index if no `uid` is provided.
+      So if your app can add/remove traces before the end of the `data` array, such
+      that the same trace has a different index, you can still preserve user-driven
+      changes if you give each trace a `uid` that stays with it as it moves.'
+    editType: none
+    valType: any
+  visible:
+    description: Determines whether or not this trace is visible. If *legendonly*,
+      the trace is not drawn, but can appear as a legend item (provided that the legend
+      itself is visible).
+    dflt: yes
+    editType: calc
+    valType: enumerated
+    values:
+    - 'TRUE'
+    - 'FALSE'
+    - legendonly
+  width:
+    arrayOk: yes
+    description: Sets the bar width (in position axis units).
+    dflt: ~
+    editType: calc
+    min: 0
+    valType: number
+  widthsrc:
+    description: Sets the source reference on Chart Studio Cloud for  width .
+    editType: none
+    valType: string
+  x:
+    description: Sets the x coordinates.
+    editType: calc+clearAxisTypes
+    valType: data_array
+  x0:
+    description: Alternate to `x`. Builds a linear space of x coordinates. Use with
+      `dx` where `x0` is the starting coordinate and `dx` the step.
+    dflt: 0
+    editType: calc+clearAxisTypes
+    valType: any
+  xaxis:
+    description: Sets a reference between this trace's x coordinates and a 2D cartesian
+      x axis. If *x* (the default value), the x coordinates refer to `layout.xaxis`.
+      If *x2*, the x coordinates refer to `layout.xaxis2`, and so on.
+    dflt: x
+    editType: calc+clearAxisTypes
+    valType: subplotid
+  xhoverformat:
+    description: 'Sets the hover text formatting rulefor `x`  using d3 formatting
+      mini-languages which are very similar to those in Python. For numbers, see:
+      https://github.com/d3/d3-format/tree/v1.4.5#d3-format. And for dates see: https://github.com/d3/d3-time-format/tree/v2.2.3#locale_format.
+      We add two items to d3''s date formatter: *%h* for half of the year as a decimal
+      number as well as *%{n}f* for fractional seconds with n digits. For example,
+      *2016-10-13 09:15:23.456* with tickformat *%H~%M~%S.%2f* would display *09~15~23.46*By
+      default the values are formatted using `xaxis.hoverformat`.'
+    dflt: ''
+    editType: none
+    valType: string
+  xperiod:
+    description: Only relevant when the axis `type` is *date*. Sets the period positioning
+      in milliseconds or *M<n>* on the x axis. Special values in the form of *M<n>*
+      could be used to declare the number of months. In this case `n` must be a positive
+      integer.
+    dflt: 0
+    editType: calc
+    valType: any
+  xperiod0:
+    description: Only relevant when the axis `type` is *date*. Sets the base for period
+      positioning in milliseconds or date string on the x0 axis. When `x0period` is
+      round number of weeks, the `x0period0` by default would be on a Sunday i.e.
+      2000-01-02, otherwise it would be at 2000-01-01.
+    editType: calc
+    valType: any
+  xperiodalignment:
+    description: Only relevant when the axis `type` is *date*. Sets the alignment
+      of data points on the x axis.
+    dflt: middle
+    editType: calc
+    valType: enumerated
+    values:
+    - start
+    - middle
+    - end
+  xsrc:
+    description: Sets the source reference on Chart Studio Cloud for  x .
+    editType: none
+    valType: string
+  'y':
+    description: Sets the y coordinates.
+    editType: calc+clearAxisTypes
+    valType: data_array
+  y0:
+    description: Alternate to `y`. Builds a linear space of y coordinates. Use with
+      `dy` where `y0` is the starting coordinate and `dy` the step.
+    dflt: 0
+    editType: calc+clearAxisTypes
+    valType: any
+  yaxis:
+    description: Sets a reference between this trace's y coordinates and a 2D cartesian
+      y axis. If *y* (the default value), the y coordinates refer to `layout.yaxis`.
+      If *y2*, the y coordinates refer to `layout.yaxis2`, and so on.
+    dflt: 'y'
+    editType: calc+clearAxisTypes
+    valType: subplotid
+  yhoverformat:
+    description: 'Sets the hover text formatting rulefor `y`  using d3 formatting
+      mini-languages which are very similar to those in Python. For numbers, see:
+      https://github.com/d3/d3-format/tree/v1.4.5#d3-format. And for dates see: https://github.com/d3/d3-time-format/tree/v2.2.3#locale_format.
+      We add two items to d3''s date formatter: *%h* for half of the year as a decimal
+      number as well as *%{n}f* for fractional seconds with n digits. For example,
+      *2016-10-13 09:15:23.456* with tickformat *%H~%M~%S.%2f* would display *09~15~23.46*By
+      default the values are formatted using `yaxis.hoverformat`.'
+    dflt: ''
+    editType: none
+    valType: string
+  yperiod:
+    description: Only relevant when the axis `type` is *date*. Sets the period positioning
+      in milliseconds or *M<n>* on the y axis. Special values in the form of *M<n>*
+      could be used to declare the number of months. In this case `n` must be a positive
+      integer.
+    dflt: 0
+    editType: calc
+    valType: any
+  yperiod0:
+    description: Only relevant when the axis `type` is *date*. Sets the base for period
+      positioning in milliseconds or date string on the y0 axis. When `y0period` is
+      round number of weeks, the `y0period0` by default would be on a Sunday i.e.
+      2000-01-02, otherwise it would be at 2000-01-01.
+    editType: calc
+    valType: any
+  yperiodalignment:
+    description: Only relevant when the axis `type` is *date*. Sets the alignment
+      of data points on the y axis.
+    dflt: middle
+    editType: calc
+    valType: enumerated
+    values:
+    - start
+    - middle
+    - end
+  ysrc:
+    description: Sets the source reference on Chart Studio Cloud for  y .
+    editType: none
+    valType: string
+categories:
+- bar-like
+- cartesian
+- svg
+- oriented
+- showLegend
+- zoomScale
+layoutAttributes:
+  waterfallgap:
+    description: Sets the gap (in plot fraction) between bars of adjacent location
+      coordinates.
+    editType: calc
+    max: 1
+    min: 0
+    valType: number
+  waterfallgroupgap:
+    description: Sets the gap (in plot fraction) between bars of the same location
+      coordinate.
+    dflt: 0
+    editType: calc
+    max: 1
+    min: 0
+    valType: number
+  waterfallmode:
+    description: Determines how bars at the same location coordinate are displayed
+      on the graph. With *group*, the bars are plotted next to one another centered
+      around the shared location. With *overlay*, the bars are plotted over one another,
+      you might need to an *opacity* to see multiple bars.
+    dflt: group
+    editType: calc
+    valType: enumerated
+    values:
+    - group
+    - overlay
+meta:
+  description: Draws waterfall trace which is useful graph to displays the contribution
+    of various elements (either positive or negative) in a bar chart. The data visualized
+    by the span of the bars is set in `y` if `orientation` is set th *v* (the default)
+    and the labels are set in `x`. By setting `orientation` to *h*, the roles are
+    interchanged.
+type: waterfall

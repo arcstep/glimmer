@@ -34,6 +34,13 @@
   if (rlang::is_empty(a)) b else a
 }
 
+#' @title 遇到非空值填充默认值
+#' @family utils function
+#' @export
+`%not-empty%` <- function(a, b) {
+  if (!rlang::is_empty(a)) b else a
+}
+
 #' @title 删除文件夹
 #' @family utils function
 #' @export
