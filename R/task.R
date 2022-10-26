@@ -328,7 +328,7 @@ task_run0 <- function(taskItems, withEnv, runMode, ...) {
         names(envParam) |> purrr::walk(function(i) {
           assign(i, params[[i]], envir = TaskRun.ENV)
         })
-        ## 按照gali函数的规则赋值输入、输出
+        ## 按照预定义任务函数的规则赋值输入、输出
         gali <- get_funs_gali(matchName = paste0("^", script, "$"), funs = script)
         if(nrow(gali) == 1) {
           if(gali$input != "-" && gali$input %nin% names(inputAsign)) {

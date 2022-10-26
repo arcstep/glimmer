@@ -1,3 +1,6 @@
+##
+plotly_schema <- readRDS("data/plotly/plotly-schema.rds")
+
 ## 加载plotly配置
 plotly_schema_from_yaml <- function(path = "data/plotly") {
   myschema <- list(layout = list(), traces = list(), config = list())
@@ -10,11 +13,7 @@ plotly_schema_from_yaml <- function(path = "data/plotly") {
   myschema |> saveRDS(fs::path_join(c(path, "plotly-schema.rds")))
 }
 
-##
-plotly_schema <- readRDS("data/plotly/plotly-schema.rds")
-
 ## 生成plotly配置的yaml文件
-#' @export
 plotly_schema_to_yaml <- function(path = "data/plotly") {
   myschema <- plotly::schema()
   fs::dir_create(path)
@@ -66,22 +65,22 @@ get_params_plot <- function(entry = "plotly_schema", paramName = NULL, v = NULL,
 #' @title 初始化plotly
 #' @family lib-plotly functions
 #' @export
-gali_plot <- function(`@ds`) {
-  `@ds` |> plot_ly()
+plot0 <- function(d, ...) {
+  d |> plotly::plot_ly(...)
 }
 
 #' @title 绘制坐标轴
 #' @family lib-plotly functions
 #' @export
-gali_plot_trace <- function(`@plot`, type, ...) {
-  
+plot_trace <- function(plot, type, ...) {
+  plot |> plotly::add_trace(type = type, ...)
 }
 
 #' @title 绘制坐标轴
 #' @family lib-plotly functions
 #' @export
-gali_plot_layout <- function(`@plot`, ...) {
-  
+plot_layout <- function(plot, ...) {
+  plot |> plotly::layout(type = type, ...)
 }
 
 
@@ -90,10 +89,10 @@ gali_plot_layout <- function(`@plot`, ...) {
 #' mtcars |> gali_plot_hist(e_x = "mpg")
 #' @family lib-plotly functions
 #' @export
-gali_plot_hist <- function(`@ds`, e_x, c_color = "brown", s_xtitle = NULL, s_ytitle = NULL) {
+plot_hist <- function(d, e_x, c_color = "brown", s_xtitle = NULL, s_ytitle = NULL) {
   plot_ly(x = as.formula(paste("~", e_x))) |>
     add_histogram(
-      data = `@ds` |> collect(),
+      data = d |> collect(),
       color = I(c_color),
       name = paste(e_x, "")) |>
     layout(
@@ -108,21 +107,10 @@ gali_plot_hist <- function(`@ds`, e_x, c_color = "brown", s_xtitle = NULL, s_yti
 #' mtcars |>
 #'  plot_marker(e_x = "mpg", e_y = "disp", f1_alpha = 0.6)
 #' @export
-gali_plot_marker <- function(`@ds`, e_x, e_y, f1_alpha = 0.2, s_name = NULL) {
-  `@ds` |>
+plot_marker <- function(d, e_x, e_y, f1_alpha = 0.2, s_name = NULL) {
+  d |>
     plot_ly(x = as.formula(paste("~", e_x)), y = as.formula(paste("~", e_y))) |>
     add_markers(alpha = f1_alpha, name = s_name %empty% "alpha")
-}
-
-#' @title 增加trace
-#' @family lib-plotly functions
-#' @export
-gali_trace_markers <- function(`@plot`, e_x, e_y, e_mode = 'lines+markers', s_name = NULL) {
-  `@plot` |>
-    add_trace(x = as.formula(paste("~", e_x)),
-                y = as.formula(paste("~", e_y)),
-                mode = e_mode,
-                name = s_name %empty% e_mode)
 }
 
 #' @title 柱图
@@ -136,8 +124,8 @@ gali_trace_markers <- function(`@plot`, e_x, e_y, e_mode = 'lines+markers', s_na
 #'   mutate(class = forcats::fct_reorder(class, n, .desc = TRUE)) |>
 #'   plot_bar(x = "class", y = "n")
 #' @export
-gali_plot_bar <- function(`@ds`, e_x, e_y) {
-  `@ds` |>
+plot_bar <- function(d, e_x, e_y) {
+  d |>
     plot_ly() |>
     add_bars(x = as.formula(paste("~", e_x)), y = as.formula(paste("~", e_y)))
 }
@@ -150,10 +138,10 @@ gali_plot_bar <- function(`@ds`, e_x, e_y) {
 #' 
 #' @family lib-plotly functions
 #' @export
-gali_plot_line <- function(
-    `@ds`, e_x, e_y,
+plot_line <- function(
+    d, e_x, e_y,
     e_fillcolor = "red", c_linecolor = "rgb(205, 12, 24)", e_shape = "spline") {
-  `@ds` |>
+  d |>
     plot_ly(x = as.formula(paste("~", e_x)), y = as.formula(paste("~", e_y))) |>
     add_lines(
       fillcolor = I(e_fillcolor),
@@ -172,10 +160,10 @@ gali_plot_line <- function(
 #'   gali_plot_area(e_x = "cyl", e_y = "displ")
 #'   
 #' @export
-gali_plot_area <- function(
-    `@ds`, e_x, e_y,
+plot_area <- function(
+    d, e_x, e_y,
     c_fill = "tozeroy", c_color = "red", e_shape = "spline") {
-  `@ds` |>
+  d |>
     plot_ly() |>
     add_trace(
       x = as.formula(paste("~", e_x)),
@@ -192,8 +180,8 @@ gali_plot_area <- function(
 #' mtcars |> gali_plot_pie(e_value = "cyl")
 #' @family lib-plotly functions
 #' @export
-gali_plot_pie <- function(`@ds`, e_value, s_label = NULL, f1_hole = 0.4) {
-  `@ds` |> 
+plot_pie <- function(d, e_value, s_label = NULL, f1_hole = 0.4) {
+  d |> 
     plot_ly() |>
     add_pie(
       values = as.formula(paste("~", e_value)),
@@ -207,8 +195,8 @@ gali_plot_pie <- function(`@ds`, e_value, s_label = NULL, f1_hole = 0.4) {
 #' mtcars |> count(cyl) |>
 #'  gali_plot_pie2(e_value = "n", pull = c(0.1, 0, 0))
 #' @export
-gali_plot_pie2 <- function(`@ds`, e_value, s_label = NULL, f1s_pull = 0, f1_hole = 0.25) {
-  `@ds` |> 
+plot_pie2 <- function(d, e_value, s_label = NULL, f1s_pull = 0, f1_hole = 0.25) {
+  d |> 
     plot_ly() |>
     add_trace(
       type = "pie",
@@ -228,8 +216,8 @@ gali_plot_pie2 <- function(`@ds`, e_value, s_label = NULL, f1s_pull = 0, f1_hole
 #'   
 #' @family lib-plotly functions
 #' @export
-gali_plot_barpolar <- function(`@ds`, e_theta, e_r, c_color = NULL, i_bargap = 0, f1_hole = 0.05, e_direction = "clockwise") {
-  `@ds` |> 
+plot_barpolar <- function(d, e_theta, e_r, c_color = NULL, i_bargap = 0, f1_hole = 0.05, e_direction = "clockwise") {
+  d |> 
     plot_ly() |>
     add_trace(
       type = "barpolar",
