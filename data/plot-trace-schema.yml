@@ -1,0 +1,888 @@
+bar:
+  attr:
+    x:
+      anim: yes
+      description: Sets the x coordinates.
+      editType: calc+clearAxisTypes
+      valType: data_array
+    'y':
+      anim: yes
+      description: Sets the y coordinates.
+      editType: calc+clearAxisTypes
+      valType: data_array
+    text:
+      arrayOk: yes
+      description: Sets text elements associated with each (x,y) pair. If a single
+        string, the same string appears over all the data points. If an array of string,
+        the items are mapped in order to the this trace's (x,y) coordinates. If trace
+        `hoverinfo` contains a *text* flag and *hovertext* is not set, these elements
+        will be seen in the hover labels.
+      dflt: ''
+      editType: calc
+      valType: string
+    textposition:
+      arrayOk: yes
+      description: Specifies the location of the `text`. *inside* positions `text`
+        inside, next to the bar end (rotated and scaled if needed). *outside* positions
+        `text` outside, next to the bar end (scaled if needed), unless there is another
+        bar stacked on this one, then the text gets pushed inside. *auto* tries to
+        position `text` inside the bar, but if the bar is too small and no bar is
+        stacked on this one the text is moved outside. If *none*, no text appears.
+      dflt: auto
+      editType: calc
+      valType: enumerated
+      values:
+      - inside
+      - outside
+      - auto
+      - none
+    name:
+      description: Sets the trace name. The trace name appear as the legend item and
+        on hover.
+      editType: style
+      valType: string
+    marker:
+      valType: object
+  layoutAttr:
+    bargap:
+      description: Sets the gap (in plot fraction) between bars of adjacent location
+        coordinates.
+      editType: calc
+      max: 1
+      min: 0
+      valType: number
+    barmode:
+      description: Determines how bars at the same location coordinate are displayed
+        on the graph. With *stack*, the bars are stacked on top of one another With
+        *relative*, the bars are stacked on top of one another, with negative values
+        below the axis, positive values above With *group*, the bars are plotted next
+        to one another centered around the shared location. With *overlay*, the bars
+        are plotted over one another, you might need to an *opacity* to see multiple
+        bars.
+      dflt: group
+      editType: calc
+      valType: enumerated
+      values:
+      - stack
+      - group
+      - overlay
+      - relative
+barpolar:
+  attr:
+    r:
+      description: Sets the radial coordinates
+      editType: calc+clearAxisTypes
+      valType: data_array
+    theta:
+      description: Sets the angular coordinates
+      editType: calc+clearAxisTypes
+      valType: data_array
+    name:
+      description: Sets the trace name. The trace name appear as the legend item and
+        on hover.
+      editType: style
+      valType: string
+  layoutAttr:
+    bargap:
+      description: Sets the gap between bars of adjacent location coordinates. Values
+        are unitless, they represent fractions of the minimum difference in bar positions
+        in the data.
+      dflt: 0.1
+      editType: calc
+      max: 1
+      min: 0
+      valType: number
+    barmode:
+      description: Determines how bars at the same location coordinate are displayed
+        on the graph. With *stack*, the bars are stacked on top of one another With
+        *overlay*, the bars are plotted over one another, you might need to an *opacity*
+        to see multiple bars.
+      dflt: stack
+      editType: calc
+      valType: enumerated
+      values:
+      - stack
+      - overlay
+box:
+  attr:
+    x:
+      description: Sets the x sample data or coordinates. See overview for more info.
+      editType: calc+clearAxisTypes
+      valType: data_array
+    'y':
+      description: Sets the y sample data or coordinates. See overview for more info.
+      editType: calc+clearAxisTypes
+      valType: data_array
+    jitter:
+      description: Sets the amount of jitter in the sample points drawn. If *0*, the
+        sample points align along the distribution axis. If *1*, the sample points
+        are drawn in a random jitter of width equal to the width of the box(es).
+      editType: calc
+      max: 1
+      min: 0
+      valType: number
+    boxpoints:
+      description: If *outliers*, only the sample points lying outside the whiskers
+        are shown If *suspectedoutliers*, the outlier points are shown and points
+        either less than 4*Q1-3*Q3 or greater than 4*Q3-3*Q1 are highlighted (see
+        `outliercolor`) If *all*, all sample points are shown If *false*, only the
+        box(es) are shown with no sample points Defaults to *suspectedoutliers* when
+        `marker.outliercolor` or `marker.line.outliercolor` is set. Defaults to *all*
+        under the q1/median/q3 signature. Otherwise defaults to *outliers*.
+      editType: calc
+      valType: enumerated
+      values:
+      - all
+      - outliers
+      - suspectedoutliers
+      - 'FALSE'
+    name:
+      description: Sets the trace name. The trace name appear as the legend item and
+        on hover. For box traces, the name will also be used for the position coordinate,
+        if `x` and `x0` (`y` and `y0` if horizontal) are missing and the position
+        axis is categorical
+      editType: calc+clearAxisTypes
+      valType: string
+    marker:
+      valType: object
+    line:
+      valType: object
+carpet:
+  attr:
+    a:
+      description: An array containing values of the first parameter value
+      editType: calc
+      valType: data_array
+    b:
+      description: A two dimensional array of y coordinates at each carpet point.
+      editType: calc
+      valType: data_array
+    'y':
+      description: A two dimensional array of y coordinates at each carpet point.
+      editType: calc+clearAxisTypes
+      valType: data_array
+    color:
+      description: 'Sets default for all colors associated with this axis all at once:
+        line, font, tick, and grid colors. Grid color is lightened by blending this
+        with the plot background Individual pieces can override this.'
+      dflt: '#444'
+      editType: plot
+      valType: color
+    name:
+      description: Sets the trace name. The trace name appear as the legend item and
+        on hover.
+      editType: style
+      valType: string
+contour:
+  attr:
+    x:
+      description: Sets the x coordinates.
+      editType: calc+clearAxisTypes
+      impliedEdits:
+        xtype: array
+      valType: data_array
+    'y':
+      description: Sets the y coordinates.
+      editType: calc+clearAxisTypes
+      impliedEdits:
+        ytype: array
+      valType: data_array
+    z:
+      description: Sets the z data.
+      editType: calc
+      valType: data_array
+    colorscale:
+      description: 'Sets the colorscale. The colorscale must be an array containing
+        arrays mapping a normalized value to an rgb, rgba, hex, hsl, hsv, or named
+        color string. At minimum, a mapping for the lowest (0) and highest (1) values
+        are required. For example, `[[0, ''rgb(0,0,255)''], [1, ''rgb(255,0,0)'']]`.
+        To control the bounds of the colorscale in color space, use`zmin` and `zmax`.
+        Alternatively, `colorscale` may be a palette name string of the following
+        list: Blackbody,Bluered,Blues,Cividis,Earth,Electric,Greens,Greys,Hot,Jet,Picnic,Portland,Rainbow,RdBu,Reds,Viridis,YlGnBu,YlOrRd.'
+      dflt: ~
+      editType: calc
+      impliedEdits:
+        autocolorscale: no
+      valType: colorscale
+    name:
+      description: Sets the trace name. The trace name appear as the legend item and
+        on hover.
+      editType: style
+      valType: string
+    contours:
+      valType: object
+funnel:
+  attr:
+    x:
+      description: Sets the x coordinates.
+      editType: calc+clearAxisTypes
+      valType: data_array
+    'y':
+      description: Sets the y coordinates.
+      editType: calc+clearAxisTypes
+      valType: data_array
+    orientation:
+      description: Sets the orientation of the funnels. With *v* (*h*), the value
+        of the each bar spans along the vertical (horizontal). By default funnels
+        are tend to be oriented horizontally; unless only *y* array is presented or
+        orientation is set to *v*. Also regarding graphs including only 'horizontal'
+        funnels, *autorange* on the *y-axis* are set to *reversed*.
+      editType: calc+clearAxisTypes
+      valType: enumerated
+      values:
+      - v
+      - h
+    textposition:
+      arrayOk: yes
+      description: Specifies the location of the `text`. *inside* positions `text`
+        inside, next to the bar end (rotated and scaled if needed). *outside* positions
+        `text` outside, next to the bar end (scaled if needed), unless there is another
+        bar stacked on this one, then the text gets pushed inside. *auto* tries to
+        position `text` inside the bar, but if the bar is too small and no bar is
+        stacked on this one the text is moved outside. If *none*, no text appears.
+      dflt: auto
+      editType: calc
+      valType: enumerated
+      values:
+      - inside
+      - outside
+      - auto
+      - none
+    textinfo:
+      arrayOk: no
+      description: Determines which trace information appear on the graph. In the
+        case of having multiple funnels, percentages & totals are computed separately
+        (per trace).
+      editType: plot
+      extras: none
+      flags:
+      - label
+      - text
+      - percent initial
+      - percent previous
+      - percent total
+      - value
+      valType: flaglist
+    opacity:
+      description: Sets the opacity of the trace.
+      dflt: 1
+      editType: style
+      max: 1
+      min: 0
+      valType: number
+    name:
+      description: Sets the trace name. The trace name appear as the legend item and
+        on hover.
+      editType: style
+      valType: string
+    marker:
+      valType: object
+    connector:
+      valType: object
+funnelarea:
+  attr:
+    textposition:
+      arrayOk: yes
+      description: Specifies the location of the `textinfo`.
+      dflt: inside
+      editType: plot
+      valType: enumerated
+      values:
+      - inside
+      - none
+    textinfo:
+      description: Determines which trace information appear on the graph.
+      editType: calc
+      extras: none
+      flags:
+      - label
+      - text
+      - value
+      - percent
+      valType: flaglist
+    opacity:
+      description: Sets the opacity of the trace.
+      dflt: 1
+      editType: style
+      max: 1
+      min: 0
+      valType: number
+    name:
+      description: Sets the trace name. The trace name appear as the legend item and
+        on hover.
+      editType: style
+      valType: string
+    scalegroup:
+      description: If there are multiple funnelareas that should be sized according
+        to their totals, link them by providing a non-empty group id here shared by
+        every trace in the same group.
+      dflt: ''
+      editType: calc
+      valType: string
+    marker:
+      valType: object
+heatmap:
+  attr:
+    x:
+      description: Sets the x coordinates.
+      editType: calc+clearAxisTypes
+      impliedEdits:
+        xtype: array
+      valType: data_array
+    'y':
+      description: Sets the y coordinates.
+      editType: calc+clearAxisTypes
+      impliedEdits:
+        ytype: array
+      valType: data_array
+    z:
+      description: Sets the z data.
+      editType: calc
+      valType: data_array
+    colorscale:
+      description: 'Sets the colorscale. The colorscale must be an array containing
+        arrays mapping a normalized value to an rgb, rgba, hex, hsl, hsv, or named
+        color string. At minimum, a mapping for the lowest (0) and highest (1) values
+        are required. For example, `[[0, ''rgb(0,0,255)''], [1, ''rgb(255,0,0)'']]`.
+        To control the bounds of the colorscale in color space, use`zmin` and `zmax`.
+        Alternatively, `colorscale` may be a palette name string of the following
+        list: Blackbody,Bluered,Blues,Cividis,Earth,Electric,Greens,Greys,Hot,Jet,Picnic,Portland,Rainbow,RdBu,Reds,Viridis,YlGnBu,YlOrRd.'
+      dflt: ~
+      editType: calc
+      impliedEdits:
+        autocolorscale: no
+      valType: colorscale
+    name:
+      description: Sets the trace name. The trace name appear as the legend item and
+        on hover.
+      editType: style
+      valType: string
+histogram:
+  attr:
+    x:
+      description: Sets the sample data to be binned on the x axis.
+      editType: calc+clearAxisTypes
+      valType: data_array
+    'y':
+      description: Sets the sample data to be binned on the y axis.
+      editType: calc+clearAxisTypes
+      valType: data_array
+    histfunc:
+      description: Specifies the binning function used for this histogram trace. If
+        *count*, the histogram values are computed by counting the number of values
+        lying inside each bin. If *sum*, *avg*, *min*, *max*, the histogram values
+        are computed using the sum, the average, the minimum or the maximum of the
+        values lying inside each bin respectively.
+      dflt: count
+      editType: calc
+      valType: enumerated
+      values:
+      - count
+      - sum
+      - avg
+      - min
+      - max
+    name:
+      description: Sets the trace name. The trace name appear as the legend item and
+        on hover.
+      editType: style
+      valType: string
+  layoutAttr:
+    barmode:
+      description: Determines how bars at the same location coordinate are displayed
+        on the graph. With *stack*, the bars are stacked on top of one another With
+        *relative*, the bars are stacked on top of one another, with negative values
+        below the axis, positive values above With *group*, the bars are plotted next
+        to one another centered around the shared location. With *overlay*, the bars
+        are plotted over one another, you might need to an *opacity* to see multiple
+        bars.
+      dflt: group
+      editType: calc
+      valType: enumerated
+      values:
+      - stack
+      - group
+      - overlay
+      - relative
+    bargap:
+      description: Sets the gap (in plot fraction) between bars of adjacent location
+        coordinates.
+      editType: calc
+      max: 1
+      min: 0
+      valType: number
+histogram2d:
+  attr:
+    x:
+      description: Sets the sample data to be binned on the x axis.
+      editType: calc+clearAxisTypes
+      valType: data_array
+    'y':
+      description: Sets the sample data to be binned on the y axis.
+      editType: calc+clearAxisTypes
+      valType: data_array
+    histfunc:
+      description: Specifies the binning function used for this histogram trace. If
+        *count*, the histogram values are computed by counting the number of values
+        lying inside each bin. If *sum*, *avg*, *min*, *max*, the histogram values
+        are computed using the sum, the average, the minimum or the maximum of the
+        values lying inside each bin respectively.
+      dflt: count
+      editType: calc
+      valType: enumerated
+      values:
+      - count
+      - sum
+      - avg
+      - min
+      - max
+    name:
+      description: Sets the trace name. The trace name appear as the legend item and
+        on hover.
+      editType: style
+      valType: string
+histogram2dcontour:
+  attr:
+    x:
+      description: Sets the sample data to be binned on the x axis.
+      editType: calc+clearAxisTypes
+      valType: data_array
+    'y':
+      description: Sets the sample data to be binned on the y axis.
+      editType: calc+clearAxisTypes
+      valType: data_array
+    histfunc:
+      description: Specifies the binning function used for this histogram trace. If
+        *count*, the histogram values are computed by counting the number of values
+        lying inside each bin. If *sum*, *avg*, *min*, *max*, the histogram values
+        are computed using the sum, the average, the minimum or the maximum of the
+        values lying inside each bin respectively.
+      dflt: count
+      editType: calc
+      valType: enumerated
+      values:
+      - count
+      - sum
+      - avg
+      - min
+      - max
+    name:
+      description: Sets the trace name. The trace name appear as the legend item and
+        on hover.
+      editType: style
+      valType: string
+    contours:
+      valType: object
+icicle:
+  attr:
+    labels:
+      description: Sets the labels of each of the sectors.
+      editType: calc
+      valType: data_array
+    parents:
+      description: Sets the parent sectors for each of the sectors. Empty string items
+        '' are understood to reference the root node in the hierarchy. If `ids` is
+        filled, `parents` items are understood to be "ids" themselves. When `ids`
+        is not set, plotly attempts to find matching items in `labels`, but beware
+        they must be unique.
+      editType: calc
+      valType: data_array
+    ids:
+      anim: yes
+      description: Assigns id labels to each datum. These ids for object constancy
+        of data points during animation. Should be an array of strings, not numbers
+        or any other type.
+      editType: calc
+      valType: data_array
+    name:
+      description: Sets the trace name. The trace name appear as the legend item and
+        on hover.
+      editType: style
+      valType: string
+indicator:
+  attr:
+    value:
+      anim: yes
+      description: Sets the number to be displayed.
+      editType: calc
+      valType: number
+    mode:
+      description: Determines how the value is displayed on the graph. `number` displays
+        the value numerically in text. `delta` displays the difference to a reference
+        value in text. Finally, `gauge` displays the value graphically on an axis.
+      dflt: number
+      editType: calc
+      flags:
+      - number
+      - delta
+      - gauge
+      valType: flaglist
+    domain:
+      valType: object
+    delta:
+      valType: object
+    gauge:
+      valType: object
+    title:
+      valType: object
+pie:
+  attr:
+    textposition:
+      arrayOk: yes
+      description: Specifies the location of the `textinfo`.
+      dflt: auto
+      editType: plot
+      valType: enumerated
+      values:
+      - inside
+      - outside
+      - auto
+      - none
+    textinfo:
+      description: Determines which trace information appear on the graph.
+      editType: calc
+      extras: none
+      flags:
+      - label
+      - text
+      - value
+      - percent
+      valType: flaglist
+    hoverinfo:
+      arrayOk: yes
+      description: Determines which trace information appear on hover. If `none` or
+        `skip` are set, no information is displayed upon hovering. But, if `none`
+        is set, click and hover events are still fired.
+      dflt: all
+      editType: none
+      extras:
+      - all
+      - none
+      - skip
+      flags:
+      - label
+      - text
+      - value
+      - percent
+      - name
+      valType: flaglist
+    text:
+      description: Sets text elements associated with each sector. If trace `textinfo`
+        contains a *text* flag, these elements will be seen on the chart. If trace
+        `hoverinfo` contains a *text* flag and *hovertext* is not set, these elements
+        will be seen in the hover labels.
+      editType: plot
+      valType: data_array
+    values:
+      description: Sets the values of the sectors. If omitted, we count occurrences
+        of each label.
+      editType: calc
+      valType: data_array
+    hole:
+      description: Sets the fraction of the radius to cut out of the pie. Use this
+        to make a donut chart.
+      dflt: 0
+      editType: calc
+      max: 1
+      min: 0
+      valType: number
+    pull:
+      arrayOk: yes
+      description: Sets the fraction of larger radius to pull the sectors out from
+        the center. This can be a constant to pull all slices apart from each other
+        equally or an array to highlight one or more slices.
+      dflt: 0
+      editType: calc
+      max: 1
+      min: 0
+      valType: number
+    name:
+      description: Sets the trace name. The trace name appear as the legend item and
+        on hover.
+      editType: style
+      valType: string
+    insidetextfont:
+      valType: object
+    marker:
+      valType: object
+sankey:
+  attr:
+    orientation:
+      description: Sets the orientation of the Sankey diagram.
+      dflt: h
+      editType: calc
+      valType: enumerated
+      values:
+      - v
+      - h
+    node:
+      valType: object
+    link:
+      valType: object
+scatter:
+  attr:
+    x:
+      anim: yes
+      description: Sets the x coordinates.
+      editType: calc+clearAxisTypes
+      valType: data_array
+    'y':
+      anim: yes
+      description: Sets the y coordinates.
+      editType: calc+clearAxisTypes
+      valType: data_array
+    text:
+      arrayOk: yes
+      description: Sets text elements associated with each (x,y) pair. If a single
+        string, the same string appears over all the data points. If an array of string,
+        the items are mapped in order to the this trace's (x,y) coordinates. If trace
+        `hoverinfo` contains a *text* flag and *hovertext* is not set, these elements
+        will be seen in the hover labels.
+      dflt: ''
+      editType: calc
+      valType: string
+    mode:
+      description: Determines the drawing mode for this scatter trace. If the provided
+        `mode` includes *text* then the `text` elements appear at the coordinates.
+        Otherwise, the `text` elements appear on hover. If there are less than 20
+        points and the trace is not stacked then the default is *lines+markers*. Otherwise,
+        *lines*.
+      editType: calc
+      extras: none
+      flags:
+      - lines
+      - markers
+      - text
+      valType: flaglist
+    hoverinfo:
+      arrayOk: yes
+      description: Determines which trace information appear on hover. If `none` or
+        `skip` are set, no information is displayed upon hovering. But, if `none`
+        is set, click and hover events are still fired.
+      dflt: all
+      editType: none
+      extras:
+      - all
+      - none
+      - skip
+      flags:
+      - x
+      - 'y'
+      - z
+      - text
+      - name
+      valType: flaglist
+    marker:
+      valType: object
+scatterpolar:
+  attr:
+    r:
+      description: Sets the radial coordinates
+      editType: calc+clearAxisTypes
+      valType: data_array
+    theta:
+      description: Sets the angular coordinates
+      editType: calc+clearAxisTypes
+      valType: data_array
+    text:
+      arrayOk: yes
+      description: Sets text elements associated with each (x,y) pair. If a single
+        string, the same string appears over all the data points. If an array of string,
+        the items are mapped in order to the this trace's (x,y) coordinates. If trace
+        `hoverinfo` contains a *text* flag and *hovertext* is not set, these elements
+        will be seen in the hover labels.
+      dflt: ''
+      editType: calc
+      valType: string
+    mode:
+      description: Determines the drawing mode for this scatter trace. If the provided
+        `mode` includes *text* then the `text` elements appear at the coordinates.
+        Otherwise, the `text` elements appear on hover. If there are less than 20
+        points and the trace is not stacked then the default is *lines+markers*. Otherwise,
+        *lines*.
+      editType: calc
+      extras: none
+      flags:
+      - lines
+      - markers
+      - text
+      valType: flaglist
+    hoverinfo:
+      arrayOk: yes
+      description: Determines which trace information appear on hover. If `none` or
+        `skip` are set, no information is displayed upon hovering. But, if `none`
+        is set, click and hover events are still fired.
+      dflt: all
+      editType: none
+      extras:
+      - all
+      - none
+      - skip
+      flags:
+      - r
+      - theta
+      - text
+      - name
+      valType: flaglist
+    marker:
+      valType: object
+sunburst:
+  attr:
+    values:
+      description: Sets the values associated with each of the sectors. Use with `branchvalues`
+        to determine how the values are summed.
+      editType: calc
+      valType: data_array
+    parents:
+      description: Sets the parent sectors for each of the sectors. Empty string items
+        '' are understood to reference the root node in the hierarchy. If `ids` is
+        filled, `parents` items are understood to be "ids" themselves. When `ids`
+        is not set, plotly attempts to find matching items in `labels`, but beware
+        they must be unique.
+      editType: calc
+      valType: data_array
+    labels:
+      description: Sets the labels of each of the sectors.
+      editType: calc
+      valType: data_array
+    branchvalues:
+      description: Determines how the items in `values` are summed. When set to *total*,
+        items in `values` are taken to be value of all its descendants. When set to
+        *remainder*, items in `values` corresponding to the root and the branches
+        sectors are taken to be the extra part not part of the sum of the values at
+        their leaves.
+      dflt: remainder
+      editType: calc
+      valType: enumerated
+      values:
+      - remainder
+      - total
+    maxdepth:
+      description: Sets the number of rendered sectors from any given `level`. Set
+        `maxdepth` to *-1* to render all the levels in the hierarchy.
+      dflt: -1
+      editType: plot
+      valType: integer
+    insidetextorientation:
+      description: Controls the orientation of the text inside chart sectors. When
+        set to *auto*, text may be oriented in any direction in order to be as big
+        as possible in the middle of a sector. The *horizontal* option orients text
+        to be parallel with the bottom of the chart, and may make text smaller in
+        order to achieve that goal. The *radial* option orients text along the radius
+        of the sector. The *tangential* option orients text perpendicular to the radius
+        of the sector.
+      dflt: auto
+      editType: plot
+      valType: enumerated
+      values:
+      - horizontal
+      - radial
+      - tangential
+      - auto
+table:
+  attr:
+    header:
+      valType: object
+    cells:
+      valType: object
+treemap:
+  attr:
+    values:
+      description: Sets the values associated with each of the sectors. Use with `branchvalues`
+        to determine how the values are summed.
+      editType: calc
+      valType: data_array
+    parents:
+      description: Sets the parent sectors for each of the sectors. Empty string items
+        '' are understood to reference the root node in the hierarchy. If `ids` is
+        filled, `parents` items are understood to be "ids" themselves. When `ids`
+        is not set, plotly attempts to find matching items in `labels`, but beware
+        they must be unique.
+      editType: calc
+      valType: data_array
+    labels:
+      description: Sets the labels of each of the sectors.
+      editType: calc
+      valType: data_array
+    textinfo:
+      description: Determines which trace information appear on the graph.
+      editType: plot
+      extras: none
+      flags:
+      - label
+      - text
+      - value
+      - current path
+      - percent root
+      - percent entry
+      - percent parent
+      valType: flaglist
+    maxdepth:
+      description: Sets the number of rendered sectors from any given `level`. Set
+        `maxdepth` to *-1* to render all the levels in the hierarchy.
+      dflt: -1
+      editType: plot
+      valType: integer
+    ids:
+      anim: yes
+      description: Assigns id labels to each datum. These ids for object constancy
+        of data points during animation. Should be an array of strings, not numbers
+        or any other type.
+      editType: calc
+      valType: data_array
+    outsidetextfont:
+      valType: object
+    marker:
+      valType: object
+    pathbar:
+      valType: object
+violin:
+  attr:
+    x:
+      description: Sets the x sample data or coordinates. See overview for more info.
+      editType: calc+clearAxisTypes
+      valType: data_array
+    'y':
+      description: Sets the y sample data or coordinates. See overview for more info.
+      editType: calc+clearAxisTypes
+      valType: data_array
+    name:
+      description: Sets the trace name. The trace name appear as the legend item and
+        on hover. For violin traces, the name will also be used for the position coordinate,
+        if `x` and `x0` (`y` and `y0` if horizontal) are missing and the position
+        axis is categorical. Note that the trace name is also used as a default value
+        for attribute `scalegroup` (please see its description for details).
+      editType: calc+clearAxisTypes
+      valType: string
+    marker:
+      valType: object
+    line:
+      valType: object
+waterfall:
+  attr:
+    x:
+      description: Sets the x coordinates.
+      editType: calc+clearAxisTypes
+      valType: data_array
+    'y':
+      description: Sets the y coordinates.
+      editType: calc+clearAxisTypes
+      valType: data_array
+    measure:
+      description: An array containing types of values. By default the values are
+        considered as 'relative'. However; it is possible to use 'total' to compute
+        the sums. Also 'absolute' could be applied to reset the computed total or
+        to declare an initial value where needed.
+      dflt: []
+      editType: calc
+      valType: data_array
+    orientation:
+      description: Sets the orientation of the bars. With *v* (*h*), the value of
+        the each bar spans along the vertical (horizontal).
+      editType: calc+clearAxisTypes
+      valType: enumerated
+      values:
+      - v
+      - h
+    connector:
+      valType: object

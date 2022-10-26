@@ -65,15 +65,173 @@ get_params_plot <- function(entry = "plotly_schema", paramName = NULL, v = NULL,
 #' @title 初始化plotly
 #' @family lib-plotly functions
 #' @export
-plot0 <- function(d, ...) {
-  d |> plotly::plot_ly(...)
+plot_init <- function() {
+  plotly::plot_ly() |>
+    plotly::config(displaylogo = FALSE, locale = "zh-CN")
 }
 
-#' @title 绘制坐标轴
+#' @title 绘制图层
 #' @family lib-plotly functions
 #' @export
-plot_trace <- function(plot, type, ...) {
-  plot |> plotly::add_trace(type = type, ...)
+plot_trace <- function(p, type, ..., data = NULL, inherit = TRUE) {
+  plotly::add_trace(p, type, ..., data = NULL, inherit = TRUE)
+}
+
+
+plot_config_schema <- function() {
+  list(
+    "locale" = plotly_schema$config$locale,
+    "displaytModeBar" = plotly_schema$config$displayModeBar,
+    "modeBarButtons" = plotly_schema$config$modeBarButtons
+  )
+}
+
+plot_layout_schema <- function() {
+  list(
+    "title" = plotly_schema$layout$layoutAttributes$title,
+    "font" = plotly_schema$layout$layoutAttributes$font,
+    "colorway" = plotly_schema$layout$layoutAttributes$colorway,
+    "annotations" = plotly_schema$layout$layoutAttributes$annotations,
+    "shapes" = plotly_schema$layout$layoutAttributes$shapes,
+    "xaxis" = plotly_schema$layout$layoutAttributes$xaxis,
+    "yaxis" = plotly_schema$layout$layoutAttributes$yaxis,
+    "polar" = plotly_schema$layout$layoutAttributes$polar,
+    "geo" = plotly_schema$layout$layoutAttributes$geo,
+    "showlegend" = plotly_schema$layout$layoutAttributes$showlegend,
+    "leagend" = plotly_schema$layout$layoutAttributes$legend,
+    "width" = plotly_schema$layout$layoutAttributes$width,
+    "height" = plotly_schema$layout$layoutAttributes$height,
+    "plot_bgcolor" = plotly_schema$layout$layoutAttributes$plot_bgcolor,
+    "paper_bgcolor" = plotly_schema$layout$layoutAttributes$paper_bgcolor
+  )
+}
+
+plot_trace_schema <- function() {
+  list(
+    "bar" = list(
+      attr = plotly_schema$traces[["bar"]]$attributes[
+        c("x", "y", "text", "textposition", "marker", "name")],
+      layoutAttr = plotly_schema$traces[["bar"]]$layoutAttributes[
+        c("bargap", "barmode")]
+    ),
+    "barpolar" = list(
+      attr = plotly_schema$traces[["barpolar"]]$attributes[
+        c("r", "theta", "name")],
+      layoutAttr = plotly_schema$traces[["barpolar"]]$layoutAttributes[
+        c("bargap", "barmode")]
+    ),
+    "box" = list(
+      attr = plotly_schema$traces[["box"]]$attributes[
+        c("x", "y", "jitter", "boxpoints", "marker", "line", "name")]
+    ),
+    "carpet" = list(
+      attr = plotly_schema$traces[["carpet"]]$attributes[
+        c("a", "b", "y", "color", "name")]
+    ),
+    "contour" = list(
+      attr = plotly_schema$traces[["contour"]]$attributes[
+        c("x", "y", "z", "colorscale", "contours", "name")]
+    ),
+    "funnel" = list(
+      attr = plotly_schema$traces[["funnel"]]$attributes[
+        c("x", "y", "orientation", "textposition", "textinfo", "opacity", "marker", "connector", "name")]
+    ),
+    "funnelarea" = list(
+      attr = plotly_schema$traces[["funnelarea"]]$attributes[
+        c("textposition", "textinfo", "opacity", "marker", "name", "scalegroup")]
+    ),
+    "heatmap" = list(
+      attr = plotly_schema$traces[["heatmap"]]$attributes[
+        c("x", "y", "z", "colorscale", "name")]
+    ),
+    "histogram" = list(
+      attr = plotly_schema$traces[["histogram"]]$attributes[
+        c("x", "y", "histfunc", "name")],
+      layoutAttr = plotly_schema$traces[["histogram"]]$layoutAttributes[
+        c("barmode", "bargap")]
+    ),
+    "histogram2d" = list(
+      attr = plotly_schema$traces[["histogram2d"]]$attributes[
+        c("x", "y", "histfunc", "name")]
+    ),
+    "histogram2dcontour" = list(
+      attr = plotly_schema$traces[["histogram2dcontour"]]$attributes[
+        c("x", "y", "histfunc", "contours", "name")]
+    ),
+    "icicle" = list(
+      attr = plotly_schema$traces[["icicle"]]$attributes[
+        c("labels", "parents", "ids", "name")]
+    ),
+    "indicator" = list(
+      attr = plotly_schema$traces[["indicator"]]$attributes[
+        c("domain", "value", "delta", "gauge", "title", "mode")]
+    ),
+    "pie" = list(
+      attr = plotly_schema$traces[["pie"]]$attributes[
+        c("textposition", "textinfo", "insidetextfont", "hoverinfo", "text",
+          "values", "hole", "marker", "pull", "name")]
+    ),
+    "sankey" = list(
+      attr = plotly_schema$traces[["sankey"]]$attributes[
+        c("orientation", "node", "link")]
+    ),
+    "scatter" = list(
+      attr = plotly_schema$traces[["scatter"]]$attributes[
+        c("x", "y", "text", "marker", "mode", "hoverinfo")]
+    ),
+    "scatterpolar" = list(
+      attr = plotly_schema$traces[["scatterpolar"]]$attributes[
+        c("r", "theta", "text", "marker", "mode", "hoverinfo")]
+    ),
+    "sunburst" = list(
+      attr = plotly_schema$traces[["sunburst"]]$attributes[
+        c("values", "parents", "labels", "branchvalues", "maxdepth", "insidetextorientation")]
+    ),
+    "table" = list(
+      attr = plotly_schema$traces[["table"]]$attributes[
+        c("header", "cells")]
+    ),
+    "treemap" = list(
+      attr = plotly_schema$traces[["treemap"]]$attributes[
+        c("values", "parents", "labels", "textinfo", "outsidetextfont", "marker",
+          "pathbar", "maxdepth", "ids")]
+    ),
+    "violin" = list(
+      attr = plotly_schema$traces[["violin"]]$attributes[
+        c("x", "y", "marker", "line", "name")]
+    ),
+    "waterfall" = list(
+      attr = plotly_schema$traces[["waterfall"]]$attributes[
+        c("x", "y", "measure", "orientation", "connector")]
+    )
+  )
+}
+
+#' @export
+plot_trace_schema_yaml <- function() {
+  x <- plot_trace_schema()
+  objects <- list()
+  names(x) |> purrr::walk(function(i) {
+    names(x[[i]]$attr) |> purrr::walk(function(j) {
+      if(!is.na(j)) {
+        if("valType" %nin% names(x[[i]]$attr[[j]])) {
+          x[[i]]$attr[[j]] <<- NULL
+          x[[i]]$attr[[j]] <<- list(
+            valType = "object"
+          )
+          if(j %in% names(objects)) {
+            objects[[j]] <<- unlist(c(objects[[j]], i))
+          } else {
+            objects[[j]] <<- i
+          }
+        }
+      } else {
+        warning("No attr: ", i, "$", j)
+      }
+    })
+  })
+  x |> yaml::write_yaml("data/plot-trace-schema.yml")
+  objects
 }
 
 #' @title 绘制坐标轴
