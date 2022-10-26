@@ -1,0 +1,32 @@
+plot:
+  tags:
+    - 图表
+    - plotly
+  description: plotly可视化图表
+  functions:
+    gali_plot_hist:
+      description: 绘制直方图
+      inputAsign:
+        ds: "@ds"
+      outputAsign: "@plot"
+      params:
+        ds:
+          description: 数据集
+          editType: dataset
+          valType: ds_collected
+        x:
+          description: Sets the x coordinates.
+          editType: calc
+          valType: data_array
+        color: 
+          description: 柱形填充色
+          editType: calc
+          valType: color
+        xtitle:
+          description: X轴标题
+          editType: calc
+          valType: data_array
+        ytitle:
+          description: Y轴标题
+          editType: calc
+          valType: string

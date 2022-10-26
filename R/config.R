@@ -151,81 +151,43 @@ config_yaml <- function(path = "./", yml = "config.yml") {
   yaml::read_yaml(fs::path_join(c(path, yml)))
 }
 
-##
-all_param_type <- tribble(
-  ~prefix, ~typeName, ~tips,
-  "s_", "string", "字符串",
-  "sv_", "string...", "字符串序列", 
-  "i_", "int", "整数",
-  "iv_", "int...", "整数序列",
-  "f_", "float", "浮点数",
-  "f1_", "float", "0-1小数",
-  "fv_", "float...", "数值序列",
-  "ds_", "date_string", "日期字符串",
-  "dts_", "datetime_string", "日期时间字符串",
-  "ts_", "time_string", "时间字符串",
-  "t_", "timestamp", "时间戳",
-  "c_", "color", "颜色",
-  "b_", "bool", "布尔",
-  "e_", "enum", "枚举值",
-  "o_", "operater", "逻辑操作符"
-)
+## 加载函数定义元数据
+funs_schema <- list()
+fs::dir_ls("data/task-functions-def", type = "file", glob = "*.yml") |>
+  purrr::walk(function(p) {
+    yml <- yaml::read_yaml(p)
+    names(yml) |> purrr::walk(function(item) {
+      funs_schema[[item]] <<- yml[[item]]
+    })
+  })
+## 加载plotly预定义函数配置
 
-#' @title 自动转换参数值
-get_param_auto <- function(params) {
-  params |> as_tibble() |>
-    pivot_longer(names_to = "paramName", values_to = "value") |>
-    mutate(prefix = stringr::str_remove(paramName, "(?<=_)(.*)")) |>
-    left_join(all_param_type, by = "prefix")
-}
-
-#' @title 获取函数参数
-#' @description 根据规则生成参数要求
-#' 
-#' 如果参数命名格式按照如下规范约定，则自动生成参数要求，例如：
-#' \itemize{
-#' \item s_ 要求单个字符串
-#' \item i_ 要求整数
-#' \item f_ 要求浮点数
-#' \item t_ 要求时间戳整数
-#' \item c_ 颜色枚举
-#' \item b_ 要求布尔类型
-#' 可以是静态文件定义，也可以是从某个数据集中实时提取
-#' }
-#' @param funcName 函数名称，可以是字符串或函数名
+#' @title 查询函数Schema
 #' @export
-get_params <- function(funcName) {
-  tibble(paramName = formalArgs(funcName),
-         defaultValue = formals(funcName) |> as.character()) |>
-    mutate(prefix = stringr::str_remove(paramName, "(?<=_)(.*)")) |>
-    left_join(all_param_type, by = "prefix")
+get_funs_schema <- function(..., entry = "funs_schema") {
+  entryPath <- paste(entry, ..., sep = "$")
+  item <- parse(text = entryPath) |> eval()
+  ## 所选参数在plotly的schema定义中直接可以找到
+  if("valType" %in% names(item)) {
+    ## 直接返回非列表参数
+    item
+  } else {
+    if(is.null(attr(item, "names"))) {
+      list(
+        "valType" = "array",
+        "description" = "-",
+        "items" = item,
+        "entry" = entryPath)
+    } else {
+      list(
+        "valType" = "object",
+        "description" = "-",
+        "items" = names(item),
+        "entry" = entryPath)
+    }
+  }
 }
 
-#' @title 查询函数
+#' @title 查询ds函数
 #' @export
-get_funs <- function(prefix = ".*", funs = lsf.str("package:glimmer")) {
-  p <- tribble(
-    ~type, ~input, ~output, ~tips,
-    "import", "-", "@ds", "导入数据到内存",
-    "export", "@ds", "-", "导出数据到磁盘",
-    "create", "-", "-", "创建元数据",
-    "search", "-", "-", "列举元数据",
-    "read", "-", "@ds", "读取Parquet文件组数据集",
-    "write", "@ds", "-", "保存Parquet文件组数据集",
-    "ds", "@ds", "@ds", "处理矩形数据",
-    "plot", "@ds", "@plot", "绘制plotly图表",
-    "trace", "@plot", "@plot", "增加plotly绘制层",
-    "DT", "@ds", "@DT", "绘制DT数据表"
-  )
-  tibble(funcName = funs[funs |> stringr::str_detect(prefix)]) |>
-    mutate(type = stringr::str_remove(funcName, prefix) |> stringr::str_remove("(?<=)_.+")) |>
-    left_join(p, by = "type")
-}
-
-#' @title 所有gali函数
-#' @export
-get_funs_gali <- function(matchName = ".*", funs = lsf.str("package:glimmer")) {
-  get_funs("^gali_", funs) |>
-    filter(stringr::str_detect(funcName, matchName))
-}
-
+get_ds_funs <- purrr::partial(get_funs_schema, entry = "funs_schema$ds$functions")

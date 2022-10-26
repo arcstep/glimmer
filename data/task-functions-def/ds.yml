@@ -1,0 +1,78 @@
+ds:
+  tags:
+    - 数据集
+  description: 数据集处理函数
+  functions:
+    ds_read0:
+      description: 读取已归档数据
+      outputAsign: "@ds"
+      params:
+        "dsName":
+          description: 数据集名称
+          editType: dataset_name
+          valType: enumerated
+        "topic":
+          description: 存储主题域
+          editType: calc
+          valType: string
+        "noDeleted":
+          description: 不返回标记为删除的数据
+          editType: calc
+          valType: boolean
+    ds_write:
+      description: 写入已归档数据
+      inputAsign: 
+        "d": "@ds"
+      params:
+        "d":
+          description: 要处理的数据框
+          editType: calc
+          valType: tibble
+        "dsName":
+          description: 数据集名称
+          editType: dataset_name
+          valType: enumerated
+        "topic":
+          description: 存储主题域
+          editType: calc
+          valType: string
+    ds_collect:
+      description: 结束惰性计算，立即执行数据收集
+      inputAsign: 
+        "d": "@ds"
+      outputAsign: "@ds"
+      params:
+        "d":
+          description: 要处理的数据框
+          editType: calc
+          valType: tibble
+    ds_head:
+      description: 获取头部N行数据
+      inputAsign: 
+        "d": "@ds"
+      outputAsign: "@ds"
+      params:
+        "d":
+          description: 要处理的数据框
+          editType: calc
+          valType: tibble
+        "n":
+          description: N行数据
+          editType: calc
+          valType: integer
+          min: 0
+    ds_tail:
+      description: 获取尾部N行数据
+      inputAsign: 
+        "d": "@ds"
+      outputAsign: "@ds"
+      params:
+        "d":
+          description: 要处理的数据框
+          editType: calc
+          valType: tibble
+        "n":
+          description: N行数据
+          editType: calc
+          valType: integer
+          min: 0
