@@ -6,17 +6,17 @@ test_that("创建模型：一般情况", {
   
   ## 构造风险模型
   resp <- risk_model_create("cars", modelName = "risk/cyl-too-big") |>
-    task_gali_add("gali_ds_filter", list(s_column = "cyl", o_name = ">=", fv_value = 8)) |>
-    task_gali_add("gali_ds_collect") |>
+    task_func_add("ds_filter", list(column = "cyl", op = ">=", value = 8)) |>
+    task_func_add("ds_collect") |>
     task_run()
   resp$cyl |> unique() |>
     testthat::expect_equal(8)
 
   ## 写入风险疑点数据
   risk_model_create("cars", modelName = "risk/cyl-middle") |>
-    task_gali_add("gali_ds_filter", list(s_column = "cyl", o_name = ">=", fv_value = 6)) |>
-    task_gali_add("gali_ds_filter", list(s_column = "cyl", o_name = "<", fv_value = 8)) |>
-    task_gali_add("gali_write_risk", inputAsign = list(s_modelId = "s_modelId")) |>
+    task_func_add("ds_filter", list(column = "cyl", op = ">=", value = 6)) |>
+    task_func_add("ds_filter", list(column = "cyl", op = "<", value = 8)) |>
+    task_func_add("risk_data_write") |>
     task_run()
   (risk_data_read() |> distinct(dataTitle))$dataTitle |>
     testthat::expect_equal("6")
@@ -47,9 +47,9 @@ test_that("疑点数据：清理未处理的疑点数据", {
   
   ## 写入风险疑点数据
   risk_model_create("cars", modelName = "risk/cyl-middle") |>
-    task_gali_add("gali_ds_filter", list(s_column = "cyl", o_name = ">=", fv_value = 6)) |>
-    task_gali_add("gali_ds_filter", list(s_column = "cyl", o_name = "<", fv_value = 8)) |>
-    task_gali_add("gali_write_risk", inputAsign = list(s_modelId = "s_modelId")) |>
+    task_func_add("ds_filter", list(column = "cyl", op = ">=", value = 6)) |>
+    task_func_add("ds_filter", list(column = "cyl", op = "<", value = 8)) |>
+    task_func_add("risk_data_write") |>
     task_run()
   
   risk_data_read() |> nrow() |>
@@ -60,8 +60,8 @@ test_that("疑点数据：清理未处理的疑点数据", {
     testthat::expect_equal(6)
 
   risk_model_create("cars", modelName = "risk/cyl-middle", tagName = "V2") |>
-    task_gali_add("gali_ds_filter", list(s_column = "cyl", o_name = ">=", fv_value = 6)) |>
-    task_gali_add("gali_write_risk", inputAsign = list(s_modelId = "s_modelId")) |>
+    task_func_add("ds_filter", list(column = "cyl", op = ">=", value = 6)) |>
+    task_func_add("risk_data_write") |>
     task_run()
   
   risk_data_read() |> nrow() |>

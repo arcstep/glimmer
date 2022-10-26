@@ -69,8 +69,10 @@ risk_model_create <- function(dsName,
                 riskDataName = riskDataName,
                 riskTip = riskTip,
                 riskLevel = riskLevel)) |>
-    task_expr_add(expression({`@task`$taskId}), outputAsign = "s_modelId") |>
-    task_gali_add("gali_read", list("e_dsName" = dsName))
+    ## 从任务运行环境中自定提取taskId并映射为@modelId
+    task_expr_add(expression({`@task`$taskId}), outputAsign = "@modelId") |>
+    ## 自动读取dsName
+    task_func_add("ds_read0", params = list("dsName" = dsName))
 }
 
 #' @title 读取疑点数据
@@ -165,19 +167,21 @@ risk_data_set_done <- function(d,
 #' @description 
 #' 如果疑点数据已经生成，但未处理，则先清理这些数据
 #' 
+#' @param d 经过疑点筛查的数据集
+#' @param modelId 风险模型Id，一般被提前配置在任务执行环境中，并做映射
 #' @family risk function
 #' @export
-risk_data_write <- function(d, s_modelId) {
+risk_data_write <- function(d, modelId) {
   ## 根据任务ID获取数据
-  task <- task_read(s_modelId)
+  task <- task_read(modelId)
   if(task$taskType != "__RISK__") {
-    stop("Not Risk Model Task: ", s_modelId, "!!")
+    stop("Not Risk Model Task: ", modelId, "!!")
   }
   datasetName <- task$extention$dsName
   dsYaml <- ds_yaml(datasetName)
   submitTime <- now(tzone = "Asia/Shanghai")
   ## 清理未处理完的疑点数据
-  risk_data_clear(s_modelId,
+  risk_data_clear(modelId,
                   riskDataName = task$extention$riskDataName,
                   cacheTopic = task$extention$cacheTopic,
                   taskTopic = task$taskTopic)
@@ -208,11 +212,4 @@ risk_data_write <- function(d, s_modelId) {
     mutate(todo = TRUE) |>
     mutate(year = year(submitTime), month = month(submitTime)) |>
     ds_write(task$extention$riskDataName, topic = task$extention$cacheTopic)
-}
-
-#' @title 根据风险模型生成并写入疑点数据
-#' @family gali-risk function
-#' @export
-gali_write_risk <- function(`@ds`, s_modelId) {
-  risk_data_write(`@ds`, s_modelId)
 }

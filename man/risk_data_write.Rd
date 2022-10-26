@@ -4,7 +4,12 @@
 \alias{risk_data_write}
 \title{根据风险模型生成并写入疑点数据}
 \usage{
-risk_data_write(d, s_modelId)
+risk_data_write(d, modelId)
+}
+\arguments{
+\item{d}{经过疑点筛查的数据集}
+
+\item{modelId}{风险模型Id，一般被提前配置在任务执行环境中，并做映射}
 }
 \description{
 如果疑点数据已经生成，但未处理，则先清理这些数据

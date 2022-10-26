@@ -1,0 +1,26 @@
+risk:
+  tags:
+    - 风险模型
+    - 数据筛查
+  description: 管理风险模型和疑点数据
+  functions:
+    risk_data_read:
+      description: 读取疑点数据
+      outputAsign: "@ds"
+      params:
+        "todoFlag":
+          description: 仅返回未处理疑点数据
+          editType: switcher
+          valType: boolean
+    risk_data_write:
+      description: 写入疑点数据
+      params:
+        "d":
+          description: 要处理的数据框
+          valType: tibble
+          inputAsign: "@ds"
+        "modelId":
+          description: 风险模型ID（风险模式是类型为"__RISK__"的任务）
+          editType: task_search
+          valType: task_name
+          inputAsign: "@modelId"
