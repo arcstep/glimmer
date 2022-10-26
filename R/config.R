@@ -59,6 +59,7 @@ set_topic <- function(topic, path) {
 #' @family config functions
 #' @export
 config_load <- function(path = "./", yml = "config.yml") {
+  ## 加载配置到内存
   topics <- config_yaml(path, yml)
   if("ROOT_PATH" %in% names(topics)) {
     if(!fs::dir_exists(topics$ROOT_PATH)) {
@@ -68,6 +69,8 @@ config_load <- function(path = "./", yml = "config.yml") {
   } else {
     root_path <- NULL
   }
+  
+  ## 设置主题并自动创建主题目录
   names(topics) |> purrr::walk(function(item) {
     if(item != "ROOT_PATH") {
       if(stringr::str_detect(topics[[item]], "^(\\.\\/)")) {
@@ -78,6 +81,21 @@ config_load <- function(path = "./", yml = "config.yml") {
       get_path(item) |> fs::dir_create()
     }
   })
+  
+  ## 加载扩展的函数
+  get_path("FUNS_DEFINE") |>
+    fs::dir_ls(recurse = T, glob = "*.R", type = "file") |>
+    purrr::walk(function(path) source(path))
+  
+  ## 加载扩展的函数定义元数据
+  get_path("FUNS_DEFINE") |>
+    fs::dir_ls(recurse = T, glob = "*.yml", type = "file") |>
+    purrr::walk(function(p) {
+      yml <- yaml::read_yaml(p)
+      names(yml) |> purrr::walk(function(item) {
+        assign(item, yml[[item]], envir = SCHEMA.ENV)
+      })
+    })
 }
 
 #' @title 创建或补写配置项到磁盘
@@ -102,7 +120,8 @@ config_write <- function(path = "./", yml = "config.yml", option = list()) {
         "IMPORT" = "./IMPORT",
         "CACHE" = "./CACHE",
         "TASK_SCRIPTS" = "./TASK_SCRIPTS",
-        "TASK_DEFINE" = "./TASK_DEFINE")
+        "TASK_DEFINE" = "./TASK_DEFINE",
+        "FUNS_DEFINE" = "./FUNS_DEFINE")
     }
     names(option) |> purrr::walk(function(i) {
       xoption[[i]] <<- option[[i]]
@@ -151,20 +170,19 @@ config_yaml <- function(path = "./", yml = "config.yml") {
   yaml::read_yaml(fs::path_join(c(path, yml)))
 }
 
-## 加载函数定义元数据
-funs_schema <- list()
-fs::dir_ls("data/funs_schema", type = "file", glob = "*.yml") |>
+## 加载预定义的函数定义元数据
+fs::dir_ls("data/funs_schema", recurse = T, type = "file", glob = "*.yml") |>
   purrr::walk(function(p) {
     yml <- yaml::read_yaml(p)
     names(yml) |> purrr::walk(function(item) {
-      funs_schema[[item]] <<- yml[[item]]
+      assign(item, yml[[item]], envir = SCHEMA.ENV)
     })
   })
-## 加载plotly预定义函数配置
 
 #' @title 查询函数Schema
 #' @export
 get_funs_schema <- function(..., entry = "funs_schema") {
+  funs_schema <- as.list(SCHEMA.ENV)
   entryPath <- paste(entry, ..., sep = "$")
   item <- parse(text = entryPath) |> eval()
   ## 所选参数在plotly的schema定义中直接可以找到
@@ -184,6 +202,19 @@ get_funs_schema <- function(..., entry = "funs_schema") {
         "description" = "-",
         "items" = names(item),
         "entry" = entryPath)
+    }
+  }
+}
+
+#' @title 查询函数参数
+#' @export
+get_fun_schema <- function(funcName, ..., funcsTopic = NULL) {
+  funcsTopic <- funcsTopic %empty% get_funs_schema()$items
+  for(item in funcsTopic) {
+    if(funcName %in% get_funs_schema(item, "functions")$items) {
+      return(get_funs_schema(item, "functions", funcName, ...))
+    } else {
+      return(list())
     }
   }
 }

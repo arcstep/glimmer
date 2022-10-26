@@ -328,14 +328,20 @@ task_run0 <- function(taskItems, withEnv, runMode, ...) {
         names(envParam) |> purrr::walk(function(i) {
           assign(i, params[[i]], envir = TaskRun.ENV)
         })
-        ## 按照预定义任务函数的规则赋值输入、输出
-        gali <- get_funs_gali(matchName = paste0("^", script, "$"), funs = script)
-        if(nrow(gali) == 1) {
-          if(gali$input != "-" && gali$input %nin% names(inputAsign)) {
-            inputAsign[[gali$input]] <- gali$input
+        ## 按照预定义任务函数连接管道：自动赋值输入、输出
+        if(!rlang::is_empty(get_fun_schema(script))) {
+          ia <- get_fun_schema(script, "inputAsign")$items
+          oa <- get_fun_schema(script, "outputAsign")$items
+          ## 预定义schema中有默认的映射规则，且在任务定义中未指定新的映射
+          ## 允许映射多个输入参数
+          if(!is.null(ia) && ia %nin% names(inputAsign)) {
+            ia |> purrr::walk(function(item) {
+              inputAsign[[item]] <<- get_fun_schema(script, "inputAsign", item)$items
+            })
           }
-          if(gali$output != "-" && is.null(outputAsign |> unlist())) {
-            outputAsign <- gali$output
+          ## 仅一个输出参数
+          if(!is.null(oa) && is.null(outputAsign |> unlist())) {
+            outputAsign <- oa
           }
         }
         ## 使用环境内变量覆盖入参

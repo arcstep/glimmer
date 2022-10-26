@@ -6,20 +6,6 @@ library(lubridate, warn.conflicts = FALSE)
 
 rootPath <- tempdir()
 
-## 普通函数准备
-mycars <- function() { mtcars |> as_tibble() }
-mycyl <- function(i_cyl = 4) { mtcars |> as_tibble() |> filter(cyl == i_cyl) }
-myarrange <- function(d, sv_columns) {
-  d |> arrange(!!!rlang::syms(sv_columns))
-}
-## gali函数准备
-gali_import_cars <- function() { mtcars |> as_tibble() }
-gali_ds_filter_cyl <- function(`@ds`, i_cyl = 4) { `@ds` |> as_tibble() |> filter(cyl == i_cyl) }
-gali_ds_as_sort <- function(`@ds`, sv_columns) {
-  `@ds` |> arrange(!!!syms(sv_columns))
-}
-
-
 sample_dataset_init <- function() {
   config_init(rootPath)
 
@@ -86,6 +72,8 @@ sample_files_prepare <- function() {
   fs::dir_copy(testthat::test_path("_IMPORT"), get_path("IMPORT"), overwrite = TRUE)
   fs::dir_copy(testthat::test_path("_TASK_DEFINE"), get_path("TASK_DEFINE"), overwrite = TRUE)
   fs::dir_copy(testthat::test_path("_TASK_SCRIPTS"), get_path("TASK_SCRIPTS"), overwrite = TRUE)
+  fs::dir_copy(testthat::test_path("_FUNS_DEFINE"), get_path("FUNS_DEFINE"), overwrite = TRUE)
+  config_load(rootPath)
 }
 
 sample_init <- function() {

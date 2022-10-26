@@ -1,0 +1,30 @@
+projects:
+  functions:
+    gali_import_cars:
+      outputAsign: "@ds"
+    gali_ds_filter_cyl:
+      inputAsign: 
+        "d": "@ds"
+      outputAsign: "@ds"
+      params:
+        "d":
+          editType: calc
+          valType: tibble
+        "i_cyl":
+          description: 条件
+          editType: calc
+          valType: integer
+    gali_ds_as_sort:
+      inputAsign: 
+        "d": "@ds"
+      outputAsign: "@ds"
+      params:
+        "d":
+          description: 要处理的数据框
+          editType: calc
+          valType: tibble
+        "sv_columns":
+          description: 选择排序的字段
+          editType: calc
+          valType: dataset_column
+          dataset: "@ds"

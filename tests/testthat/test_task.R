@@ -193,7 +193,7 @@ test_that("<task_run>: func", {
   temp_remove()
 })
 
-test_that("<task_run>: gali", {
+test_that("<task_run>: 预定义函数管道", {
   sample_init()
 
   ## 默认参数
@@ -233,7 +233,7 @@ test_that("<task_run>: gali", {
   task_create(taskId = "fun03") |>
     task_gali_add("gali_import_cars", outputAsign = "mycars") |>
     task_string_add(script = "mycars |> head(5)", inputAsign = "mycars", outputAsign = "mycars") |>
-    task_gali_add(script = "gali_ds_filter_cyl", params = list(i_cyl = 4), inputAsign = list("@ds" = "mycars")) |>
+    task_gali_add(script = "gali_ds_filter_cyl", params = list(i_cyl = 4), inputAsign = list("d" = "mycars")) |>
     task_run() |> nrow() |>
     testthat::expect_equal(1)
   
