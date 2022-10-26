@@ -198,42 +198,42 @@ test_that("<task_run>: 预定义函数管道", {
 
   ## 默认参数
   task_create(taskId = "fun01") |>
-    task_gali_add("gali_import_cars") |>
+    task_func_add("gali_import_cars") |>
     task_run() |> nrow() |>
     testthat::expect_equal(nrow(mtcars))
   
   ## 管道连接
   task_create(taskId = "fun02") |>
-    task_gali_add("gali_import_cars") |>
-    task_gali_add("gali_ds_filter_cyl") |>
+    task_func_add("gali_import_cars") |>
+    task_func_add("gali_ds_filter_cyl") |>
     task_run() |> nrow() |>
     testthat::expect_equal(nrow(mtcars |> filter(cyl == 4)))
   
   task_create(taskId = "fun02") |>
-    task_gali_add("gali_import_cars") |>
-    task_gali_add(script = "gali_ds_filter_cyl", params = list(i_cyl = 6)) |>
+    task_func_add("gali_import_cars") |>
+    task_func_add(script = "gali_ds_filter_cyl", params = list(i_cyl = 6)) |>
     task_run() |> nrow() |>
     testthat::expect_equal(nrow(mtcars |> filter(cyl == 6)))
   
   ## 显式使用映射参数
   task_create(taskId = "fun03") |>
-    task_gali_add("gali_import_cars") |>
-    task_gali_add(script = "gali_ds_filter_cyl", params = list(i_cyl = 6)) |>
+    task_func_add("gali_import_cars") |>
+    task_func_add(script = "gali_ds_filter_cyl", params = list(i_cyl = 6)) |>
     task_string_add(script = "`@ds` |> head(5)") |>
     task_run() |> nrow() |>
     testthat::expect_equal(5)
   
   task_create(taskId = "fun03") |>
-    task_gali_add("gali_import_cars") |>
-    task_gali_add(script = "gali_ds_filter_cyl", params = list(i_cyl = 6), outputAsign = "car6") |>
+    task_func_add("gali_import_cars") |>
+    task_func_add(script = "gali_ds_filter_cyl", params = list(i_cyl = 6), outputAsign = "car6") |>
     task_string_add(script = "car6 |> head(5)") |>
     task_run() |> nrow() |>
     testthat::expect_equal(5)
 
   task_create(taskId = "fun03") |>
-    task_gali_add("gali_import_cars", outputAsign = "mycars") |>
+    task_func_add("gali_import_cars", outputAsign = "mycars") |>
     task_string_add(script = "mycars |> head(5)", inputAsign = "mycars", outputAsign = "mycars") |>
-    task_gali_add(script = "gali_ds_filter_cyl", params = list(i_cyl = 4), inputAsign = list("d" = "mycars")) |>
+    task_func_add(script = "gali_ds_filter_cyl", params = list(i_cyl = 4), inputAsign = list("d" = "mycars")) |>
     task_run() |> nrow() |>
     testthat::expect_equal(1)
   

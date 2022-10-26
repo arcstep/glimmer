@@ -89,11 +89,6 @@ task_item_add <- function(
   }
 }
 
-#' @title 为任务增加gali函数子任务
-#' @family task-define function
-#' @export
-task_gali_add <- purrr::partial(task_item_add, type = "gali")
-
 #' @title 为任务增加函数子任务
 #' @family task-define function
 #' @export
@@ -303,23 +298,48 @@ task_run <- function(taskId,
   })
 }
 
-#
-task_run0 <- function(taskItems, withEnv, runMode, ...) {
-  taskToRun <- function(..., taskItems) {
-    ## 子函数内定义一个设置返回值的函数，供内部使用
-    TaskRun.ENV <- new.env(hash = TRUE)
-    # TaskRun.ENV <- globalenv()
-    ## 提取task_run运行时参数，可以设置执行环境的变量值
-    taskParams <- list(...)
-    names(taskParams) |> purrr::walk(function(i) {
-      assign(i, taskParams[[i]], envir = TaskRun.ENV)
+## 预定义schema中有默认的映射规则，且在任务定义中未指定新的映射
+## 允许映射多个输入参数
+getFuncInputAsign <- function(script, inputAsign) {
+  ia <- list()
+  get_fun_schema(script, "params")$items |> purrr::walk(function(item) {
+    ia[[item]] <<- get_fun_schema(script, "params", item)$inputAsign
+  })
+  if(!rlang::is_empty(ia)) {
+    names(ia) |> purrr::walk(function(item) {
+      if(item %nin% names(inputAsign)) {
+        inputAsign[[item]] <<- get_fun_schema(script, "params", item, "inputAsign")$items
+      }
     })
-    ## 将结果保存在curResult
-    curResult <- NULL
-    ## 逐项执行子任务
-    taskItems |> tibble::rowid_to_column("rowId") |>
-      purrr::pwalk(function(rowId, script, params, type, inputAsign, outputAsign) {
-      if(type %in% c("gali", "func")) {
+  }
+  inputAsign
+}
+
+## 仅一个输出参数
+getFuncOutputAsign <- function(script, outputAsign) {
+  oa <- get_fun_schema(script, "outputAsign")$items
+  if(!is.null(oa) && is.null(outputAsign |> unlist())) {
+    outputAsign <- oa
+  }
+  outputAsign
+}
+
+taskToRun <- function(taskItems, withEnv, ...) {
+  ## 子函数内定义一个设置返回值的函数，供执行环境使用
+  TaskRun.ENV <- new.env(hash = TRUE)
+  # TaskRun.ENV <- globalenv()
+  ## 提取task_run运行时参数，可以设置执行环境的变量值
+  taskParams <- list(...)
+  names(taskParams) |> purrr::walk(function(i) {
+    assign(i, taskParams[[i]], envir = TaskRun.ENV)
+  })
+  ## 将结果保存在curResult
+  curResult <- NULL
+  ## 逐项执行子任务
+  taskItems |>
+    tibble::rowid_to_column("rowId") |>
+    purrr::pwalk(function(rowId, script, params, type, inputAsign, outputAsign) {
+      if(type == "func") {
         ## 提取函数定义参数，无法匹配的参数
         myparam <- formalArgs(script)
         funcParam <- params[myparam[myparam %in% names(params)]] %empty% list()
@@ -330,19 +350,8 @@ task_run0 <- function(taskItems, withEnv, runMode, ...) {
         })
         ## 按照预定义任务函数连接管道：自动赋值输入、输出
         if(!rlang::is_empty(get_fun_schema(script))) {
-          ia <- get_fun_schema(script, "inputAsign")$items
-          oa <- get_fun_schema(script, "outputAsign")$items
-          ## 预定义schema中有默认的映射规则，且在任务定义中未指定新的映射
-          ## 允许映射多个输入参数
-          if(!is.null(ia) && ia %nin% names(inputAsign)) {
-            ia |> purrr::walk(function(item) {
-              inputAsign[[item]] <<- get_fun_schema(script, "inputAsign", item)$items
-            })
-          }
-          ## 仅一个输出参数
-          if(!is.null(oa) && is.null(outputAsign |> unlist())) {
-            outputAsign <- oa
-          }
+          inputAsign <- getFuncInputAsign(script, inputAsign)
+          outputAsign <- getFuncOutputAsign(script, outputAsign)
         }
         ## 使用环境内变量覆盖入参
         names(inputAsign |> unlist()) |> purrr::walk(function(i) {
@@ -402,18 +411,20 @@ task_run0 <- function(taskItems, withEnv, runMode, ...) {
         }
       })
     })
-    if(withEnv) {
-      list("result" = curResult, "env" = as.list(TaskRun.ENV))
-    } else {
-      curResult
-    }
-  }
-  
-  if(runMode == "r") {
-    callr::r(taskToRun, args = list(..., "taskItems" = taskItems))
-  } else if(runMode == "r_bg"){
-    callr::r_bg(taskToRun, args = list(..., "taskItems" = taskItems))
+  if(withEnv) {
+    list("result" = curResult, "env" = as.list(TaskRun.ENV))
   } else {
-    do.call("taskToRun", args = list(..., "taskItems" = taskItems))
+    curResult
+  }
+}
+
+#
+task_run0 <- function(taskItems, withEnv, runMode, ...) {
+  if(runMode == "r") {
+    callr::r(taskToRun, args = list(taskItems, withEnv, ...))
+  } else if(runMode == "r_bg"){
+    callr::r_bg(taskToRun, args = list(taskItems, withEnv, ...))
+  } else {
+    do.call("taskToRun", args = list(taskItems, withEnv, ...))
   }
 }

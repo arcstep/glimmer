@@ -1,19 +1,18 @@
 plot:
   tags:
-    - 图表
+    - 图表绘制
     - plotly
   description: plotly可视化图表
   functions:
     gali_plot_hist:
       description: 绘制直方图
-      inputAsign:
-        ds: "@ds"
       outputAsign: "@plot"
       params:
         ds:
           description: 数据集
           editType: dataset
           valType: ds_collected
+          inputAsign: "@ds"
         x:
           description: Sets the x coordinates.
           editType: calc

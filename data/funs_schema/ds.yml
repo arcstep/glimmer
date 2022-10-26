@@ -1,6 +1,6 @@
 ds:
   tags:
-    - 数据集
+    - 数据集操作
   description: 数据集处理函数
   functions:
     ds_read0:
@@ -9,70 +9,222 @@ ds:
       params:
         "dsName":
           description: 数据集名称
-          editType: dataset_name
-          valType: enumerated
-        "topic":
-          description: 存储主题域
-          editType: calc
-          valType: string
+          editType: dataset_search
+          valType: dataset_name
         "noDeleted":
           description: 不返回标记为删除的数据
-          editType: calc
+          editType: switcher
           valType: boolean
     ds_write:
       description: 写入已归档数据
-      inputAsign: 
-        "d": "@ds"
       params:
         "d":
           description: 要处理的数据框
-          editType: calc
           valType: tibble
+          inputAsign: "@ds"
         "dsName":
           description: 数据集名称
-          editType: dataset_name
-          valType: enumerated
-        "topic":
-          description: 存储主题域
-          editType: calc
-          valType: string
+          editType: dataset_search
+          valType: dataset_name
     ds_collect:
       description: 结束惰性计算，立即执行数据收集
-      inputAsign: 
-        "d": "@ds"
       outputAsign: "@ds"
       params:
         "d":
           description: 要处理的数据框
-          editType: calc
           valType: tibble
+          inputAsign: "@ds"
+    ds_filter:
+      description: 过滤数据框
+      outputAsign: "@ds"
+      params:
+        "d":
+          description: 要处理的数据框
+          valType: tibble
+          inputAsign: "@ds"
+        "column":
+          description: 比较列
+          valType: column_name
+          editType: column_search
+          enumateFrom: "@ds"
+        "op":
+          description: 比较操作符
+          valType: op_name
+          editType: operator_list
+        "value":
+          description: 比较值
+          editType: column_value_edit
+          valType: any
     ds_head:
       description: 获取头部N行数据
-      inputAsign: 
-        "d": "@ds"
       outputAsign: "@ds"
       params:
         "d":
           description: 要处理的数据框
-          editType: calc
           valType: tibble
+          inputAsign: "@ds"
         "n":
-          description: N行数据
-          editType: calc
+          description: 行数
+          editType: integer_edit
           valType: integer
           min: 0
     ds_tail:
       description: 获取尾部N行数据
-      inputAsign: 
-        "d": "@ds"
+      outputAsign: "@ds"
+      params:
+        "d":
+          description: 要处理的数据框
+          valType: tibble
+          inputAsign: "@ds"
+        "n":
+          description: 行数
+          editType: integer_edit
+          valType: integer
+          min: 0
+    ds_n_max:
+      description: 获取值最大的N行数据
+      outputAsign: "@ds"
+      params:
+        "d":
+          description: 要处理的数据框
+          valType: tibble
+          inputAsign: "@ds"
+        "olderColumn":
+          description: 权重列
+          valType: column_name
+          editType: column_search
+          enumateFrom: "@ds"
+        "n":
+          description: 行数
+          editType: integer_edit
+          valType: integer
+          min: 0
+        "with_ties":
+          description: 是否返回相同权重的数据
+          editType: switcher
+          valType: boolean
+    ds_n_min:
+      description: 获取值最小的N行数据
+      outputAsign: "@ds"
+      params:
+        "d":
+          description: 要处理的数据框
+          valType: tibble
+          inputAsign: "@ds"
+        "olderColumn":
+          description: 权重列
+          valType: column_name
+          editType: column_search
+          enumateFrom: "@ds"
+        "n":
+          description: 行数
+          valType: integer
+          editType: integer_edit
+          min: 0
+        "with_ties":
+          description: 是否返回相同权重的数据
+          editType: switcher
+          valType: boolean
+    ds_arrange:
+      description: 重新排列数据行
+      outputAsign: "@ds"
+      params:
+        "d":
+          description: 要处理的数据框
+          valType: tibble
+          inputAsign: "@ds"
+        "columns":
+          description: 一组列名
+          valType: column_name_list
+          editType: columns_search
+          enumateFrom: "@ds"
+        "desc":
+          description: 是否按反序排列
+          editType: switcher
+          valType: boolean
+        "by_group":
+          description: 仅在分组内重新排列
+          editType: switcher
+          valType: boolean
+    ds_select:
+      description: 重新排列数据行
+      outputAsign: "@ds"
+      params:
+        "d":
+          description: 要处理的数据框
+          valType: tibble
+          inputAsign: "@ds"
+        "columns":
+          description: 一组列名
+          valType: column_name_list
+          editType: columns_search
+          enumateFrom: "@ds"
+        "showOthers":
+          description: 在最后面显示其余所有列
+          valType: boolean
+          editType: switcher
+        "regex":
+          description: 使用正则表达式匹配列名
+          valType: string
+          editType: regex_edit
+    ds_rename:
+      description: 修改列名
+      outputAsign: "@ds"
+      params:
+        "d":
+          description: 要处理的数据框
+          valType: tibble
+          inputAsign: "@ds"
+        "newColumn":
+          description: 新列名
+          valType: column_name
+          editType: string_edit
+        "oldColumn":
+          description: 旧列名
+          valType: column_name
+          editType: column_search
+          enumateFrom: "@ds"
+    ds_count:
+      description: 统计值出现次数
       outputAsign: "@ds"
       params:
         "d":
           description: 要处理的数据框
           editType: calc
           valType: tibble
-        "n":
-          description: N行数据
+          inputAsign: "@ds"
+        "columns":
+          description: 一组列名
+          valType: column_name_list
+          editType: columns_search
+          enumateFrom: "@ds"
+        "sort":
+          description: 优先显示频次较多的列
+          editType: switcher
+          valType: boolean
+        "name":
+          description: 为统计结果列命名
+          valType: string
+          editType: string_edit
+    ds_add_count:
+      description: 计数统计，并将结果追加到原数据集
+      outputAsign: "@ds"
+      params:
+        "d":
+          description: 要处理的数据框
           editType: calc
-          valType: integer
-          min: 0
+          valType: tibble
+          inputAsign: "@ds"
+        "columns":
+          description: 一组列名
+          valType: column_name_list
+          editType: columns_search
+          enumateFrom: "@ds"
+        "sort":
+          description: 优先显示频次较多的列
+          editType: switcher
+          valType: boolean
+        "name":
+          description: 为统计结果列命名
+          valType: string
+          editType: string_edit

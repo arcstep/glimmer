@@ -213,10 +213,9 @@ get_fun_schema <- function(funcName, ..., funcsTopic = NULL) {
   for(item in funcsTopic) {
     if(funcName %in% get_funs_schema(item, "functions")$items) {
       return(get_funs_schema(item, "functions", funcName, ...))
-    } else {
-      return(list())
     }
   }
+  return(list())
 }
 
 #' @title 查询ds函数

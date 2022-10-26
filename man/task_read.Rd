@@ -22,7 +22,6 @@ Other task-define function:
 \code{\link{task_expr_add}()},
 \code{\link{task_file_add}()},
 \code{\link{task_func_add}()},
-\code{\link{task_gali_add}()},
 \code{\link{task_id}()},
 \code{\link{task_item_add}()},
 \code{\link{task_online}()},
