@@ -1,0 +1,242 @@
+test_that("<ds_collect>", {
+  sample_init()
+  
+  m <- mtcars |> as_tibble() |> rownames_to_column()
+  ds_drop("车数据")
+  ds_init("车数据", keyColumns = "rowname", data = m |> head())
+  
+  m |> slice(1:10) |> as_tibble() |> ds_write("车数据")
+  ds_read("车数据") |> ds_collect() |> nrow() |>
+    testthat::expect_equal(10)
+  
+  temp_remove()
+})
+
+test_that("<ds_filter>：一般流程", {
+  sample_init()
+
+  ## 使用默认的 @result 获得返回值
+  mtcars |> ds_filter("cyl", ">", 6) |> nrow() |>
+    testthat::expect_equal(mtcars |> filter(cyl > 6) |> nrow())
+
+  ## 使用新的变量名
+  mtcars |> ds_filter("cyl", ">", 6) |> nrow() |>
+    testthat::expect_equal(mtcars |> filter(cyl > 6) |> nrow())
+  
+  temp_remove()
+})
+
+test_that("<ds_filter>：比较操作符", {
+  mtcars |> ds_filter("cyl", "<", 6) |> nrow() |>
+    testthat::expect_equal(mtcars |> filter(cyl < 6) |> nrow())
+  
+  mtcars |> ds_filter("cyl", ">=", 6) |> nrow() |>
+    testthat::expect_equal(mtcars |> filter(cyl >= 6) |> nrow())
+  
+  mtcars |> ds_filter("cyl", "<=", 6) |> nrow() |>
+    testthat::expect_equal(mtcars |> filter(cyl <= 6) |> nrow())
+
+  mtcars |> ds_filter("cyl", "==", 6) |> nrow() |>
+    testthat::expect_equal(mtcars |> filter(cyl == 6) |> nrow())
+  
+  mtcars |> ds_filter("cyl", "!=", 6) |> nrow() |>
+    testthat::expect_equal(mtcars |> filter(cyl != 6) |> nrow())
+})
+
+test_that("<ds_filter>：正则表达式", {
+  mtcars |> rownames_to_column() |>
+    ds_filter("rowname", "%regex%", "Mazda") |>
+    nrow() |>
+    testthat::expect_equal(
+      mtcars |>
+        rownames_to_column() |>
+        filter(stringr::str_detect(rowname, "Mazda")) |>
+        nrow())
+
+  mtcars |> rownames_to_column() |>
+    ds_filter("rowname", "%not-regex%", "Mazda") |>
+    nrow() |>
+    testthat::expect_equal(
+      mtcars |>
+        rownames_to_column() |>
+        filter(stringr::str_detect(rowname, "Mazda", negate = T)) |>
+        nrow())
+})
+
+test_that("<ds_filter>：包含", {
+  mtcars |> rownames_to_column() |>
+    ds_filter("rowname", "%in%", c("Honda Civic", "Fiat 128")) |>
+    nrow() |>
+    testthat::expect_equal(
+      mtcars |>
+        rownames_to_column() |>
+        filter(rowname %in% c("Honda Civic", "Fiat 128")) |>
+        nrow())
+
+  mtcars |> rownames_to_column() |>
+    ds_filter("rowname", "%nin%", c("Honda Civic", "Fiat 128")) |>
+    nrow() |>
+    testthat::expect_equal(
+      mtcars |>
+        rownames_to_column() |>
+        filter(!(rowname %in% c("Honda Civic", "Fiat 128"))) |>
+        nrow())
+  
+})
+
+test_that("<ds_filter>：比较时间和日期", {
+  d <- tibble(
+    n = 1:5,
+    day = c("2020-05-01", "2020-06-01", "2020-05-11", "2020-07-3", "2019-12-30") |> lubridate::as_date(),
+    dt = c("2020-05-01 11:11:11", "2020-06-01 11:11:11", "2020-05-11 11:11:11", "2020-07-3 11:11:11", "2019-12-30 11:11:11") |> lubridate::as_datetime(tz = "Asia/Shanghai")
+  )
+  
+  ## 测试日期格式比较
+  d |> ds_filter("day", "date# >", "2020-05-30") |> nrow() |>
+    testthat::expect_equal(
+      d |> filter(day > as_date("2020-05-30")) |> nrow()
+    )
+  
+  ## 测试时间格式比较
+  d |> ds_filter("dt", "time# >", "2020-05-30") |> nrow() |>
+    testthat::expect_equal(
+      d |> filter(dt > as_datetime("2020-05-30")) |> nrow()
+    )
+})
+
+test_that("<ds_head/ ds_tail>", {
+  sample_init()
+  
+  m <- mtcars |> as_tibble() |> rownames_to_column()
+  ds_drop("车数据")
+  ds_init("车数据", keyColumns = "rowname", data = m |> head())
+  
+  m |> as_tibble() |> ds_write("车数据")
+
+  ds_read("车数据") |>
+    ds_head() |>
+    ds_collect() |>
+    nrow() |>
+    testthat::expect_equal(10)
+
+  ds_read("车数据") |>
+    ds_head(n = 5) |>
+    ds_collect() |>
+    nrow() |>
+    testthat::expect_equal(5)
+  
+  ds_read("车数据") |>
+    ds_tail(n = 6) |>
+    ds_collect() |>
+    nrow() |>
+    testthat::expect_equal(6)
+  
+  temp_remove()
+})
+
+test_that("<ds_n_max/ ds_n_min>", {
+  sample_init()
+  
+  m <- mtcars |> as_tibble() |> rownames_to_column()
+  ds_drop("车数据")
+  ds_init("车数据", keyColumns = "rowname", data = m |> head())
+  
+  m |> as_tibble() |> ds_write("车数据")
+  
+  ds_read("车数据") |>
+    ds_n_max(n = 3, orderColumn = "disp") |>
+    ds_collect() |>
+    nrow() |>
+    testthat::expect_equal(3)
+  
+  ds_read("车数据") |>
+    ds_n_min("disp", 3) |>
+    ds_collect() |>
+    nrow() |>
+    testthat::expect_equal(3)
+  
+  temp_remove()
+})
+
+test_that("<ds_select>", {
+  sample_init()
+  
+  m <- mtcars |> as_tibble() |> rownames_to_column()
+  ds_drop("车数据")
+  ds_init("车数据", keyColumns = "rowname", data = m |> head())
+  
+  m |> as_tibble() |> ds_write("车数据")
+  
+  ds_read("车数据") |>
+    ds_select(columns = "cyl") |>
+    ds_collect() |>
+    ncol() |>
+    testthat::expect_equal(1)
+  
+  ds_read(dsName = "车数据") |>
+    ds_select(columns = c("cyl", "disp")) |>
+    ds_collect() |>
+    ncol() |>
+    testthat::expect_equal(2)
+  
+  ds_read(dsName = "车数据") |>
+    ds_select(columns = c("cyl", "disp"), showOthers = T) |>
+    ds_collect() |>
+    ncol() |>
+    testthat::expect_equal(17)
+
+  ds_read("车数据") |>
+    ds_select(c("cyl", "disp"), regex = "^@") |>
+    ds_collect() |>
+    ncol() |>
+    testthat::expect_equal(7)
+  
+  temp_remove()
+})
+
+
+test_that("<ds_arrange>", {
+  sample_init()
+  
+  m <- mtcars |> as_tibble() |> rownames_to_column()
+  ds_drop("车数据")
+  ds_init("车数据", keyColumns = "rowname", data = m |> head())
+  
+  m |> as_tibble() |> ds_write("车数据")
+  
+  (ds_read("车数据") |>
+    ds_arrange(columns = "disp") |>
+    ds_collect() |>
+    head(1))$disp |>
+    testthat::expect_equal(min(mtcars$disp))
+  
+  (ds_read("车数据") |>
+      ds_arrange(columns = "disp", desc = T) |>
+      ds_collect() |>
+      head(1))$disp |>
+    testthat::expect_equal(max(mtcars$disp))
+  
+  temp_remove()
+})
+
+test_that("<ds_rename>", {
+  sample_init()
+  
+  m <- mtcars |> as_tibble() |> rownames_to_column()
+  # m |> gali_ds_rename(s_newName = "中国队", s_oldName = "disp")
+  
+  ds_drop("车数据")
+  ds_init("车数据", keyColumns = "rowname", data = m |> head())
+  
+  m |> as_tibble() |> ds_write("车数据")
+  
+  resp <- ds_read(dsName = "车数据") |>
+    ds_rename(newName = "MY_DISP", oldName = "disp") |>
+    ds_rename(newName = "中国队", oldName = "cyl") |>
+    ds_collect() |>
+    names()
+  ("MY_DISP" %in% resp) |> testthat::expect_true()
+  ("中国队" %in% resp) |> testthat::expect_true()
+
+  temp_remove()
+})

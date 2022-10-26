@@ -14,6 +14,7 @@ Other utils function:
 \code{\link{\%empty\%}()},
 \code{\link{\%error\%}()},
 \code{\link{\%nin\%}()},
+\code{\link{\%not-empty\%}()},
 \code{\link{\%not-regex\%}()},
 \code{\link{\%regex\%}()},
 \code{\link{create_dir}()},

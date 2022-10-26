@@ -1,5 +1,5 @@
 test_that("当数据集配置文件不存在时", {
-  sample_config_init()
+  sample_init()
   ds_drop("车数据")
   ds_append(mtcars, "车数据") |>
     testthat::expect_error("Empty Dataset Metadata")
@@ -8,7 +8,7 @@ test_that("当数据集配置文件不存在时", {
 })
 
 test_that("当新数据集结构不一致", {
-  sample_config_init()
+  sample_init()
   ds_drop("车数据")
   ds_init("车数据", data = mtcars |> head())
   
@@ -26,7 +26,7 @@ test_that("当新数据集结构不一致", {
 })
 
 test_that("当新数据集结构不一致，且缺少关键字段", {
-  sample_config_init()
+  sample_init()
   ds_drop("车数据")
   m <- mtcars |> as_tibble() |> rownames_to_column("id")
   ds_init("车数据", data = m |> head(), keyColumns = "id", partColumns = "cyl")
@@ -52,7 +52,7 @@ test_that("当新数据集结构不一致，且缺少关键字段", {
 })
 
 test_that("当新数据集架构不一致，按要求转换", {
-  sample_config_init()
+  sample_init()
   ds_drop("AAA")
   ds_init("AAA", schema = list(
     list("fieldName" = "a", "fieldType" = "int32"),
@@ -67,7 +67,7 @@ test_that("当新数据集架构不一致，按要求转换", {
 })
 
 test_that("追加数据：缺少架构描述", {
-  sample_config_init()
+  sample_init()
   m <- mtcars |> as_tibble() |> rownames_to_column()
   ds_drop("车数据")
   ds_init("车数据", keyColumns = "rowname")
@@ -79,7 +79,7 @@ test_that("追加数据：缺少架构描述", {
 })
 
 test_that("追加数据：创建新数据", {
-  sample_config_init()
+  sample_init()
   m <- mtcars |> as_tibble() |> rownames_to_column()
   ds_drop("车数据")
   ds_init("车数据", keyColumns = "rowname", data = m |> head())
@@ -98,7 +98,7 @@ test_that("追加数据：创建新数据", {
 })
 
 test_that("追加数据：修改旧数据", {
-  sample_config_init()
+  sample_init()
   m <- mtcars |> as_tibble() |> rownames_to_column()
   ds_drop("车数据")
   ds_init("车数据", keyColumns = "rowname", data = m |> head())
@@ -119,7 +119,7 @@ test_that("追加数据：修改旧数据", {
 })
 
 test_that("存取数据：因子类型", {
-  sample_config_init()
+  sample_init()
   
   ## 按照因子类型存取
   m <- mtcars |>
@@ -164,7 +164,7 @@ test_that("存取数据：因子类型", {
 
 
 test_that("删除数据：没有设置主键时不允许删除", {
-  sample_config_init()
+  sample_init()
   ## 没有设置主键，删除失败
   ds_drop("车数据")
   ds_init("车数据", data = mtcars |> head())
@@ -185,7 +185,7 @@ test_that("删除数据：没有设置主键时不允许删除", {
 })
 
 test_that("归档数据操作：无分区", {
-  sample_config_init()
+  sample_init()
   ## 设置了主键，删除成功
   ds_drop("车数据")
   m <- mtcars |> as_tibble() |> rownames_to_column()
@@ -201,7 +201,7 @@ test_that("归档数据操作：无分区", {
 })
 
 test_that("归档数据操作：有分区", {
-  sample_config_init()
+  sample_init()
   ## 设置了主键，删除成功
   ds_drop("车数据")
   m <- mtcars |> as_tibble() |> rownames_to_column() |> mutate(cyl = as.integer(cyl))
@@ -229,7 +229,7 @@ test_that("归档数据操作：有分区", {
 
 
 test_that("内存中对数据去重", {
-  sample_config_init()
+  sample_init()
   
   all <- mtcars |> as_tibble() |>
     mutate(cyl = as.integer(cyl), am = as.integer(am)) |>
@@ -249,7 +249,7 @@ test_that("内存中对数据去重", {
 })
 
 test_that("读写数据时使用推荐的显示列", {
-  sample_config_init()
+  sample_init()
   
   all <- mtcars |> as_tibble() |>
     mutate(cyl = as.integer(cyl), am = as.integer(am)) |>

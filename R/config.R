@@ -153,7 +153,7 @@ config_yaml <- function(path = "./", yml = "config.yml") {
 
 ## 加载函数定义元数据
 funs_schema <- list()
-fs::dir_ls("data/task-functions-def", type = "file", glob = "*.yml") |>
+fs::dir_ls("data/funs_schema", type = "file", glob = "*.yml") |>
   purrr::walk(function(p) {
     yml <- yaml::read_yaml(p)
     names(yml) |> purrr::walk(function(item) {
