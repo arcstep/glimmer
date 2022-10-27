@@ -3,6 +3,8 @@ ds:
     - 数据集操作
   description: 数据集处理函数
   functions:
+    ds_all:
+      description: 列举所有数据集
     ds_read0:
       description: 读取已归档数据
       outputAsign: "@ds"
