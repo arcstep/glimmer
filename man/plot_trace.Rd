@@ -2,20 +2,20 @@
 % Please edit documentation in R/funs-plotly.R
 \name{plot_trace}
 \alias{plot_trace}
-\title{绘制坐标轴}
+\title{绘制图层}
 \usage{
-plot_trace(plot, type, ...)
+plot_trace(p, type, ..., data = NULL, inherit = TRUE)
 }
 \description{
-绘制坐标轴
+绘制图层
 }
 \seealso{
 Other lib-plotly functions: 
-\code{\link{plot0}()},
 \code{\link{plot_area}()},
 \code{\link{plot_barpolar}()},
 \code{\link{plot_bar}()},
 \code{\link{plot_hist}()},
+\code{\link{plot_init}()},
 \code{\link{plot_layout}()},
 \code{\link{plot_line}()},
 \code{\link{plot_marker}()},

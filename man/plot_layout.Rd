@@ -11,11 +11,11 @@ plot_layout(plot, ...)
 }
 \seealso{
 Other lib-plotly functions: 
-\code{\link{plot0}()},
 \code{\link{plot_area}()},
 \code{\link{plot_barpolar}()},
 \code{\link{plot_bar}()},
 \code{\link{plot_hist}()},
+\code{\link{plot_init}()},
 \code{\link{plot_line}()},
 \code{\link{plot_marker}()},
 \code{\link{plot_pie2}()},
