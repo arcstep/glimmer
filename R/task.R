@@ -301,23 +301,17 @@ task_run <- function(taskId,
 ## 预定义schema中有默认的映射规则，且在任务定义中未指定新的映射
 ## 允许映射多个输入参数
 getFuncInputAsign <- function(script, inputAsign) {
-  ia <- list()
   get_fun_schema(script, "params")$items |> purrr::walk(function(item) {
-    ia[[item]] <<- get_fun_schema(script, "params", item)$inputAsign
+    if(is.null(inputAsign[[item]])) {
+      inputAsign[[item]] <<- get_fun_schema(script, "params", item)$inputAsign
+    }
   })
-  if(!rlang::is_empty(ia)) {
-    names(ia) |> purrr::walk(function(item) {
-      if(item %nin% names(inputAsign)) {
-        inputAsign[[item]] <<- get_fun_schema(script, "params", item, "inputAsign")$items
-      }
-    })
-  }
-  inputAsign
+  Filter(function(i) !is.null(i), inputAsign)
 }
 
 ## 仅一个输出参数
 getFuncOutputAsign <- function(script, outputAsign) {
-  oa <- get_fun_schema(script, "outputAsign")$items
+  oa <- get_fun_schema(script, "outputAsign")$value
   if(!is.null(oa) && is.null(outputAsign |> unlist())) {
     outputAsign <- oa
   }

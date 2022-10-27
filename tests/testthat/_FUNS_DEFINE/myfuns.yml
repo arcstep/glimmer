@@ -12,7 +12,7 @@ projects:
         "i_cyl":
           editType: calc
           valType: integer
-    gali_ds_as_sort:
+    "gali_ds_as_sort":
       outputAsign: "@ds"
       params:
         "d":
