@@ -12,7 +12,7 @@ ds:
         "dsName":
           description: 数据集名称
           editType: dataset_search
-          valType: dataset_name
+          valType: string
         "noDeleted":
           description: 不返回标记为删除的数据
           editType: switcher
@@ -27,7 +27,7 @@ ds:
         "dsName":
           description: 数据集名称
           editType: dataset_search
-          valType: dataset_name
+          valType: string
     ds_collect:
       description: 结束惰性计算，立即执行数据收集
       outputAsign: "@ds"
