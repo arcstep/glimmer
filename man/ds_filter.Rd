@@ -35,16 +35,36 @@ taskId、column、op、value等参数构造唯一的gali_ds_filter表达式，
 }
 }
 \seealso{
-Other gali-dataset function: 
+Other dataset function: 
 \code{\link{ds_add_count}()},
+\code{\link{ds_all}()},
+\code{\link{ds_append}()},
 \code{\link{ds_arrange}()},
+\code{\link{ds_as_datetime}()},
+\code{\link{ds_as_deleted}()},
+\code{\link{ds_as_from}()},
+\code{\link{ds_as_unique}()},
 \code{\link{ds_collect}()},
 \code{\link{ds_count}()},
+\code{\link{ds_delete}()},
+\code{\link{ds_demo}()},
+\code{\link{ds_diff_dataset}()},
+\code{\link{ds_diff_schema}()},
+\code{\link{ds_drop}()},
+\code{\link{ds_exists}()},
+\code{\link{ds_files}()},
 \code{\link{ds_head}()},
+\code{\link{ds_init}()},
 \code{\link{ds_n_max}()},
 \code{\link{ds_n_min}()},
+\code{\link{ds_read0}()},
+\code{\link{ds_read}()},
 \code{\link{ds_rename}()},
+\code{\link{ds_schema_obj}()},
+\code{\link{ds_schema}()},
 \code{\link{ds_select}()},
-\code{\link{ds_tail}()}
+\code{\link{ds_tail}()},
+\code{\link{ds_type}()},
+\code{\link{ds_write}()}
 }
-\concept{gali-dataset function}
+\concept{dataset function}
