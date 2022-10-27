@@ -182,27 +182,27 @@ fs::dir_ls("data/funs_schema", recurse = T, type = "file", glob = "*.yml") |>
 #' @title 查询函数Schema
 #' @export
 get_funs_schema <- function(..., entry = "funs_schema") {
-  funs_schema <- as.list(SCHEMA.ENV)
   entryPath <- paste(entry, ..., sep = "$")
+  funs_schema <- as.list(SCHEMA.ENV)
   item <- parse(text = entryPath) |> eval()
   ## 所选参数在plotly的schema定义中直接可以找到
   if("valType" %in% names(item)) {
     ## 直接返回非列表参数
     item
   } else {
+    resp <- list("entry" = entryPath)
     if(is.null(attr(item, "names"))) {
-      list(
-        "valType" = "array",
-        "description" = "-",
-        "items" = item,
-        "entry" = entryPath)
+      resp[["valType"]] <- "vector"
+      resp[["value"]] <- item
     } else {
-      list(
-        "valType" = "object",
-        "description" = "-",
-        "items" = names(item),
-        "entry" = entryPath)
+      resp[["valType"]] <- "object"
+      resp[["items"]] <- names(item)
+      resp[["description"]] <- item$description
+      resp[["inputAsign"]] <- item$inputAsign
+      resp[["outputAsign"]] <- item$outputAsign
+      resp[["tags"]] <- item$tags
     }
+    resp
   }
 }
 
