@@ -1,17 +1,21 @@
+#
+Demo.Env <- new.env()
+fs::dir_ls("data/demo") |>
+  stringr::str_remove_all("data/demo/|.rds") |>
+  purrr::walk(function(p) {
+    assign(p,
+           paste0("data/demo/", p, ".rds") |> readRDS(),
+           envir = Demo.Env)
+    })
 
 #' @title Demo数据集
 #' @family dataset function
 #' @export
 ds_demo <- function(demoDataset = NULL) {
   if(is.null(demoDataset)) {
-    fs::dir_ls("data/demo") |> stringr::str_remove_all("data/demo/|.rds")
+    Demo.Env |> as.list()
   } else {
-    path <- paste0("data/demo/", demoDataset, ".rds")
-    if(fs::file_exists(path)) {
-      readRDS(path)
-    } else {
-      tibble()
-    }
+    get(demoDataset, envir = Demo.Env)
   }
 }
 
