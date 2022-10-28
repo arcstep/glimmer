@@ -33,7 +33,7 @@ test_that("<ds_write>", {
     testthat::expect_equal(10)
   
   task_create("cars/ds_read02") |>
-    task_empty_add(params = list(`@ds` = m |> slice(5:15))) |>
+    task_global_add(globalVars = list(`@ds` = m |> slice(5:15))) |>
     task_func_add("ds_write", params = list(dsName = "车数据")) |>
     task_run()
   ds_read0("车数据") |> collect() |> nrow() |>
