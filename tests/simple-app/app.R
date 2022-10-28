@@ -7,12 +7,10 @@ sample_init()
 
 task_create(taskId = "demo-task") |>
   task_item_add(type = "func", script = "ds_demo", params = list(demoDataset = "mtcars")) |>
-  task_item_add(type = "func", script = "ds_count", params = list(columns = "cyl", sort = TRUE))
-
-print(task_search())
+  task_item_add(type = "func", script = "ds_arrange", params = list(columns = "disp", desc = TRUE))
 
 #' @export
-sm_ui_task <- function(id) {
+sm_task_ui <- function(id) {
   ns <- NS(id)
   shiny::tagList(
     uiOutput(ns("head")),
@@ -25,13 +23,13 @@ sm_ui_task <- function(id) {
         uiOutput(ns("task_env"))
       ),
       mainPanel(
-        uiOutput(ns("preview"))
+        sm_preview_ui(ns("preview"))
       )
     ))
 }
 
 #' @export
-sm_server_task <- function(id, taskId, displayMode = "editor") {
+sm_task_server <- function(id, taskId, displayMode = "editor") {
   ns <- NS(id)
   moduleServer(id, function(input, output, session) {
     ##
@@ -45,12 +43,7 @@ sm_server_task <- function(id, taskId, displayMode = "editor") {
     observeEvent(input$run, {
       resp <- task_run(taskId)
       print(resp)
-      if("data.frame" %in% class(resp)) {
-        output$preview <- renderUI(DT::DTOutput(ns("dt_preview")))
-        output$dt_preview <- DT::renderDT({
-          resp |> DT::datatable()
-        })
-      }
+      sm_preview_server("preview", resp)
     }, ignoreInit = TRUE)
     ##
     output$task_items <- renderUI({
@@ -61,7 +54,7 @@ sm_server_task <- function(id, taskId, displayMode = "editor") {
             span(paste0(type)),
             br(),
             shiny::tags$code(script |> as.character()),
-            if(!is.na(params)) {
+            if(!identical(NA, params)) {
               ## 参数清单
               shiny::tags$ul(
                 !!!(names(params) |> purrr::map(function(j) {
@@ -82,11 +75,11 @@ sm_server_task <- function(id, taskId, displayMode = "editor") {
 }
 
 ui <- fluidPage(
-  sm_ui_task("task")
+  sm_task_ui("task")
 )
 
 server <- function(input, output, session) {
-  sm_server_task("task", taskId = "demo-task")
+  sm_task_server("task", taskId = "demo-task")
 }
 
 shinyApp(ui, server)
