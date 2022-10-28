@@ -13,10 +13,9 @@ task_func_add(...)
 Other task-define function: 
 \code{\link{task_create}()},
 \code{\link{task_dir_add}()},
-\code{\link{task_empty_add}()},
 \code{\link{task_expr_add}()},
 \code{\link{task_file_add}()},
-\code{\link{task_id}()},
+\code{\link{task_global_add}()},
 \code{\link{task_item_add}()},
 \code{\link{task_online}()},
 \code{\link{task_read}()},

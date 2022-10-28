@@ -6,21 +6,24 @@
 \usage{
 task_item_add(
   taskId,
-  script = "ls()",
-  params = list(NULL),
-  inputAsign = list(NULL),
-  outputAsign = list(NULL),
+  script = NA,
+  params = NA,
+  globalVars = NA,
+  inputAsign = NA,
+  outputAsign = NA,
   touchFiles = TRUE,
   taskTopic = "TASK_DEFINE",
-  type = "empty"
+  type = "global"
 )
 }
 \arguments{
 \item{taskId}{任务标识}
 
-\item{script}{子任务的执行路径}
+\item{script}{执行脚本或函数名、文件名、目录名}
 
-\item{params}{执行脚本的参数映射}
+\item{params}{执行函数参数映射}
+
+\item{globalVars}{设置全局变量}
 
 \item{inputAsign}{针对function和gali类型，使用执行环境内变量映射入参}
 
@@ -37,11 +40,10 @@ task_item_add(
 Other task-define function: 
 \code{\link{task_create}()},
 \code{\link{task_dir_add}()},
-\code{\link{task_empty_add}()},
 \code{\link{task_expr_add}()},
 \code{\link{task_file_add}()},
 \code{\link{task_func_add}()},
-\code{\link{task_id}()},
+\code{\link{task_global_add}()},
 \code{\link{task_online}()},
 \code{\link{task_read}()},
 \code{\link{task_run}()},

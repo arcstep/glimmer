@@ -41,6 +41,22 @@
   if (!rlang::is_empty(a)) b else a
 }
 
+#' @title 遇到NA填充默认值
+#' @family utils function
+#' @export
+`%na%` <- function(a, b) {
+  if(identical(NA, a)) b else a
+}
+
+#' @title 遇到NA填充默认值
+#' @family utils function
+#' @export
+`%not-na%` <- function(a, b) {
+  if(identical(NA, a)) a else b
+}
+
+
+
 #' @title 删除文件夹
 #' @family utils function
 #' @export

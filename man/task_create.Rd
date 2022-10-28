@@ -7,7 +7,6 @@
 task_create(
   taskId,
   online = FALSE,
-  items = NULL,
   taskType = "__UNKNOWN__",
   desc = "-",
   taskTopic = "TASK_DEFINE",
@@ -29,8 +28,6 @@ task_create(
 \item{desc}{任务描述}
 
 \item{taskTopic}{保存任务定义的存储主题文件夹}
-
-\item{runLevel}{同一批次任务中，运行时的优先级}
 }
 \description{
 创建任务执行框架
@@ -38,11 +35,10 @@ task_create(
 \seealso{
 Other task-define function: 
 \code{\link{task_dir_add}()},
-\code{\link{task_empty_add}()},
 \code{\link{task_expr_add}()},
 \code{\link{task_file_add}()},
 \code{\link{task_func_add}()},
-\code{\link{task_id}()},
+\code{\link{task_global_add}()},
 \code{\link{task_item_add}()},
 \code{\link{task_online}()},
 \code{\link{task_read}()},

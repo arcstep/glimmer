@@ -13,8 +13,10 @@ create_dir(path)
 Other utils function: 
 \code{\link{\%empty\%}()},
 \code{\link{\%error\%}()},
+\code{\link{\%na\%}()},
 \code{\link{\%nin\%}()},
 \code{\link{\%not-empty\%}()},
+\code{\link{\%not-na\%}()},
 \code{\link{\%not-regex\%}()},
 \code{\link{\%regex\%}()},
 \code{\link{gen_batchNum}()},

@@ -1,17 +1,20 @@
 #' @export
 sm_ui_task <- function(id) {
   ns <- NS(id)
-  sidebarLayout(
-    sidebarPanel(
-      uiOutput(ns("task_items"))
-    ),
-    mainPanel(
-      uiOutput(ns("head")),
-      actionButton(ns("run"), label = "执行", class = "btn btn-primary"),
-      hr(),
-      uiOutput(ns("preview"))
-    )
-  )
+  shiny::tagList(
+    uiOutput(ns("head")),
+    actionButton(ns("run"), label = "执行", class = "btn btn-primary"),
+    hr(),
+    sidebarLayout(
+      sidebarPanel(
+        uiOutput(ns("task_params")),
+        uiOutput(ns("task_items")),
+        uiOutput(ns("task_env"))
+      ),
+      mainPanel(
+        uiOutput(ns("preview"))
+      )
+    ))
 }
 
 #' @export
@@ -32,7 +35,20 @@ sm_server_task <- function(id, taskId, displayMode = "editor") {
           shiny::tagList(
             span(paste0(rowid, " ", type)),
             br(),
-            shiny::tags$code(script),
+            if(length(script) > 0) {
+              shiny::tags$code(script)
+            } else {
+              ""
+            },
+            shiny::tags$li(
+              !!!(params |> purrr::map(function(item) {
+                if(length(item) > 0) {
+                  shiny::tags$code(item |> as.character())
+                } else {
+                  ""
+                }
+              }))
+            ),
             p()
           )
         }))

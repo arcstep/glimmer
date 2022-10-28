@@ -39,7 +39,7 @@ sample_task_define <- function() {
 
   task_create(taskId = "task_sample_define_param") |>
     task_item_add(script = "SIMPLE/a.R", type = "file", touchFiles = F) |>
-    task_item_add(script = "result <- (x |> filter(age > myage))", params = list(myage = 3), type = "string", touchFiles = F)
+    task_item_add(script = "result <- (x |> filter(age > myage))", globalVars = list(myage = 3), type = "string", touchFiles = F)
 
   task_create(taskId = "task_sample_runtime_param") |>
     task_item_add(script = "SIMPLE/a.R", type = "file", touchFiles = F) |>

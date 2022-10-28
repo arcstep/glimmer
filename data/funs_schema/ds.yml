@@ -3,6 +3,14 @@ ds:
     - 数据集操作
   description: 数据集处理函数
   functions:
+    ds_demo:
+      description: glimmer内置的示例数据集
+      outputAsign: "@ds"
+      params:
+        "demoDataset":
+          description: 数据集名称
+          editType: demo_dataset_name
+          valType: string
     ds_all:
       description: 列举所有数据集
     ds_read0:
