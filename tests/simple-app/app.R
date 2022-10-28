@@ -1,19 +1,18 @@
 library(shiny)
 library(glimmer)
 
-rootPath <- tempdir()
-config_init(rootPath)
-import_init()
-risk_data_init()
-task_queue_init()
+setwd("../../")
+source("tests/testthat/helper.R")
+sample_init()
+
+print(task_search())
 
 ui <- fluidPage(
-  titlePanel("任务函数"),
-  ui_func_editor("func_editor")
+  sm_ui_task("task")
 )
 
 server <- function(input, output, session) {
-  server_func_editor("func_editor")
+  sm_server_task("task", taskId = "task_sample_simple")
 }
 
 shinyApp(ui, server)

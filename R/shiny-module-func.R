@@ -1,5 +1,5 @@
 #' @export
-ui_func_editor <- function(id) {
+sm_ui_func <- function(id) {
   ns <- NS(id)
   sidebarLayout(
     sidebarPanel(
@@ -19,7 +19,7 @@ ui_func_editor <- function(id) {
 }
 
 #' @export
-server_func_editor <- function(id) {
+sm_server_func <- function(id) {
   ns <- NS(id)
   moduleServer(id, function(input, output, session) {
     output$func_panel <- renderUI({
