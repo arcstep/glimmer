@@ -2,7 +2,7 @@
 sm_params_ui <- function(id, params) {
   message("sm_params_ui:", id)
   ns <- NS(id)
-  div(
+  tags$div(
     textOutput(ns("title")),
     if(!identical(NA, params)) {
       ## 参数清单
@@ -11,8 +11,6 @@ sm_params_ui <- function(id, params) {
           tags$li( tags$span(j), ":", tags$span(params[[j]]))
         }))
       )
-    } else {
-      tags$span("Empty")
     }
   )
 }
@@ -21,6 +19,13 @@ sm_params_ui <- function(id, params) {
 #' @export
 sm_params_server <- function(id, params) {
   moduleServer(id, function(input, output, session) {
-
+    message("sm_params_server:", id)
+    output$title <- renderText({
+      if(!identical(NA, params)) {
+        paste(length(params), "Params:")
+      } else {
+        "No Params"
+      }      
+    })
   })
 }

@@ -21,5 +21,9 @@ sm_scripts_server <- function(id, scriptItems) {
   ns <- NS(id)
   moduleServer(id, function(input, output, session) {
     message("sm_scripts_server id:", id)
+    scriptItems |>
+      purrr::pwalk(function(rowid, type, script, params, globalVars, inputAsign, outputAsign) {
+        sm_params_server(rowid, params)
+      })
   })
 }

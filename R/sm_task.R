@@ -28,7 +28,7 @@ sm_task_server <- function(id, taskId, displayMode = "editor") {
     output$head <- renderUI({shiny::tags$h3(taskInfo$title %empty% taskInfo$taskId)})
     ##
     scriptItems <- taskInfo$items |> tibble::rowid_to_column()
-    output[["task-scripts-items"]] <- renderUI(sm_scripts_ui(ns("list"), scriptItems))
+    output[["task-scripts-items"]] <- renderUI(sm_scripts_ui(ns("scripts"), scriptItems))
     ##
     observeEvent(input$run, {
       resp <- task_run(taskId)
@@ -36,6 +36,6 @@ sm_task_server <- function(id, taskId, displayMode = "editor") {
       sm_preview_server("preview", resp)
     }, ignoreInit = TRUE)
     ##
-    sm_scripts_server("task-scripts", scriptItems)
+    sm_scripts_server("scripts", scriptItems)
   })
 }
