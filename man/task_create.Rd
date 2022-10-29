@@ -11,6 +11,7 @@ task_create(
   desc = "-",
   taskTopic = "TASK_DEFINE",
   scriptsTopic = "TASK_SCRIPTS",
+  snapTopic = "SNAP",
   queueDataset = "__TASK_QUEUE__",
   importDataset = "__IMPORT_FILES__",
   cacheTopic = "CACHE",

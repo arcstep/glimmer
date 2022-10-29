@@ -1,3 +1,19 @@
+## 获取任务快照的临时ID
+getTaskSnapPath <- function(snapId, taskTopic = "TASK_DEFINE", snapTopic = "SNAP") {
+  if(length(snapId) != 1) {
+    stop("snapId length MUST be 1 >> ", snapId |> paste(collapse = ","))
+  }
+  get_path(snapTopic, taskTopic, snapId, "main.rds")
+}
+
+##
+getTaskPath <- function(taskId, taskTopic = "TASK_DEFINE") {
+  if(length(taskId) != 1) {
+    stop("taskId length MUST be 1 >> ", taskId |> paste(collapse = ","))
+  }
+  get_path(taskTopic, paste0(taskId, ".rds"))
+}
+
 #' @title 创建任务执行框架
 #' @param taskTopic 保存任务定义的存储主题文件夹
 #' @param taskType 任务类型
@@ -8,13 +24,14 @@
 #' @export
 task_create <- function(taskId, online = FALSE,
                         taskType = "__UNKNOWN__", desc = "-",
-                        taskTopic = "TASK_DEFINE", scriptsTopic = "TASK_SCRIPTS",
+                        taskTopic = "TASK_DEFINE", scriptsTopic = "TASK_SCRIPTS", snapTopic = "SNAP",
                         queueDataset = "__TASK_QUEUE__",importDataset = "__IMPORT_FILES__",
                         cacheTopic = "CACHE", importTopic = "IMPORT", extention = list()) {
-  path <- get_path(taskTopic, paste0(taskId, ".rds"))
+  path <- getTaskPath(taskId, taskTopic)
   fs::path_dir(path) |> fs::dir_create()
-  settings <- list(
+  meta <- list(
     "taskId" = taskId,
+    "snapId" = NULL,   ## snapId不为空时出于编辑模式
     "online" = online,
     "taskType" = taskType,
     "desc" = desc,
@@ -27,8 +44,104 @@ task_create <- function(taskId, online = FALSE,
     "importTopic" = importTopic,
     "createdAt" = as_datetime(lubridate::now(), tz = "Asia/Shanghai") |> as.character()
   )
-  settings |> saveRDS(path)
-  taskId
+  saveRDS(meta, path)
+  return(taskId)
+}
+
+#' @title 进入编辑状态
+#' @export
+task_edit <- function(taskId, taskTopic = "TASK_DEFINE", snapTopic = "SNAP") {
+  path <- getTaskPath(taskId, taskTopic)
+  if(fs::file_exists(path)) {
+    meta <- readRDS(path)
+    if(is.null(meta$snapId)) {
+      ## 修改为编辑模式，并克隆任务到快照
+      meta$snapId <- gen_batchNum()
+      saveRDS(meta, path)
+      ##
+      pathSnap <- getTaskSnapPath(meta$snapId, taskTopic, snapTopic)
+      fs::path_dir(pathSnap) |> fs::dir_create()
+      saveRDS(meta, pathSnap)
+    } else {
+      warning("Already in Editing Mode: ", taskId)
+    }
+    return(taskId)
+  } else {
+    stop("No Task Define: ", taskId)
+  }
+}
+
+#' @title 放弃修改，重新编辑
+#' @export
+task_discard <- function(taskId, taskTopic = "TASK_DEFINE", snapTopic = "SNAP") {
+  path <- getTaskPath(taskId, taskTopic)
+  if(fs::file_exists(path)) {
+    meta <- readRDS(path)
+    if(!is.null(meta$snapId)) {
+      ## 放弃编辑的内容，重新克隆任务到快照
+      saveRDS(meta, getTaskSnapPath(meta$snapId, taskTopic, snapTopic))
+    } else {
+      warning("Try to Discard But Not in Editing Mode: ", taskId)
+    }
+    return(taskId)
+  } else {
+    stop("No Task Define: ", taskId)
+  }
+}
+
+#' @title 保存修改内容，并继续编辑
+#' @export
+task_save <- function(taskId, taskTopic = "TASK_DEFINE", snapTopic = "SNAP") {
+  path <- getTaskPath(taskId, taskTopic)
+  if(fs::file_exists(path)) {
+    meta <- readRDS(path)
+    if(!is.null(meta$snapId)) {
+      ## 将快照内容复制到任务定义文件，并继续编辑
+      newMeta <- readRDS(getTaskSnapPath(meta$snapId, taskTopic, snapTopic))
+      saveRDS(newMeta, path)
+    } else {
+      warning("No Snap Need to Save: ", taskId)
+    }
+    return(taskId)
+  } else {
+    stop("No Task Define: ", taskId)
+  }
+}
+
+#' @title 克隆任务
+#' @export
+task_clone <- function(taskId, newTaskId, taskTopic = "TASK_DEFINE", snapTopic = "SNAP") {
+  path <- getTaskPath(taskId, taskTopic)
+  if(fs::file_exists(path)) {
+    meta <- readRDS(path)
+    meta$snapId <- NULL
+    pathClone <- getTaskPath(newTaskId, taskTopic)
+    fs::path_dir(pathClone) |> fs::dir_create()
+    saveRDS(meta, pathClone)
+    return(newTaskId)
+  } else {
+    stop("No Task Define: ", taskId)
+  }
+}
+
+#' @title 提交修改内容，并结束编辑
+#' @export
+task_submit <- function(taskId, taskTopic = "TASK_DEFINE", snapTopic = "SNAP") {
+  path <- getTaskPath(taskId, taskTopic)
+  if(fs::file_exists(path)) {
+    meta <- readRDS(path)
+    if(!is.null(meta$snapId)) {
+      ## 将快照内容复制到任务定义文件，并结束编辑模式
+      newMeta <- readRDS(getTaskSnapPath(meta$snapId, taskTopic, snapTopic))
+      newMeta$snapId <- NULL
+      saveRDS(newMeta, path)
+    } else {
+      warning("No Snap Need to Submit: ", taskId)
+    }
+    return(taskId)
+  } else {
+    stop("No Task Define: ", taskId)
+  }
 }
 
 #' @title 增加子任务
@@ -38,7 +151,8 @@ task_create <- function(taskId, online = FALSE,
 #' @param globalVars 设置全局变量
 #' @param inputAsign 针对function和gali类型，使用执行环境内变量映射入参
 #' @param outputAsign 保存子任务输出
-#' @param type 可以是string,expr,function,gali,file,dir,empty等
+#' @param touchFiles 类型为file,dir时自动创建脚本文件
+#' @param type 可以是string,expr,function,gali,file,dir,global等
 #' @param taskTopic 任务主题存储位置
 #' @family task-define function
 #' @export
@@ -51,36 +165,40 @@ task_item_add <- function(
     outputAsign = NA,
     touchFiles = TRUE,
     taskTopic = "TASK_DEFINE",
+    snapTopic = "SNAP",
     type = "global") {
-  path <- get_path(taskTopic, paste0(taskId, ".rds"))
+  path <- getTaskPath(taskId, taskTopic)
   if(fs::file_exists(path)) {
     ## 写入任务定义配置文件
     meta <- readRDS(path)
-    item <- tibble(
-      "type" = type,
-      "script" = script,
-      "params" = params %not-na% list(params),
-      "globalVars" = globalVars %not-na% list(globalVars),
-      "inputAsign" = inputAsign %not-na% list(inputAsign),
-      "outputAsign" = outputAsign %not-na% list(outputAsign)
-      )
-    if(rlang::is_empty(meta$items)) {
-      meta$items <- item
-    } else {
-      meta$items <- rbind(as_tibble(meta$items), item)
+    if(!is.null(meta$snapId)) {
+      ## 在编辑模式中，将任务追加到任务快照中
+      meta <- getTaskSnapPath(meta$snapId, taskTopic, snapTopic) |> readRDS()
     }
-    meta |> saveRDS(path)
-    ## 使用模板创建脚本
-    if(touchFiles) {
-      if(type == "file") task_script_file_create(script)
-      if(type == "dir") task_script_dir_create(script)
-    }
-    ##
-    ## 支持管道定义
-    taskId
   } else {
     stop("Can't Add Task Before Task Define: ", taskId)
   }
+  item <- tibble(
+    "type" = type,
+    "script" = script,
+    "params" = params %not-na% list(params),
+    "globalVars" = globalVars %not-na% list(globalVars),
+    "inputAsign" = inputAsign %not-na% list(inputAsign),
+    "outputAsign" = outputAsign %not-na% list(outputAsign)
+    )
+  if(rlang::is_empty(meta$items)) {
+    meta$items <- item
+  } else {
+    meta$items <- rbind(as_tibble(meta$items), item)
+  }
+  meta |> saveRDS(path)
+  ## 使用模板创建脚本
+  if(touchFiles) {
+    if(type == "file") task_script_file_create(script)
+    if(type == "dir") task_script_dir_create(script)
+  }
+  ## 支持管道定义
+  taskId
 }
 
 #' @title 为任务增加函数子任务
@@ -161,18 +279,14 @@ task_read <- function(taskId, taskTopic = "TASK_DEFINE") {
 #' @family task-define function
 #' @export
 task_online <- function(taskId, online = TRUE, taskTopic = "TASK_DEFINE") {
-  if(length(taskId) != 1) {
-    stop("taskId length MUST be 1 >> ", taskId |> paste(collapse = ","))
-  }
-  path <- get_path(taskTopic, paste0(taskId, ".rds"))
+  path <- getTaskPath(taskId, taskTopic)
   if(fs::file_exists(path)) {
     x <- readRDS(path)
     x$online = online
     x |> saveRDS(path)
     message("Task <", taskTopic, "/", taskId, "> online: ", online, " !!")
   } else {
-    warning("No Task Define: ", taskId)
-    list("task_path" = path)
+    stop("No Task Define: ", taskId)
   }
 }
 

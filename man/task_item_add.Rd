@@ -13,6 +13,7 @@ task_item_add(
   outputAsign = NA,
   touchFiles = TRUE,
   taskTopic = "TASK_DEFINE",
+  snapTopic = "SNAP",
   type = "global"
 )
 }
@@ -29,9 +30,11 @@ task_item_add(
 
 \item{outputAsign}{保存子任务输出}
 
+\item{touchFiles}{类型为file,dir时自动创建脚本文件}
+
 \item{taskTopic}{任务主题存储位置}
 
-\item{type}{可以是string,expr,function,gali,file,dir,empty等}
+\item{type}{可以是string,expr,function,gali,file,dir,global等}
 }
 \description{
 增加子任务
