@@ -1,0 +1,7 @@
+ROOT_PATH: /Users/xuehongwei/R-workspace/glimmer/tests/simple-app
+SNAP: ./SNAP
+IMPORT: ./IMPORT
+CACHE: ./CACHE
+TASK_SCRIPTS: ./TASK_SCRIPTS
+TASK_DEFINE: ./TASK_DEFINE
+FUNS_DEFINE: ./FUNS_DEFINE
