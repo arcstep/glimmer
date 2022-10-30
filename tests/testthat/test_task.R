@@ -54,6 +54,37 @@ test_that("定义任务：dir类型", {
   temp_remove()
 })
 
+test_that("任务脚本：赠、改、删、调序", {
+  sample_init()
+  
+  task_create(taskId = "TaskA", force = TRUE) |>
+    task_func_add(script = "ds_demo", params = list("demoDataset" = "mpg")) |>
+    task_func_add(script = "ds_head") |>
+    task_func_add(script = "ds_arrange", params = list("columns" = "displ"))
+  task_read("TaskA")$items$script |>
+    identical(c("ds_demo", "ds_head", "ds_arrange")) |>
+    testthat::expect_true()
+
+  task_item_remove("TaskA", 2)
+  task_read("TaskA")$items$script |>
+    identical(c("ds_demo", "ds_arrange")) |>
+    testthat::expect_true()
+
+  "TaskA" |> task_func_add(script = "ds_head")
+  "TaskA" |> task_item_exchange(3, 2)
+  task_read("TaskA")$items$script |>
+    identical(c("ds_demo", "ds_head", "ds_arrange")) |>
+    testthat::expect_true()
+
+  "TaskA" |> task_func_update(2, script = "ds_tail", params = list(n = 3))
+  task_read("TaskA")$items$script |>
+    identical(c("ds_demo", "ds_tail", "ds_arrange")) |>
+    testthat::expect_true()
+  
+  temp_remove()
+})
+
+
 test_that("<task_run>: withEnv", {
   sample_init()
   task_create("mytask") |>

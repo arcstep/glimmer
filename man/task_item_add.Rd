@@ -13,7 +13,6 @@ task_item_add(
   outputAsign = NA,
   touchFiles = TRUE,
   taskTopic = "TASK_DEFINE",
-  snapTopic = "SNAP",
   type = "global"
 )
 }
@@ -43,14 +42,24 @@ task_item_add(
 Other task-define function: 
 \code{\link{task_create}()},
 \code{\link{task_dir_add}()},
+\code{\link{task_dir_update}()},
 \code{\link{task_expr_add}()},
+\code{\link{task_expr_update}()},
 \code{\link{task_file_add}()},
+\code{\link{task_file_update}()},
 \code{\link{task_func_add}()},
+\code{\link{task_func_update}()},
 \code{\link{task_global_add}()},
+\code{\link{task_global_update}()},
+\code{\link{task_item_exchange}()},
+\code{\link{task_item_remove}()},
+\code{\link{task_item_update}()},
 \code{\link{task_online}()},
 \code{\link{task_read}()},
 \code{\link{task_run}()},
 \code{\link{task_search}()},
-\code{\link{task_string_add}()}
+\code{\link{task_string_add}()},
+\code{\link{task_string_update}()},
+\code{\link{task_update}()}
 }
 \concept{task-define function}

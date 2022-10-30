@@ -2,10 +2,11 @@
 % Please edit documentation in R/task.R
 \name{task_edit}
 \alias{task_edit}
-\title{进入编辑状态}
+\title{进入编辑模式}
 \usage{
 task_edit(taskId, taskTopic = "TASK_DEFINE", snapTopic = "SNAP")
 }
 \description{
-进入编辑状态
+针对任务中的脚本可使用编辑模式，
+其余任务设置则直接更新任务定义。
 }
