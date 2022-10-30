@@ -85,9 +85,18 @@ test_that("追加数据：创建新数据", {
   ds_init("车数据", keyColumns = "rowname", data = m |> head())
   
   m |> slice(1:10) |> as_tibble() |> ds_append("车数据")
+  ## ds_read
   ds_read("车数据") |> collect() |> nrow() |>
     testthat::expect_equal(10)
+  ## ds_read0
+  ds_read0("车数据") |> collect() |> nrow() |>
+    testthat::expect_equal(0)
+  ## ds_submit
+  ds_submit("车数据")
+  ds_read0("车数据") |> collect() |> nrow() |>
+    testthat::expect_equal(10)
   
+    
   m |> slice(1:10) |> as_tibble() |> ds_append("车数据")
   get_path("CACHE", "车数据") |> arrow::open_dataset() |> nrow() |>
     testthat::expect_equal(20)
@@ -95,6 +104,45 @@ test_that("追加数据：创建新数据", {
     testthat::expect_equal(10)
   
   temp_remove()
+})
+
+test_that("读取数据：ds_read0 vs ds_read vs arrow::open_dataset", {
+  sample_init()
+  d <- ds_demo("mpg") |> select(-rowid)
+  1:5 |> purrr::walk(function(i) d <<- rbind(d, d))
+  d <- tibble::rowid_to_column(d, "rowid")
+  ds_drop("cars")
+  ds_init("cars", keyColumns = "rowid", data = d)
+  d |> ds_append("cars")
+  ## ds_read
+  ds_read("cars") |>
+    collect() |>
+    nrow() |>
+    testthat::expect_equal(nrow(d))
+  ds_read0("cars") |>
+    collect() |>
+    nrow() |>
+    testthat::expect_equal(0)
+  arrow::open_dataset(get_path("CACHE", "cars")) |>
+    collect() |>
+    nrow() |>
+    testthat::expect_equal(nrow(d))
+  ##
+  ds_submit("cars")
+  ds_read("cars") |>
+    collect() |>
+    nrow() |>
+    testthat::expect_equal(nrow(d))
+  ds_read0("cars") |>
+    collect() |>
+    nrow() |>
+    testthat::expect_equal(nrow(d))
+  arrow::open_dataset(get_path("CACHE", "cars")) |>
+    collect() |>
+    nrow() |>
+    testthat::expect_equal(nrow(d))
+  
+  temp_remove()  
 })
 
 test_that("追加数据：修改旧数据", {

@@ -234,6 +234,8 @@ ds_files <- function(dsName, topic = "CACHE") {
 }
 
 #' @title 仅读取已归档数据
+#' @description 
+#' 仅返回已归档数据
 #' @param dsName 数据集名称
 #' @param topic 主题域
 #' @param noDeleted 不返回标记为删除的数据
@@ -251,7 +253,7 @@ ds_read0 <- function(dsName, topic = "CACHE", noDeleted = TRUE) {
   if(length(d$files) == 0) return(tibble())
   
   ##
-  if(noDeleted) d <- d |> filter(!`@deleted`)
+  d <- d |> filter(`@action` == "__ARCHIVE__" & `@deleted` == !noDeleted)
   ## 按元数据中的读取建议整理结果
   if(!is_empty(meta$suggestedColumns)) {
     d |> select(!!!syms(meta$suggestedColumns), everything())
