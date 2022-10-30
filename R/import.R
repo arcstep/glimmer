@@ -52,7 +52,7 @@ import_changed <- function(importTopic = "IMPORT", snapTopic = "SNAP") {
   }
   
   ## 扫描任务脚本文件夹
-  if(!rlang::is_empty(batchFolders)) {
+  if(!is_empty(batchFolders)) {
     batchFolders |>
       sort() |>
       purrr::map(function(batchPath) {
@@ -91,11 +91,11 @@ import_scan <- function(importDataset = "__IMPORT_FILES__",
                         cacheTopic = "CACHE") {
   changed_files <- import_changed(importTopic, snapTopic)
 
-  if(!rlang::is_empty(changed_files)) {
+  if(!is_empty(changed_files)) {
     ## 筛查未曾入库或虽曾入库但已修改的素材文件
     existing <- ds_read(dsName = importDataset, topic = cacheTopic) |>
       collect()
-    if(rlang::is_empty(existing)) {
+    if(is_empty(existing)) {
       newScan <- changed_files
     } else {
       newScan <- changed_files |>
@@ -126,7 +126,7 @@ import_search <- function(fileMatch = ".*",
                          ignoreFlag = FALSE,
                          b_todo = TRUE) {
   filesToRead <- ds_read(dsName = importDataset, topic = cacheTopic)
-  if(!rlang::is_empty(filesToRead)) {
+  if(!is_empty(filesToRead)) {
     d0 <- filesToRead |> filter(todo %in% b_todo)
     d0 |> filter(ignore == ignoreFlag) |>
       collect() |>
@@ -176,8 +176,8 @@ import_run <- function(files = tibble(),
   tasksToMatch <- tasks %empty% task_search(typeMatch = "IMPORT", taskTopic = taskTopic)
 
   ## 按照约定，使用taskId匹配导入素材的filePath
-  if(!rlang::is_empty(filesToRead)) {
-    if(!rlang::is_empty(tasksToMatch)) {
+  if(!is_empty(filesToRead)) {
+    if(!is_empty(tasksToMatch)) {
       hasMatched <- 0
       resp <- tasksToMatch |>
         filter(online) |>

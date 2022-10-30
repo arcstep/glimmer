@@ -64,7 +64,7 @@ ds_type <- function(type = "__UNKNOWN__") {
 #' @family dataset function
 #' @export
 ds_append <- function(d, dsName, topic = "CACHE") {
-  if(rlang::is_empty(d)) {
+  if(is_empty(d)) {
     warning("Empty Dataset to write >>> ", dsName, "/", topic)
   } else {
     if(nrow(d) == 0) {
@@ -75,24 +75,24 @@ ds_append <- function(d, dsName, topic = "CACHE") {
       
       ## 读取数据集配置
       meta <- ds_yaml(dsName, topic)
-      if(rlang::is_empty(meta)) {
+      if(is_empty(meta)) {
         stop("Empty Dataset Metadata!!!")
       }
       
       ## 缺少schema定义
-      if(rlang::is_empty(meta$schema)) {
+      if(is_empty(meta$schema)) {
         stop("No Schema Defined!!!")
       }
 
       ## 缺少主键字段
-      if(!rlang::is_empty(meta$keyColumns)) {
+      if(!is_empty(meta$keyColumns)) {
         if(FALSE %in% (meta$keyColumns %in% names(d))) {
           stop("No keyColumns in data: ", meta$keyColumns |> paste(collapse = ", "))
         }
       }
       
       ## 缺少分区字段
-      if(!rlang::is_empty(meta$partColumns)) {
+      if(!is_empty(meta$partColumns)) {
         if(FALSE %in% (meta$partColumns %in% c("@action", names(d)))) {
           stop("No partColumns in data: ", meta$partColumns |> paste(collapse = ", "))
         }
@@ -145,7 +145,7 @@ ds_write <- function(d, dsName, topic = "CACHE") {
 #' @export
 ds_delete <- function(d, dsName, topic = "CACHE") {
   meta <- ds_yaml(dsName, topic)
-  if(rlang::is_empty(meta$keyColumns)) {
+  if(is_empty(meta$keyColumns)) {
     stop("Can't Delete without keyColumns Setting!!!")
   }
   ds_read(dsName, topic) |>
@@ -173,7 +173,7 @@ ds_submit <- function(dsName, topic = "CACHE") {
   force(toRemoveFiles)
   ## 找出更新数据的分区
   # part <- meta$partColumns[meta$partColumns != "@action"]
-  # if(rlang::is_empty(part)) {
+  # if(is_empty(part)) {
     d <- ds_read(dsName, topic, noDeleted = FALSE) |> collect()
   # } else {
   #   myschema <- do.call("schema", ds_schema_obj(dsName, topic))
@@ -187,7 +187,7 @@ ds_submit <- function(dsName, topic = "CACHE") {
   #     collect()
   # }
 
-  if(rlang::is_empty(d)) {
+  if(is_empty(d)) {
     warning("Empty Dataset to submit >>> ", dsName, "/", topic)
   } else {
     if(nrow(d) == 0) {
@@ -253,7 +253,7 @@ ds_read0 <- function(dsName, topic = "CACHE", noDeleted = TRUE) {
   ##
   if(noDeleted) d <- d |> filter(!`@deleted`)
   ## 按元数据中的读取建议整理结果
-  if(!rlang::is_empty(meta$suggestedColumns)) {
+  if(!is_empty(meta$suggestedColumns)) {
     d |> select(!!!syms(meta$suggestedColumns), everything())
   } else {
     d
@@ -266,7 +266,7 @@ ds_read0 <- function(dsName, topic = "CACHE", noDeleted = TRUE) {
 #' @family dataset function
 #' @export
 ds_exists <- function(dsName, topic = "CACHE") {
-  !rlang::is_empty(ds_yaml(dsName))
+  !is_empty(ds_yaml(dsName))
 }
 
 #' @title 读取数据集
@@ -320,7 +320,7 @@ ds_read <- function(dsName, topic = "CACHE", noDeleted = TRUE) {
     keys <- tibble()
   }
 
-  if(!rlang::is_empty(keys)) {
+  if(!is_empty(keys)) {
     ## 旧数据要更新的记录
     arrchive_expired <- d |>
       filter(`@action` == "__ARCHIVE__") |>
@@ -344,7 +344,7 @@ ds_read <- function(dsName, topic = "CACHE", noDeleted = TRUE) {
   }
 
   ## 按元数据中的读取建议整理结果
-  if(!rlang::is_empty(meta$suggestedColumns)) {
+  if(!is_empty(meta$suggestedColumns)) {
     resp |> select(!!!syms(meta$suggestedColumns), everything())
   } else {
     resp
@@ -397,7 +397,7 @@ ds_drop <- function(dsName, topic = "CACHE") {
 #' @family dataset function
 #' @export
 ds_schema <- function(ds) {
-  if(rlang::is_empty(ds)) {
+  if(is_empty(ds)) {
     tibble()
   } else {
     # tibble(
@@ -431,7 +431,7 @@ ds_schema <- function(ds) {
 ds_schema_obj <- function(dsName, topic = "CACHE") {
   s <- list()
   yml <- ds_yaml(dsName, topic)
-  if(!rlang::is_empty(yml$schema)) {
+  if(!is_empty(yml$schema)) {
     yml$schema |> purrr::walk(function(item) {
       s[[item$fieldName]] <<- dt_field(item$fieldType)
     }) 
@@ -466,10 +466,10 @@ ds_diff_schema <- function(schema1, schema2) {
 #' @family dataset function
 #' @export
 ds_diff_dataset <- function(ds1, ds2) {
-  if(rlang::is_empty(ds1)) {
+  if(is_empty(ds1)) {
     stop("ds1 is NULL and failed to compare")
   }
-  if(rlang::is_empty(ds2)) {
+  if(is_empty(ds2)) {
     stop("ds1 is NULL and failed to compare")
   }
   ds_diff_schema(ds_schema(ds1), ds_schema(ds2))

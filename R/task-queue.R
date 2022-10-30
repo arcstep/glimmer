@@ -57,7 +57,7 @@ task_queue_search <- function(b_todo = TRUE, taskMatch = ".*", dsName = "__TASK_
   all <- ds_read(dsName = dsName, topic = cacheTopic) |>
     filter(todo %in% b_todo) |>
     collect()
-  if(!rlang::is_empty(all)) {
+  if(!is_empty(all)) {
     all |> filter(stringr::str_detect(taskId, taskMatch)) |>
       arrange(desc(runAt))
   }

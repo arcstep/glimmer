@@ -202,7 +202,7 @@ task_item_add <- function(
     "inputAsign" = inputAsign %not-na% list(inputAsign),
     "outputAsign" = outputAsign %not-na% list(outputAsign)
     )
-  if(rlang::is_empty(meta$items)) {
+  if(is_empty(meta$items)) {
     meta$items <- item
   } else {
     meta$items <- rbind(as_tibble(meta$items), item)
@@ -351,7 +351,7 @@ task_run <- function(taskId,
   ## 设置运行环境
   batchId <- gen_batchNum()
   taskMeta <- task_read(taskId)
-  if(is.na(taskMeta$items) || rlang::is_empty(taskMeta$items)) {
+  if(is.na(taskMeta$items) || is_empty(taskMeta$items)) {
     warning("Empty Task: ", taskId)
     return()
   }
@@ -428,7 +428,7 @@ getFuncInputAsign <- function(script, inputAsign) {
 ## 仅一个输出参数
 getFuncOutputAsign <- function(script, outputAsign) {
   oa <- get_fun_schema(script, "outputAsign")$value
-  if(!is.null(oa) && rlang::is_empty(outputAsign)) {
+  if(!is.null(oa) && is_empty(outputAsign)) {
     oa
   } else {
     outputAsign
@@ -456,7 +456,7 @@ taskToRun <- function(taskItems, withEnv, ...) {
       })
       if(type == "func") {
         ## 支持函数管道
-        if(rlang::is_empty(get_fun_schema(script))) {
+        if(is_empty(get_fun_schema(script))) {
           stop("No Schema Defined for Function: ", script)
         }
         inputAsign <- getFuncInputAsign(script, inputAsign %na% list())

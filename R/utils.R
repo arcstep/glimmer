@@ -31,14 +31,14 @@
 #' @family utils function
 #' @export
 `%empty%` <- function(a, b) {
-  if (rlang::is_empty(a)) b else a
+  if (is_empty(a)) b else a
 }
 
 #' @title 遇到非空值填充默认值
 #' @family utils function
 #' @export
 `%not-empty%` <- function(a, b) {
-  if (!rlang::is_empty(a)) b else a
+  if (!is_empty(a)) b else a
 }
 
 #' @title 遇到NA填充默认值

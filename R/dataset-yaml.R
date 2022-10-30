@@ -58,8 +58,8 @@ ds_yaml_write <- function(dsName, meta = c(), ex = c(),  data = tibble(), topic 
     })
   
   ## 如果元数据没有提供架构描述，则从样本数据中推断
-  if(rlang::is_empty(meta$schema)) {
-    if(!rlang::is_empty(data)) {
+  if(is_empty(meta$schema)) {
+    if(!is_empty(data)) {
       datasetMeta$schema <- ds_schema(data) |>
         purrr::pmap(function(fieldType, fieldName) {
           list("fieldName" = fieldName, "fieldType" = fieldType)

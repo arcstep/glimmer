@@ -41,6 +41,7 @@ risk_model_create <- function(dsName,
                            riskLevel = "L",
                            modelDesc = "-",
                            author = "-",
+                           force = FALSE,
                            riskDataName = "__RISK_DATA__",
                            cacheTopic = "CACHE",
                            taskTopic = "TASK_DEFINE",
@@ -48,10 +49,10 @@ risk_model_create <- function(dsName,
   modelId = paste(modelName, tagName, sep = "/")
   ## 校验筛查目标的数据集配置
   yml <- ds_yaml(dsName, topic = cacheTopic)
-  if(rlang::is_empty(yml$keyColumns)) {
+  if(is_empty(yml$keyColumns)) {
     stop("Risk Model Config Invalid: ", modelId, " / ", "No KeyColumns in dataset ", dsName)
   }
-  if(rlang::is_empty(yml$titleColumn)) {
+  if(is_empty(yml$titleColumn)) {
     stop("Risk Model Config Invalid: ", modelId, " / ", "No TitleColumn in dataset ", dsName)
   }
 
@@ -60,6 +61,7 @@ risk_model_create <- function(dsName,
               taskType = "__RISK__",
               taskTopic = taskTopic,
               desc = modelDesc,
+              force = force,
               extention = list(
                 modelName = modelName,
                 tagName = tagName,
@@ -80,7 +82,7 @@ risk_model_create <- function(dsName,
 #' @export
 risk_data_read <- function(todoFlag = TRUE, riskDataName = "__RISK_DATA__", cacheTopic = "CACHE") {
   x <- ds_read0(riskDataName, cacheTopic)
-  if(rlang::is_empty(x)) {
+  if(is_empty(x)) {
     tibble()
   } else {
     x |> collect() |> filter(todo %in% todoFlag)
@@ -129,7 +131,7 @@ risk_data_clear <- function(modelId,
                             taskTopic = "TASK_DEFINE") {
   task <- task_read(modelId, taskTopic = taskTopic)
   allData <- risk_data_read(TRUE, riskDataName, cacheTopic)
-  if(!rlang::is_empty(allData)) {
+  if(!is_empty(allData)) {
     allData |>
       collect() |>
       ds_as_deleted() |>
@@ -194,7 +196,7 @@ risk_data_write <- function(d, modelId) {
     mutate(modelName = task$extention$modelName)
   ## 已处理数据
   allRiskData <- risk_data_read(FALSE, task$extention$riskDataName, task$extention$cacheTopic)
-  if(!rlang::is_empty(allRiskData)) {
+  if(!is_empty(allRiskData)) {
     toWrite <- d0 |> anti_join(
       allRiskData |> filter(!todo) |> select(modelName, dsName, dataId) |> collect(),
       by = c("modelName", "dsName", "dataId"))
