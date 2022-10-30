@@ -59,12 +59,39 @@ task_create <- function(taskId, online = FALSE, force = FALSE,
   }
 }
 
+#' @title 更新任务配置
+#' @param taskTopic 保存任务定义的存储主题文件夹
+#' @param taskType 任务类型
+#' @param taskId 任务唯一标识，每个\code{taskId}会保存为一个独立文件
+#' @param online 如果任务下线，在推荐可执行任务时将忽略
+#' @param desc 任务描述
+#' @family task-define function
+#' @export
+task_update <- function(taskId, ..., force = FALSE, taskTopic = "TASK_DEFINE") {
+  path <- getTaskPath(taskId, taskTopic)
+  if(fs::file_exists(path)) {
+    meta <- readRDS(path)
+    metaInfo <- list(...)
+    names(metaInfo) |> purrr::walk(function(i) {
+      if(force || i %in% names(meta)) {
+        meta[[i]] <<- metaInfo[[i]]
+      } else {
+        warning("No <", i, "> in Task Meta: ", taskId)
+      }
+    })
+    saveRDS(meta, path)
+    return(taskId)
+  } else {
+    stop("Task Not Exist for Update: ", taskId)
+  }
+}
+
 #' @title 进入编辑模式
 #' @description 
 #' 针对任务中的脚本可使用编辑模式，
 #' 其余任务设置则直接更新任务定义。
 #' @export
-task_edit <- function(taskId, taskTopic = "TASK_DEFINE", snapTopic = "SNAP") {
+task_edit_snap <- function(taskId, taskTopic = "TASK_DEFINE", snapTopic = "SNAP") {
   path <- getTaskPath(taskId, taskTopic)
   if(fs::file_exists(path)) {
     meta <- readRDS(path)
@@ -77,18 +104,13 @@ task_edit <- function(taskId, taskTopic = "TASK_DEFINE", snapTopic = "SNAP") {
       fs::path_dir(pathSnap) |> fs::dir_create()
       saveRDS(meta, pathSnap)
     } else {
-      warning("Already in Editing Mode: ", taskId)
+      warning("Already in Edit-Snap Mode: ", taskId)
     }
     return(taskId)
   } else {
-    stop("No Task Define try to edit: ", taskId)
+    stop("No Task Define try to edit-snap: ", taskId)
   }
 }
-
-#' @title 更新任务定义
-#' @family task-define function
-#' @export
-task_update <- purrr::partial(task_create, force = FALSE)
 
 #' @title 放弃修改，重新编辑
 #' @export

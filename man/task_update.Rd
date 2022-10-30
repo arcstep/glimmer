@@ -2,12 +2,23 @@
 % Please edit documentation in R/task.R
 \name{task_update}
 \alias{task_update}
-\title{更新任务定义}
+\title{更新任务配置}
 \usage{
-task_update(...)
+task_update(taskId, ..., force = FALSE, taskTopic = "TASK_DEFINE")
+}
+\arguments{
+\item{taskId}{任务唯一标识，每个\code{taskId}会保存为一个独立文件}
+
+\item{taskTopic}{保存任务定义的存储主题文件夹}
+
+\item{taskType}{任务类型}
+
+\item{online}{如果任务下线，在推荐可执行任务时将忽略}
+
+\item{desc}{任务描述}
 }
 \description{
-更新任务定义
+更新任务配置
 }
 \seealso{
 Other task-define function: 

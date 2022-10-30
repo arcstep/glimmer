@@ -258,7 +258,7 @@ test_that("编辑任务：正常流程", {
   
   task_create(taskId) |>
     task_func_add("ds_demo", params = list("demoDataset" = "mpg")) |>
-    task_edit()
+    task_edit_snap()
   snapId <- task_read(taskId)$snapId
   is.null(snapId) |>
     testthat::expect_false()
@@ -317,7 +317,7 @@ test_that("编辑任务：克隆、移除和放弃编辑", {
     testthat::expect_error("No Task Define")
   
   ## 放弃编辑
-  task_edit("mytask2") |>
+  task_edit_snap("mytask2") |>
     task_item_add(type = "func", script = "ds_head") |>
     task_run(snap = TRUE) |>
     nrow() |>
@@ -341,7 +341,7 @@ test_that("<task_run>: stepToRun", {
   
   ## 按快照执行任务
   task_create(taskId) |>
-    task_edit() |>
+    task_edit_snap() |>
     task_item_add(type = "func",
                   script = "ds_demo",
                   params = list("demoDataset" = "mpg")) |>
