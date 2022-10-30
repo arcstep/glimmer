@@ -22,13 +22,11 @@ getTaskPath <- function(taskId, taskTopic = "TASK_DEFINE") {
 #' @param desc 任务描述
 #' @family task-define function
 #' @export
-task_create <- function(taskId, online = FALSE,
+task_create <- function(taskId, online = FALSE, force = FALSE,
                         taskType = "__UNKNOWN__", desc = "-",
                         taskTopic = "TASK_DEFINE", scriptsTopic = "TASK_SCRIPTS", snapTopic = "SNAP",
                         queueDataset = "__TASK_QUEUE__",importDataset = "__IMPORT_FILES__",
                         cacheTopic = "CACHE", importTopic = "IMPORT", extention = list()) {
-  path <- getTaskPath(taskId, taskTopic)
-  fs::path_dir(path) |> fs::dir_create()
   meta <- list(
     "taskId" = taskId,
     "snapId" = NULL,   ## snapId不为空时出于编辑模式
@@ -44,8 +42,14 @@ task_create <- function(taskId, online = FALSE,
     "importTopic" = importTopic,
     "createdAt" = as_datetime(lubridate::now(), tz = "Asia/Shanghai") |> as.character()
   )
-  saveRDS(meta, path)
-  return(taskId)
+  path <- getTaskPath(taskId, taskTopic)
+  if(force || !fs::file_exists(path)) {
+    fs::path_dir(path) |> fs::dir_create()
+    saveRDS(meta, path)
+    return(taskId)
+  } else {
+    stop("Task Already Exist: ", taskId)
+  }
 }
 
 #' @title 进入编辑状态
@@ -141,6 +145,18 @@ task_submit <- function(taskId, taskTopic = "TASK_DEFINE", snapTopic = "SNAP") {
     return(taskId)
   } else {
     stop("No Task Define: ", taskId)
+  }
+}
+
+#' @title 删除任务
+#' @export
+task_remove <- function(taskId, taskTopic = "TASK_DEFINE") {
+  path <- getTaskPath(taskId, taskTopic)
+  if(fs::file_exists(path)) {
+    fs::file_delete(path)
+    message("Task Removed: ", taskId)
+  } else {
+    warning("No Task Define: ", taskId)
   }
 }
 

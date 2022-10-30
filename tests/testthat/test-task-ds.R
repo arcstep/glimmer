@@ -9,7 +9,7 @@ test_that("<ds_collect>", {
   ds_read0("车数据") |> collect() |> nrow() |>
     testthat::expect_equal(10)
   
-  task_create("cars/ds_read0") |>
+  task_create("cars/ds_read0", force = TRUE) |>
     task_func_add("ds_read0", params = list(dsName = "车数据")) |>
     task_func_add("ds_collect") |>
     task_run() |>
@@ -26,13 +26,13 @@ test_that("<ds_write>", {
   ds_drop("车数据")
   ds_init("车数据", keyColumns = "rowname", data = m |> head())
   
-  task_create("cars/ds_read0") |>
+  task_create("cars/ds_read0", force = TRUE) |>
     task_func_add("ds_write", params = list(dsName = "车数据")) |>
     task_run(`@ds` = m |> slice(1:10))
   ds_read0("车数据") |> collect() |> nrow() |>
     testthat::expect_equal(10)
   
-  task_create("cars/ds_read02") |>
+  task_create("cars/ds_read02", force = TRUE) |>
     task_global_add(globalVars = list(`@ds` = m |> slice(5:15))) |>
     task_func_add("ds_write", params = list(dsName = "车数据")) |>
     task_run()
@@ -143,7 +143,7 @@ test_that("<ds_head/ ds_tail>", {
   
   m |> as_tibble() |> ds_write("车数据")
   
-  task_create("cars/ds_read0") |>
+  task_create("cars/ds_read0", force = TRUE) |>
     task_func_add("ds_read0", list(dsName = "车数据")) |>
     task_func_add("ds_head") |>
     task_func_add("ds_collect") |>
@@ -151,7 +151,7 @@ test_that("<ds_head/ ds_tail>", {
     nrow() |>
     testthat::expect_equal(10)
   
-  task_create("cars/ds_read0") |>
+  task_create("cars/ds_read0", force = TRUE) |>
     task_func_add("ds_read0", list(dsName = "车数据")) |>
     task_func_add("ds_head", list(n = 5)) |>
     task_func_add("ds_collect") |>
@@ -159,7 +159,7 @@ test_that("<ds_head/ ds_tail>", {
     nrow() |>
     testthat::expect_equal(5)
   
-  task_create("cars/ds_read0") |>
+  task_create("cars/ds_read0", force = TRUE) |>
     task_func_add("ds_read0", list(dsName = "车数据")) |>
     task_func_add("ds_tail", list(n = 6)) |>
     task_func_add("ds_collect") |>
@@ -179,14 +179,14 @@ test_that("<ds_n_max/ ds_n_min>", {
   
   m |> as_tibble() |> ds_write("车数据")
   
-  task_create("cars/ds_read0") |>
+  task_create("cars/ds_read0", force = TRUE) |>
     task_func_add("ds_read0", list(dsName = "车数据")) |>
     task_func_add("ds_n_max", list(orderColumn = "cyl", n = 3)) |>
     task_run() |>
     nrow() |>
     testthat::expect_equal(3)
   
-  task_create("cars/ds_read0") |>
+  task_create("cars/ds_read0", force = TRUE) |>
     task_func_add("ds_read0", list(dsName = "车数据")) |>
     task_func_add("ds_n_min", list(orderColumn = "disp", n = 3)) |>
     task_run() |>
@@ -205,7 +205,7 @@ test_that("<ds_select>", {
   
   m |> as_tibble() |> ds_write("车数据")
   
-  task_create("cars/ds_read0") |>
+  task_create("cars/ds_read0", force = TRUE) |>
     task_func_add("ds_read0", list(dsName = "车数据")) |>
     task_func_add("ds_select", list(columns = "cyl")) |>
     task_func_add("ds_collect") |>
@@ -213,7 +213,7 @@ test_that("<ds_select>", {
     ncol() |>
     testthat::expect_equal(1)
   
-  task_create("cars/ds_read0") |>
+  task_create("cars/ds_read0", force = TRUE) |>
     task_func_add("ds_read0", list(dsName = "车数据")) |>
     task_func_add("ds_select", list(columns = c("cyl", "disp"))) |>
     task_func_add("ds_collect") |>
@@ -221,7 +221,7 @@ test_that("<ds_select>", {
     ncol() |>
     testthat::expect_equal(2)
   
-  task_create("cars/ds_read0") |>
+  task_create("cars/ds_read0", force = TRUE) |>
     task_func_add("ds_read0", list(dsName = "车数据")) |>
     task_func_add("ds_select", list(columns = c("cyl", "disp"), showOthers = T)) |>
     task_func_add("ds_collect") |>
@@ -229,7 +229,7 @@ test_that("<ds_select>", {
     ncol() |>
     testthat::expect_equal(17)
   
-  task_create("cars/ds_read0") |>
+  task_create("cars/ds_read0", force = TRUE) |>
     task_func_add("ds_read0", list(dsName = "车数据")) |>
     task_func_add("ds_select", list(columns = c("cyl", "disp"), regex = "^@")) |>
     task_func_add("ds_collect") |>
@@ -250,7 +250,7 @@ test_that("<ds_arrange>", {
   
   m |> as_tibble() |> ds_write("车数据")
   
-  (task_create("cars/ds_read0") |>
+  (task_create("cars/ds_read0", force = TRUE) |>
       task_func_add("ds_read0", list(dsName = "车数据")) |>
       task_func_add("ds_arrange", list(columns = "disp")) |>
       task_func_add("ds_collect") |>
@@ -258,7 +258,7 @@ test_that("<ds_arrange>", {
       head(1))$disp |>
     testthat::expect_equal(min(mtcars$disp))
   
-  (task_create("cars/ds_read0") |>
+  (task_create("cars/ds_read0", force = TRUE) |>
       task_func_add("ds_read0", list(dsName = "车数据")) |>
       task_func_add("ds_arrange", list(columns = "disp", desc = T)) |>
       task_func_add("ds_collect") |>
@@ -280,7 +280,7 @@ test_that("<ds_rename>", {
   
   m |> as_tibble() |> ds_write("车数据")
   
-  resp <- task_create("cars/ds_read0") |>
+  resp <- task_create("cars/ds_read0", force = TRUE) |>
     task_func_add("ds_read0", list(dsName = "车数据")) |>
     task_func_add("ds_rename", list(newName = "MY_DISP", oldName = "disp")) |>
     task_func_add("ds_rename", list(newName = "中国队", oldName = "cyl")) |>
