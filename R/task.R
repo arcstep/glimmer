@@ -1,5 +1,8 @@
 ## 获取任务快照的临时ID
 getTaskSnapPath <- function(snapId, taskTopic = "TASK_DEFINE", snapTopic = "SNAP") {
+  if(is.null(snapId)) {
+    stop("snapId Not Exist !!")
+  }
   if(length(snapId) != 1) {
     stop("snapId length MUST be 1 >> ", snapId |> paste(collapse = ","))
   }
@@ -189,7 +192,8 @@ task_item_add <- function(
     meta <- readRDS(path)
     if(!is.null(meta$snapId)) {
       ## 在编辑模式中，将任务追加到任务快照中
-      meta <- getTaskSnapPath(meta$snapId, taskTopic, snapTopic) |> readRDS()
+      path <- getTaskSnapPath(meta$snapId, taskTopic, snapTopic)
+      meta <- readRDS(path)
     }
   } else {
     stop("Can't Add Task Before Task Define: ", taskId)
@@ -274,18 +278,25 @@ task_script_dir_create <- function(scriptDir, scriptsTopic = "TASK_SCRIPTS") {
 #' @param taskTopic 保存任务定义的存储主题文件夹
 #' @family task-define function
 #' @export
-task_read <- function(taskId, taskTopic = "TASK_DEFINE") {
-  if(length(taskId) != 1) {
-    stop("taskId length MUST be 1 >> ", taskId |> paste(collapse = ","))
-  }
-  path <- get_path(taskTopic, paste0(taskId, ".rds"))
+task_read <- function(taskId, snap = FALSE, taskTopic = "TASK_DEFINE", snapTopic = "SNAP") {
+  path <- getTaskPath(taskId, taskTopic)
   if(fs::file_exists(path)) {
     x <- readRDS(path)
     x$task_path = path
-    x
+    if(snap) {
+      if(!is.null(x$snapId)) {
+        pathSnap <- getTaskSnapPath(x$snapId, taskTopic, snapTopic)
+        return(readRDS(pathSnap))
+      } else {
+        warning("Snap Not Exist for task: ", taskId)
+        return(x)
+      }
+    } else {
+      return(x)
+    }
   } else {
     warning("No Task Define: ", taskId)
-    list("task_path" = path)
+    return(list("task_path" = path))
   }
 }
 
@@ -336,24 +347,30 @@ task_search <- function(taskMatch = ".*", typeMatch = ".*", taskTopic = "TASK_DE
 }
 
 #' @title 运行任务
+#' @description 
+#' \code{task_run}可以仅执行到第\code{task_run}步结束，但不包括附加脚本（如队列）
 #' @param taskTopic 保存任务定义的存储主题文件夹
 #' @param taskId 任务标识
 #' @param withQueue 是否在运行队列中显示状态
+#' @param snap 当snap为TRUE时，执行编辑模式下的任务快照
+#' @param stepToRun 执行到第N条脚本即结束（默认为较大的10000条）
 #' @param runMode 运行模式（默认为进程内执行，改为r或r_bg为子进程执行）
 #' @family task-define function
 #' @export
 task_run <- function(taskId,
                      withQueue = FALSE,
                      withEnv = FALSE,
+                     snap = FALSE,
+                     stepToRun = 1e4L,
                      taskTopic = "TASK_DEFINE",
                      runMode = "in-process", ...) {
   paramInfo <- list(...)
   ## 设置运行环境
   batchId <- gen_batchNum()
-  taskMeta <- task_read(taskId)
+  taskMeta <- task_read(taskId, snap = snap)
   if(is.na(taskMeta$items) || is_empty(taskMeta$items)) {
     warning("Empty Task: ", taskId)
-    return()
+    return(NULL)
   }
   ## 支持队列日志
   if(withQueue) {
@@ -391,12 +408,12 @@ task_run <- function(taskId,
     )
     items <- rbind(
       item_run,
-      task_read(taskId, taskMeta$taskTopic)$items,
+      taskMeta$items |> head(stepToRun),
       item_done
     )
   } else {
     ## 不使用队列记录运行状态
-    items <- task_read(taskId, taskMeta$taskTopic)$items
+    items <- taskMeta$items |> head(stepToRun)
   }
 
   tryCatch({

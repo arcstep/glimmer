@@ -204,3 +204,102 @@ test_that("运行任务：异常情况", {
   
   temp_remove()
 })
+
+test_that("定义任务：重复定义", {
+  sample_init()
+  
+  ## 空任务
+  task_create(taskId = "mytask1")
+  task_create(taskId = "mytask1") |>
+    testthat::expect_error("Task Already Exist")
+  
+  temp_remove()
+})
+
+test_that("编辑任务：正常流程", {
+  sample_init()
+  
+  ## 进入编辑模式
+  taskId <- "mytask1"
+  taskId |> task_run() |>
+    testthat::expect_warning("Empty Task") |>
+    testthat::expect_warning("No Task Define")
+  
+  task_create(taskId) |>
+    task_func_add("ds_demo", params = list("demoDataset" = "mpg")) |>
+    task_edit()
+  snapId <- task_read(taskId)$snapId
+  is.null(snapId) |>
+    testthat::expect_false()
+  get_path("SNAP", "TASK_DEFINE", snapId, "main.rds") |>
+    fs::file_exists() |>
+    testthat::expect_true()
+  
+  ## 在编辑模式中追加
+  taskId |> task_item_add(type = "func", script = "ds_head")
+  identical("ds_demo",
+            task_read(taskId)$items$script) |>
+    testthat::expect_true()
+  taskId |> task_run() |> nrow() |>
+    testthat::expect_equal(nrow(ds_demo("mpg")))
+  identical(c("ds_demo", "ds_head"),
+            task_read(taskId, snap = TRUE)$items$script) |>
+    testthat::expect_true()
+  taskId |> task_run(snap = TRUE) |> nrow() |>
+    testthat::expect_equal(10)
+  
+  ## 从编辑模式保存
+  taskId |> task_save()
+  identical(c("ds_demo", "ds_head"),
+            task_read(taskId)$items$script) |>
+    testthat::expect_true()
+  taskId |> task_run() |> nrow() |>
+    testthat::expect_equal(10)
+  
+  ## 结束编辑模式
+  taskId |> task_item_add(type = "func",
+                          script = "ds_arrange",
+                          params = list(columns = "displ", desc = TRUE))
+  taskId |> task_submit()
+  identical(c("ds_demo", "ds_head", "ds_arrange"), task_read(taskId)$items$script) |>
+    testthat::expect_true()
+  task_run(taskId)$displ[[1]] |>
+    testthat::expect_equal(3.1)
+  
+  temp_remove()
+})
+
+test_that("<task_run>: snapToStep", {
+  sample_init()
+  
+  ## 
+  taskId <- "mytask1"
+  taskId |> task_run() |>
+    testthat::expect_warning("Empty Task") |>
+    testthat::expect_warning("No Task Define")
+  
+  ## 按快照执行任务
+  task_create(taskId) |>
+    task_edit() |>
+    task_item_add(type = "func",
+                  script = "ds_demo",
+                  params = list("demoDataset" = "mpg")) |>
+    task_item_add(type = "func",
+                  script = "ds_arrange",
+                  params = list(columns = "displ", desc = TRUE)) |>
+    task_item_add(type = "func", script = "ds_head")
+  taskId |> task_run(snap = TRUE) |> nrow() |>
+    testthat::expect_equal(10)
+  taskId |> task_run(snap = TRUE, stepToRun = 2) |> nrow() |>
+    testthat::expect_equal(nrow(ds_demo("mpg")))
+  
+  ## 按定义执行任务
+  task_submit(taskId)
+  taskId |> task_run() |> nrow() |>
+    testthat::expect_equal(10)
+  taskId |> task_run(stepToRun = 2) |> nrow() |>
+    testthat::expect_equal(nrow(ds_demo("mpg")))
+  
+  temp_remove()
+})
+

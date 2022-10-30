@@ -8,6 +8,8 @@ task_run(
   taskId,
   withQueue = FALSE,
   withEnv = FALSE,
+  snap = FALSE,
+  stepToRun = 10000L,
   taskTopic = "TASK_DEFINE",
   runMode = "in-process",
   ...
@@ -18,12 +20,16 @@ task_run(
 
 \item{withQueue}{是否在运行队列中显示状态}
 
+\item{snap}{当snap为TRUE时，执行编辑模式下的任务快照}
+
+\item{stepToRun}{执行到第N条脚本即结束（默认为较大的10000条）}
+
 \item{taskTopic}{保存任务定义的存储主题文件夹}
 
 \item{runMode}{运行模式（默认为进程内执行，改为r或r_bg为子进程执行）}
 }
 \description{
-运行任务
+\code{task_run}可以仅执行到第\code{task_run}步结束，但不包括附加脚本（如队列）
 }
 \seealso{
 Other task-define function: 

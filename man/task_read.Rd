@@ -4,7 +4,7 @@
 \alias{task_read}
 \title{读取任务}
 \usage{
-task_read(taskId, taskTopic = "TASK_DEFINE")
+task_read(taskId, snap = FALSE, taskTopic = "TASK_DEFINE", snapTopic = "SNAP")
 }
 \arguments{
 \item{taskId}{任务标识}

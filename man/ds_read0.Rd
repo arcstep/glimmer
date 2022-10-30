@@ -14,7 +14,7 @@ ds_read0(dsName, topic = "CACHE", noDeleted = TRUE)
 \item{noDeleted}{不返回标记为删除的数据}
 }
 \description{
-仅读取已归档数据
+仅返回已归档数据
 }
 \seealso{
 Other dataset function: 
