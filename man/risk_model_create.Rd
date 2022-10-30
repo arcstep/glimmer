@@ -12,6 +12,7 @@ risk_model_create(
   riskLevel = "L",
   modelDesc = "-",
   author = "-",
+  force = FALSE,
   riskDataName = "__RISK_DATA__",
   cacheTopic = "CACHE",
   taskTopic = "TASK_DEFINE",

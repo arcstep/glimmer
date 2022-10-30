@@ -19,12 +19,12 @@ Imports:
     dplyr,
     fs,
     purrr,
-    shiny,
     arrow,
     lubridate,
     yaml,
     digest,
     stringr,
-    callr,
+    shiny,
     DT,
-    plotly
+    plotly,
+    callr
