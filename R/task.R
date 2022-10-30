@@ -11,6 +11,9 @@ getTaskSnapPath <- function(snapId, taskTopic = "TASK_DEFINE", snapTopic = "SNAP
 
 ##
 getTaskPath <- function(taskId, taskTopic = "TASK_DEFINE") {
+  if(is.null(taskId)) {
+    stop("taskId Not Exist !!")
+  }
   if(length(taskId) != 1) {
     stop("taskId length MUST be 1 >> ", taskId |> paste(collapse = ","))
   }
@@ -74,7 +77,7 @@ task_edit <- function(taskId, taskTopic = "TASK_DEFINE", snapTopic = "SNAP") {
     }
     return(taskId)
   } else {
-    stop("No Task Define: ", taskId)
+    stop("No Task Define try to edit: ", taskId)
   }
 }
 
@@ -92,7 +95,7 @@ task_discard <- function(taskId, taskTopic = "TASK_DEFINE", snapTopic = "SNAP") 
     }
     return(taskId)
   } else {
-    stop("No Task Define: ", taskId)
+    stop("No Task Define try to discar: ", taskId)
   }
 }
 
@@ -111,7 +114,7 @@ task_save <- function(taskId, taskTopic = "TASK_DEFINE", snapTopic = "SNAP") {
     }
     return(taskId)
   } else {
-    stop("No Task Define: ", taskId)
+    stop("No Task Define try to save: ", taskId)
   }
 }
 
@@ -158,6 +161,7 @@ task_remove <- function(taskId, taskTopic = "TASK_DEFINE") {
   if(fs::file_exists(path)) {
     fs::file_delete(path)
     message("Task Removed: ", taskId)
+    return(taskId)
   } else {
     warning("No Task Define: ", taskId)
   }
@@ -295,8 +299,7 @@ task_read <- function(taskId, snap = FALSE, taskTopic = "TASK_DEFINE", snapTopic
       return(x)
     }
   } else {
-    warning("No Task Define: ", taskId)
-    return(list("task_path" = path))
+    stop("No Task Define before reading: ", taskId)
   }
 }
 
@@ -313,7 +316,7 @@ task_online <- function(taskId, online = TRUE, taskTopic = "TASK_DEFINE") {
     x |> saveRDS(path)
     message("Task <", taskTopic, "/", taskId, "> online: ", online, " !!")
   } else {
-    stop("No Task Define: ", taskId)
+    stop("No Task Define before changing online status: ", taskId)
   }
 }
 

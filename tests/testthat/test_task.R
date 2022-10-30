@@ -223,7 +223,7 @@ test_that("编辑任务：正常流程", {
   taskId <- "mytask1"
   taskId |> task_run() |>
     testthat::expect_warning("Empty Task") |>
-    testthat::expect_warning("No Task Define")
+    testthat::expect_error("No Task Define")
   
   task_create(taskId) |>
     task_func_add("ds_demo", params = list("demoDataset" = "mpg")) |>
@@ -269,14 +269,44 @@ test_that("编辑任务：正常流程", {
   temp_remove()
 })
 
-test_that("<task_run>: snapToStep", {
+test_that("编辑任务：克隆、移除和放弃编辑", {
+  sample_init()
+  
+  ## 克隆
+  task_create("mytask1") |>
+    task_func_add("ds_demo", params = list("demoDataset" = "mpg")) |>
+    task_clone("mytask2")
+  
+  task_read("mytask2")$items |> nrow() |>
+    testthat::expect_equal(1)
+
+  ## 移除 
+  task_remove("mytask1") |>
+    task_read() |>
+    testthat::expect_error("No Task Define")
+  
+  ## 放弃编辑
+  task_edit("mytask2") |>
+    task_item_add(type = "func", script = "ds_head") |>
+    task_run(snap = TRUE) |>
+    nrow() |>
+    testthat::expect_equal(10)
+  task_discard("mytask2") |>
+    task_run(snap = TRUE) |>
+    nrow() |>
+    testthat::expect_equal(nrow(ds_demo("mpg")))
+  
+  temp_remove()
+})
+
+test_that("<task_run>: stepToRun", {
   sample_init()
   
   ## 
   taskId <- "mytask1"
   taskId |> task_run() |>
     testthat::expect_warning("Empty Task") |>
-    testthat::expect_warning("No Task Define")
+    testthat::expect_error("No Task Define")
   
   ## 按快照执行任务
   task_create(taskId) |>
