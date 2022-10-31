@@ -6,13 +6,7 @@ sm_task_ui <- function(id) {
   shiny::tagList(
     ##
     uiOutput(ns("head")),
-    wellPanel(
-      actionButton(ns("run"), label = "执行", class = "btn btn-primary"),
-      actionButton(ns("clone"), label = "克隆", class = "btn"),
-      actionButton(ns("create"), label = "新建", class = "btn"),
-      hr(),
-      uiOutput(ns("editing-action"))
-    ),
+    wellPanel(uiOutput(ns("task-action"))),
     ##
     sm_choose_task_ui(ns("choose-task")),
     hr(),
@@ -60,16 +54,30 @@ sm_task_server <- function(id, taskId, displayMode = "editor") {
       }
     })
     # 更新编辑工具栏
-    output$`editing-action` <- renderUI({
+    basicActions1 <- tagList(
+      actionButton(ns("run"), label = "执行", class = "btn btn-primary", style = "margin-right:10px")
+    )
+    basicActions2 <- tagList(
+      span("-", style = "margin-left:15px;margin-right:15px"),
+      actionButton(ns("clone"), label = "克隆", class = "btn"),
+      actionButton(ns("create"), label = "新建", class = "btn")
+    )
+    output$`task-action` <- renderUI({
       if(!is.null(taskInfo())) {
         if(is.null(taskInfo()$snapId)) {
-          actionButton(ns("edit_snap"), label = "编辑", class = "btn")
+          tagList(
+            basicActions1,
+            actionButton(ns("edit_snap"), label = "编辑", class = "btn"),
+            basicActions2
+          )
         } else {
           tagList(
+            basicActions1,
             actionButton(ns("cancel_snap"), label = "取消编辑", class = "btn"),
             actionButton(ns("discard"), label = "复原", class = "btn"),
             actionButton(ns("save"), label = "保存", class = "btn"),
-            actionButton(ns("submit"), label = "提交", class = "btn")
+            actionButton(ns("submit"), label = "提交", class = "btn"),
+            basicActions2
           )
         }
       }

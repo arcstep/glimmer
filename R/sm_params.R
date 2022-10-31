@@ -1,11 +1,11 @@
-#' @title Shiny Modules UI - 任务参数
+#' @title Shiny Modules UI - 任务脚本参数
 #' @family Shiny Modules functions
 #' @export
 sm_params_ui <- function(id, params) {
   message("sm_params_ui:", id)
   ns <- NS(id)
   tags$div(
-    textOutput(ns("title")),
+    # textOutput(ns("title")),
     if(!identical(NA, params)) {
       ## 参数清单
       tags$ul(
@@ -17,7 +17,7 @@ sm_params_ui <- function(id, params) {
   )
 }
 
-#' @title Shiny Modules Server - 任务参数
+#' @title Shiny Modules Server - 任务脚本参数
 #' @family Shiny Modules functions
 #' @export
 sm_params_server <- function(id, params) {

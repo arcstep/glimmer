@@ -6,7 +6,7 @@ sm_scripts_ui <- function(id, scriptItems) {
   ns <- NS(id)
   ##
   shiny::tags$div(
-    !!!(scriptItems |> purrr::pmap(function(rowid, type, script, params, globalVars, inputAsign, outputAsign) {
+    !!!(scriptItems |> purrr::pmap(function(rowid, type, script, params, globalVars, inputAssign, outputAssign) {
       shiny::tags$div(
         span(paste0(type)),
         br(),
@@ -26,7 +26,7 @@ sm_scripts_server <- function(id, scriptItems) {
   moduleServer(id, function(input, output, session) {
     message("sm_scripts_server id:", id)
     scriptItems |>
-      purrr::pwalk(function(rowid, type, script, params, globalVars, inputAsign, outputAsign) {
+      purrr::pwalk(function(rowid, type, script, params, globalVars, inputAssign, outputAssign) {
         sm_params_server(rowid, params)
       })
   })

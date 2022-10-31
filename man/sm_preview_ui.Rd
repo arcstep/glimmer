@@ -11,6 +11,12 @@ Shiny Modules UI - 结果预览
 }
 \seealso{
 Other Shiny Modules functions: 
+\code{\link{sm_global_vars_server}()},
+\code{\link{sm_global_vars_ui}()},
+\code{\link{sm_input_assign_server}()},
+\code{\link{sm_input_assign_ui}()},
+\code{\link{sm_output_assign_server}()},
+\code{\link{sm_output_assign_ui}()},
 \code{\link{sm_params_server}()},
 \code{\link{sm_params_ui}()},
 \code{\link{sm_preview_server}()},

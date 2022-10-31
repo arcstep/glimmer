@@ -2,15 +2,21 @@
 % Please edit documentation in R/sm_params.R
 \name{sm_params_server}
 \alias{sm_params_server}
-\title{Shiny Modules Server - 任务参数}
+\title{Shiny Modules Server - 任务脚本参数}
 \usage{
 sm_params_server(id, params)
 }
 \description{
-Shiny Modules Server - 任务参数
+Shiny Modules Server - 任务脚本参数
 }
 \seealso{
 Other Shiny Modules functions: 
+\code{\link{sm_global_vars_server}()},
+\code{\link{sm_global_vars_ui}()},
+\code{\link{sm_input_assign_server}()},
+\code{\link{sm_input_assign_ui}()},
+\code{\link{sm_output_assign_server}()},
+\code{\link{sm_output_assign_ui}()},
 \code{\link{sm_params_ui}()},
 \code{\link{sm_preview_server}()},
 \code{\link{sm_preview_ui}()},
