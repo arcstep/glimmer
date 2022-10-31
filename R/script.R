@@ -9,7 +9,7 @@
 #' @param touchFiles 类型为file,dir时自动创建脚本文件
 #' @param type 可以是string,expr,function,gali,file,dir,var等
 #' @param taskTopic 任务主题存储位置
-#' @family task-define function
+#' @family task-script function
 #' @export
 script_item_add <- function(
     taskId,
@@ -90,7 +90,7 @@ task_script_dir_create <- function(scriptDir, scriptsTopic = "TASK_SCRIPTS") {
 #' @param touchFiles 类型为file,dir时自动创建脚本文件
 #' @param type 可以是string,expr,function,gali,file,dir,global等
 #' @param taskTopic 任务主题存储位置
-#' @family task-define function
+#' @family task-script function
 #' @export
 script_item_update <- function(
     taskId,
@@ -143,7 +143,7 @@ script_item_update <- function(
 #' @param taskId 任务标识
 #' @param rowNum 要更新的脚本序号
 #' @param taskTopic 任务主题存储位置
-#' @family task-define function
+#' @family task-script function
 #' @export
 script_item_remove <- function(
     taskId,
@@ -176,7 +176,7 @@ script_item_remove <- function(
 #' @param rowNumOld 脚本旧序号
 #' @param rowNumNew 脚本新序号
 #' @param taskTopic 任务主题存储位置
-#' @family task-define function
+#' @family task-script function
 #' @export
 script_item_exchange <- function(
     taskId,
@@ -210,61 +210,61 @@ script_item_exchange <- function(
 }
 
 #' @title 为任务增加函数任务脚本
-#' @family task-define function
+#' @family task-script function
 #' @export
 script_func_add <- purrr::partial(script_item_add, type = "func")
 
 #' @title 为任务增加字符串任务脚本
-#' @family task-define function
+#' @family task-script function
 #' @export
 script_string_add <- purrr::partial(script_item_add, type = "string")
 
 #' @title 为任务增加表达式任务脚本
-#' @family task-define function
+#' @family task-script function
 #' @export
 script_expr_add <- purrr::partial(script_item_add, type = "expr")
 
 #' @title 为任务增加文件任务脚本
-#' @family task-define function
+#' @family task-script function
 #' @export
 script_file_add <- purrr::partial(script_item_add, type = "file")
 
 #' @title 为任务增加目录任务脚本
-#' @family task-define function
+#' @family task-script function
 #' @export
 script_dir_add <- purrr::partial(script_item_add, type = "dir")
 
 #' @title 增加设置全局变量任务脚本
-#' @family task-define function
+#' @family task-script function
 #' @export
 script_var_add <- purrr::partial(script_item_add, type = "var")
 
 #' @title 更新为函数任务脚本
-#' @family task-define function
+#' @family task-script function
 #' @export
 script_func_update <- purrr::partial(script_item_update, type = "func")
 
 #' @title 更新为字符串任务脚本
-#' @family task-define function
+#' @family task-script function
 #' @export
 script_string_update <- purrr::partial(script_item_update, type = "string")
 
 #' @title 更新为表达式任务脚本
-#' @family task-define function
+#' @family task-script function
 #' @export
 script_expr_update <- purrr::partial(script_item_update, type = "expr")
 
 #' @title 更新为文件任务脚本
-#' @family task-define function
+#' @family task-script function
 #' @export
 script_file_update <- purrr::partial(script_item_update, type = "file")
 
 #' @title 更新为目录任务脚本
-#' @family task-define function
+#' @family task-script function
 #' @export
 script_dir_update <- purrr::partial(script_item_update, type = "dir")
 
 #' @title 更新为设置全局变量任务脚本
-#' @family task-define function
+#' @family task-script function
 #' @export
 script_var_update <- purrr::partial(script_item_update, type = "var")

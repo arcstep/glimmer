@@ -39,7 +39,7 @@ script_item_add(
 增加子任务
 }
 \seealso{
-Other task-define function: 
+Other task-script function: 
 \code{\link{script_dir_add}()},
 \code{\link{script_dir_update}()},
 \code{\link{script_expr_add}()},
@@ -54,13 +54,6 @@ Other task-define function:
 \code{\link{script_string_add}()},
 \code{\link{script_string_update}()},
 \code{\link{script_var_add}()},
-\code{\link{script_var_update}()},
-\code{\link{task_create}()},
-\code{\link{task_offline}()},
-\code{\link{task_online}()},
-\code{\link{task_read}()},
-\code{\link{task_run}()},
-\code{\link{task_search}()},
-\code{\link{task_update}()}
+\code{\link{script_var_update}()}
 }
-\concept{task-define function}
+\concept{task-script function}

@@ -14,22 +14,7 @@ task_search(taskMatch = ".*", typeMatch = ".*", taskTopic = "TASK_DEFINE")
 }
 \seealso{
 Other task-define function: 
-\code{\link{script_dir_add}()},
-\code{\link{script_dir_update}()},
-\code{\link{script_expr_add}()},
-\code{\link{script_expr_update}()},
-\code{\link{script_file_add}()},
-\code{\link{script_file_update}()},
-\code{\link{script_func_add}()},
-\code{\link{script_func_update}()},
-\code{\link{script_item_add}()},
-\code{\link{script_item_exchange}()},
-\code{\link{script_item_remove}()},
-\code{\link{script_item_update}()},
-\code{\link{script_string_add}()},
-\code{\link{script_string_update}()},
-\code{\link{script_var_add}()},
-\code{\link{script_var_update}()},
+\code{\link{task_cancel_snap}()},
 \code{\link{task_create}()},
 \code{\link{task_offline}()},
 \code{\link{task_online}()},

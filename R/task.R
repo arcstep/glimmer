@@ -35,7 +35,6 @@ task_create <- function(taskId, online = FALSE, force = FALSE,
                         cacheTopic = "CACHE", importTopic = "IMPORT", extention = list()) {
   meta <- list(
     "taskId" = taskId,
-    "snapId" = NULL,   ## snapId不为空时出于编辑模式
     "online" = online,
     "taskType" = taskType,
     "desc" = desc,
@@ -96,6 +95,11 @@ task_online <- purrr::partial(task_update, online = TRUE)
 #' @export
 task_offline <- purrr::partial(task_update, online = FALSE)
 
+
+#' @title 取消编辑模式
+#' @family task-define function
+#' @export
+task_cancel_snap <- purrr::partial(task_update, snapId = NULL)
 
 #' @title 进入编辑模式
 #' @description 
