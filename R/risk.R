@@ -34,7 +34,7 @@ risk_data_init <- function(dsName = "__RISK_DATA__", cacheTopic = "CACHE") {
 #' 风险模型定义后，主要支持对数据集做过滤查询。
 #' @family risk function
 #' @export
-risk_model_create <- function(dsName,
+task_risk_model_create <- function(dsName,
                            modelName,
                            tagName = "main",
                            riskTip = "-",
@@ -72,9 +72,9 @@ risk_model_create <- function(dsName,
                 riskTip = riskTip,
                 riskLevel = riskLevel)) |>
     ## 从任务运行环境中自定提取taskId并映射为@modelId
-    task_expr_add(expression({`@task`$taskId}), outputAsign = "@modelId") |>
+    script_expr_add(expression({`@task`$taskId}), outputAsign = "@modelId") |>
     ## 自动读取dsName
-    task_func_add("ds_read0", params = list("dsName" = dsName))
+    script_func_add("ds_read0", params = list("dsName" = dsName))
 }
 
 #' @title 读取疑点数据
@@ -92,7 +92,7 @@ risk_data_read <- function(todoFlag = TRUE, riskDataName = "__RISK_DATA__", cach
 #' @title 查找风险模型
 #' @family risk function
 #' @export
-risk_model_search <- function(modelMatch = ".*", taskTopic = "TASK_DEFINE") {
+task_risk_model_search <- function(modelMatch = ".*", taskTopic = "TASK_DEFINE") {
   root_path <- get_path(taskTopic)
   if(fs::dir_exists(root_path)) {
     tasks <- fs::dir_ls(root_path, type = "file", all = T, glob = "*.rds", recurse = T)

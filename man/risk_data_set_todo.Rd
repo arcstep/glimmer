@@ -21,7 +21,7 @@ Other risk function:
 \code{\link{risk_data_read}()},
 \code{\link{risk_data_set_done}()},
 \code{\link{risk_data_write}()},
-\code{\link{risk_model_create}()},
-\code{\link{risk_model_search}()}
+\code{\link{task_risk_model_create}()},
+\code{\link{task_risk_model_search}()}
 }
 \concept{risk function}

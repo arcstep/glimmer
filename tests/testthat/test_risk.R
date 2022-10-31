@@ -5,18 +5,18 @@ test_that("创建模型：一般情况", {
   m |> ds_write("cars")
   
   ## 构造风险模型
-  resp <- risk_model_create("cars", modelName = "risk/cyl-too-big") |>
-    task_func_add("ds_filter", list(column = "cyl", op = ">=", value = 8)) |>
-    task_func_add("ds_collect") |>
+  resp <- task_risk_model_create("cars", modelName = "risk/cyl-too-big") |>
+    script_func_add("ds_filter", list(column = "cyl", op = ">=", value = 8)) |>
+    script_func_add("ds_collect") |>
     task_run()
   resp$cyl |> unique() |>
     testthat::expect_equal(8)
 
   ## 写入风险疑点数据
-  risk_model_create("cars", modelName = "risk/cyl-middle") |>
-    task_func_add("ds_filter", list(column = "cyl", op = ">=", value = 6)) |>
-    task_func_add("ds_filter", list(column = "cyl", op = "<", value = 8)) |>
-    task_func_add("risk_data_write") |>
+  task_risk_model_create("cars", modelName = "risk/cyl-middle") |>
+    script_func_add("ds_filter", list(column = "cyl", op = ">=", value = 6)) |>
+    script_func_add("ds_filter", list(column = "cyl", op = "<", value = 8)) |>
+    script_func_add("risk_data_write") |>
     task_run()
   (risk_data_read() |> distinct(dataTitle))$dataTitle |>
     testthat::expect_equal("6")
@@ -31,9 +31,9 @@ test_that("创建模型：要求数据集有关键列和主题列", {
   ds_init("cars2", data = m, type = "__BUILD__", keyColumns = "rowid")
 
   ## 构造风险模型
-  risk_model_create("cars1", modelName = "risk/cars1/cyl-too-big") |>
+  task_risk_model_create("cars1", modelName = "risk/cars1/cyl-too-big") |>
     testthat::expect_error("No KeyColumns")
-  risk_model_create("cars2", modelName = "risk/cars2/cyl-too-big") |>
+  task_risk_model_create("cars2", modelName = "risk/cars2/cyl-too-big") |>
     testthat::expect_error("No TitleColumn")
 
   temp_remove()
@@ -46,10 +46,10 @@ test_that("疑点数据：清理未处理的疑点数据", {
   m |> ds_write("cars")
   
   ## 写入风险疑点数据
-  risk_model_create("cars", modelName = "risk/cyl-middle") |>
-    task_func_add("ds_filter", list(column = "cyl", op = ">=", value = 6)) |>
-    task_func_add("ds_filter", list(column = "cyl", op = "<", value = 8)) |>
-    task_func_add("risk_data_write") |>
+  task_risk_model_create("cars", modelName = "risk/cyl-middle") |>
+    script_func_add("ds_filter", list(column = "cyl", op = ">=", value = 6)) |>
+    script_func_add("ds_filter", list(column = "cyl", op = "<", value = 8)) |>
+    script_func_add("risk_data_write") |>
     task_run()
   
   risk_data_read() |> nrow() |>
@@ -59,9 +59,9 @@ test_that("疑点数据：清理未处理的疑点数据", {
   risk_data_read() |> nrow() |>
     testthat::expect_equal(6)
 
-  risk_model_create("cars", modelName = "risk/cyl-middle", tagName = "V2") |>
-    task_func_add("ds_filter", list(column = "cyl", op = ">=", value = 6)) |>
-    task_func_add("risk_data_write") |>
+  task_risk_model_create("cars", modelName = "risk/cyl-middle", tagName = "V2") |>
+    script_func_add("ds_filter", list(column = "cyl", op = ">=", value = 6)) |>
+    script_func_add("risk_data_write") |>
     task_run()
   
   risk_data_read() |> nrow() |>
