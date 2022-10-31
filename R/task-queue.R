@@ -23,14 +23,10 @@ task_queue_init <- function(dsName = "__TASK_QUEUE__", cacheTopic = "CACHE") {
     type = "__STATE__")
 }
 
-#' @title 从压马路格式提取队列参数
-#' @family queue function
-#' @export
+# 从压马路格式提取队列参数
 task_queue_param_from_yaml <- function(ymlParams) ymlParams |> yaml::yaml.load()
 
-#' @title 转换队列参数为yaml格式
-#' @family queue function
-#' @export
+# 转换队列参数为yaml格式
 task_queue_param_to_yaml <- function(params) params |> yaml::as.yaml()
 
 #' @title 构造队列中的一条数据

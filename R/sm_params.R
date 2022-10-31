@@ -1,3 +1,5 @@
+#' @title Shiny Modules UI - 任务参数
+#' @family Shiny Modules functions
 #' @export
 sm_params_ui <- function(id, params) {
   message("sm_params_ui:", id)
@@ -15,7 +17,8 @@ sm_params_ui <- function(id, params) {
   )
 }
 
-#' @title 参数清单
+#' @title Shiny Modules Server - 任务参数
+#' @family Shiny Modules functions
 #' @export
 sm_params_server <- function(id, params) {
   moduleServer(id, function(input, output, session) {

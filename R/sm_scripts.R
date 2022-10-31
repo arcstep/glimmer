@@ -1,11 +1,13 @@
+#' @title Shiny Modules UI - 任务脚本
+#' @family Shiny Modules functions
 #' @export
 sm_scripts_ui <- function(id, scriptItems) {
   message("sm_scripts_ui:", id)
   ns <- NS(id)
   ##
-  shiny::tags$ol(
+  shiny::tags$div(
     !!!(scriptItems |> purrr::pmap(function(rowid, type, script, params, globalVars, inputAsign, outputAsign) {
-      shiny::tags$li(
+      shiny::tags$div(
         span(paste0(type)),
         br(),
         shiny::tags$code(script |> as.character()),
@@ -16,6 +18,8 @@ sm_scripts_ui <- function(id, scriptItems) {
   )
 }
 
+#' @title Shiny Modules Server - 任务脚本
+#' @family Shiny Modules functions
 #' @export
 sm_scripts_server <- function(id, scriptItems) {
   ns <- NS(id)

@@ -56,7 +56,7 @@ script_item_add <- function(
   taskId
 }
 
-#' @title 创建脚本文件
+# 创建脚本文件
 task_script_file_create <- function(scriptFile, scriptsTopic = "TASK_SCRIPTS") {
   path <- get_path(scriptsTopic, scriptFile)
   if(!fs::file_exists(fs::path_dir(path))) {
@@ -67,7 +67,7 @@ task_script_file_create <- function(scriptFile, scriptsTopic = "TASK_SCRIPTS") {
   }
 }
 
-#' @title 创建脚本目录
+# 创建脚本目录
 task_script_dir_create <- function(scriptDir, scriptsTopic = "TASK_SCRIPTS") {
   path <- get_path(scriptsTopic, scriptDir)
   if(!fs::dir_exists(path)) {

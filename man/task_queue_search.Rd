@@ -17,8 +17,6 @@ task_queue_search(
 \seealso{
 Other queue function: 
 \code{\link{task_queue_init}()},
-\code{\link{task_queue_item}()},
-\code{\link{task_queue_param_from_yaml}()},
-\code{\link{task_queue_param_to_yaml}()}
+\code{\link{task_queue_item}()}
 }
 \concept{queue function}
