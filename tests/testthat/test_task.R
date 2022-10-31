@@ -129,7 +129,7 @@ test_that("<task_run>: string|expr|empty", {
   task_create(taskId = "C-expr", force = TRUE) |>
     script_var_add(globalVars = list("a" = 3, "b" = 3)) |>
     script_expr_add(script = expression({list(x = a^2, y = b*2)}),
-                  outputAsign = c("m")) |>
+                  outputAssign = c("m")) |>
     script_expr_add(script = expression({m$x+m$y})) |>
     task_run() |>
     testthat::expect_equal(3^2+3*2)
@@ -203,15 +203,15 @@ test_that("<task_run>: 预定义函数管道", {
   
   task_create(taskId = "fun03", force = TRUE) |>
     script_func_add("gali_import_cars") |>
-    script_func_add(script = "gali_ds_filter_cyl", params = list(i_cyl = 6), outputAsign = "car6") |>
+    script_func_add(script = "gali_ds_filter_cyl", params = list(i_cyl = 6), outputAssign = "car6") |>
     script_string_add(script = "car6 |> head(5)") |>
     task_run() |> nrow() |>
     testthat::expect_equal(5)
 
   task_create(taskId = "fun03", force = TRUE) |>
-    script_func_add("gali_import_cars", outputAsign = "mycars") |>
-    script_string_add(script = "mycars |> head(5)", inputAsign = "mycars", outputAsign = "mycars") |>
-    script_func_add(script = "gali_ds_filter_cyl", params = list(i_cyl = 4), inputAsign = list("d" = "mycars")) |>
+    script_func_add("gali_import_cars", outputAssign = "mycars") |>
+    script_string_add(script = "mycars |> head(5)", inputAssign = "mycars", outputAssign = "mycars") |>
+    script_func_add(script = "gali_ds_filter_cyl", params = list(i_cyl = 4), inputAssign = list("d" = "mycars")) |>
     task_run() |> nrow() |>
     testthat::expect_equal(1)
   

@@ -4,8 +4,8 @@
 #' @param script 执行脚本或函数名、文件名、目录名
 #' @param params 执行函数参数映射
 #' @param globalVars 设置全局变量
-#' @param inputAsign 针对function和gali类型，使用执行环境内变量映射入参
-#' @param outputAsign 保存子任务输出
+#' @param inputAssign 针对function和gali类型，使用执行环境内变量映射入参
+#' @param outputAssign 保存子任务输出
 #' @param touchFiles 类型为file,dir时自动创建脚本文件
 #' @param type 可以是string,expr,function,gali,file,dir,var等
 #' @param taskTopic 任务主题存储位置
@@ -16,8 +16,8 @@ script_item_add <- function(
     script = NA,
     params = NA,
     globalVars = NA,
-    inputAsign = NA,
-    outputAsign = NA,
+    inputAssign = NA,
+    outputAssign = NA,
     touchFiles = TRUE,
     taskTopic = "TASK_DEFINE",
     type = "var") {
@@ -38,8 +38,8 @@ script_item_add <- function(
     "script" = script,
     "params" = params %not-na% list(params),
     "globalVars" = globalVars %not-na% list(globalVars),
-    "inputAsign" = inputAsign %not-na% list(inputAsign),
-    "outputAsign" = outputAsign %not-na% list(outputAsign)
+    "inputAssign" = inputAssign %not-na% list(inputAssign),
+    "outputAssign" = outputAssign %not-na% list(outputAssign)
   )
   if(is_empty(meta$items)) {
     meta$items <- item
@@ -85,8 +85,8 @@ task_script_dir_create <- function(scriptDir, scriptsTopic = "TASK_SCRIPTS") {
 #' @param script 执行脚本或函数名、文件名、目录名
 #' @param params 执行函数参数映射
 #' @param globalVars 设置全局变量
-#' @param inputAsign 针对function和gali类型，使用执行环境内变量映射入参
-#' @param outputAsign 保存子任务输出
+#' @param inputAssign 针对function和gali类型，使用执行环境内变量映射入参
+#' @param outputAssign 保存子任务输出
 #' @param touchFiles 类型为file,dir时自动创建脚本文件
 #' @param type 可以是string,expr,function,gali,file,dir,global等
 #' @param taskTopic 任务主题存储位置
@@ -98,8 +98,8 @@ script_item_update <- function(
     script = NA,
     params = NA,
     globalVars = NA,
-    inputAsign = NA,
-    outputAsign = NA,
+    inputAssign = NA,
+    outputAssign = NA,
     touchFiles = TRUE,
     taskTopic = "TASK_DEFINE",
     type = "global") {
@@ -119,8 +119,8 @@ script_item_update <- function(
     "script" = script,
     "params" = params %not-na% list(params),
     "globalVars" = globalVars %not-na% list(globalVars),
-    "inputAsign" = inputAsign %not-na% list(inputAsign),
-    "outputAsign" = outputAsign %not-na% list(outputAsign)
+    "inputAssign" = inputAssign %not-na% list(inputAssign),
+    "outputAssign" = outputAssign %not-na% list(outputAssign)
   )
   if(rowNum >= 1 && rowNum <= nrow(meta$items)) {
     meta$items <- rbind(head(meta$item, rowNum - 1),

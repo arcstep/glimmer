@@ -9,8 +9,8 @@ script_item_add(
   script = NA,
   params = NA,
   globalVars = NA,
-  inputAsign = NA,
-  outputAsign = NA,
+  inputAssign = NA,
+  outputAssign = NA,
   touchFiles = TRUE,
   taskTopic = "TASK_DEFINE",
   type = "var"
@@ -25,9 +25,9 @@ script_item_add(
 
 \item{globalVars}{设置全局变量}
 
-\item{inputAsign}{针对function和gali类型，使用执行环境内变量映射入参}
+\item{inputAssign}{针对function和gali类型，使用执行环境内变量映射入参}
 
-\item{outputAsign}{保存子任务输出}
+\item{outputAssign}{保存子任务输出}
 
 \item{touchFiles}{类型为file,dir时自动创建脚本文件}
 

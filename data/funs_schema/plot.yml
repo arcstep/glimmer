@@ -6,13 +6,13 @@ plot:
   functions:
     gali_plot_hist:
       description: 绘制直方图
-      outputAsign: "@plot"
+      outputAssign: "@plot"
       params:
         ds:
           description: 数据集
           editType: dataset
           valType: ds_collected
-          inputAsign: "@ds"
+          inputAssign: "@ds"
         x:
           description: Sets the x coordinates.
           editType: calc

@@ -27,43 +27,43 @@ sample_task_define <- function() {
   ))
   ## simple
   task_create(taskId = "build_cars", taskType = "__BUILD__") |>
-    script_item(script = "BUILD/cars.R", type = "file", touchFiles = F)
+    script_item_add(script = "BUILD/cars.R", type = "file", touchFiles = F)
 
   ## tast test
   task_create(taskId = "task_sample_simple") |>
-    script_item(script = "SIMPLE/a.R", type = "file", touchFiles = F) |>
-    script_item(script = "result <- (x |> filter(age > 6))", type = "string", touchFiles = F)
+    script_item_add(script = "SIMPLE/a.R", type = "file", touchFiles = F) |>
+    script_item_add(script = "result <- (x |> filter(age > 6))", type = "string", touchFiles = F)
 
   task_create(taskId = "task_sample_dir") |>
-    script_item(script = "SIMPLE", type = "dir", touchFiles = F)
+    script_item_add(script = "SIMPLE", type = "dir", touchFiles = F)
 
   task_create(taskId = "task_sample_define_param") |>
-    script_item(script = "SIMPLE/a.R", type = "file", touchFiles = F) |>
-    script_item(script = "result <- (x |> filter(age > myage))", globalVars = list(myage = 3), type = "string", touchFiles = F)
+    script_item_add(script = "SIMPLE/a.R", type = "file", touchFiles = F) |>
+    script_item_add(script = "result <- (x |> filter(age > myage))", globalVars = list(myage = 3), type = "string", touchFiles = F)
 
   task_create(taskId = "task_sample_runtime_param") |>
-    script_item(script = "SIMPLE/a.R", type = "file", touchFiles = F) |>
-    script_item(script = "result <- (x |> filter(age > myage))", type = "string", touchFiles = F)
+    script_item_add(script = "SIMPLE/a.R", type = "file", touchFiles = F) |>
+    script_item_add(script = "result <- (x |> filter(age > myage))", type = "string", touchFiles = F)
 
   task_create(taskId = "task_sample_error") |>
-    script_item(script = "stop('I m an error!')", type = "string", touchFiles = F)
+    script_item_add(script = "stop('I m an error!')", type = "string", touchFiles = F)
 
   ## 文件不存在
   task_create(taskId = "task_sample_file_not_exist") |>
-    script_item(script = "NOT_EXISTING_FILE", type = "file", touchFiles = F)
+    script_item_add(script = "NOT_EXISTING_FILE", type = "file", touchFiles = F)
 
   ## 目录不存在
   task_create(taskId = "task_sample_dir_not_exist") |>
-    script_item(script = "NOT_EXISTING_DIR", type = "dir", touchFiles = F)
+    script_item_add(script = "NOT_EXISTING_DIR", type = "dir", touchFiles = F)
 
   ## 空文件夹
   task_create(taskId = "task_sample_empty_dir") |>
-    script_item(script = "EMPTY_FOLDER", type = "dir", touchFiles = F)
+    script_item_add(script = "EMPTY_FOLDER", type = "dir", touchFiles = F)
 
   ## import test
   mytask_add <- function(taskId, scriptFile) {
     task_create(taskId = taskId, online = TRUE, taskType = "__IMPORT__") |>
-      script_item(script = scriptFile, type = "file", touchFiles = F)
+      script_item_add(script = scriptFile, type = "file", touchFiles = F)
   }
   mytask_add("A/student", "IMPORT/student.R")
   mytask_add("A/score", "IMPORT/score.R")

@@ -309,8 +309,8 @@ task_run <- function(taskId,
       }),
       "params" = NA,
       "globalVars" = list(list("taskId" = taskId, "batchId" = batchId)),
-      "inputAsign" = NA,
-      "outputAsign" = NA
+      "inputAssign" = NA,
+      "outputAssign" = NA
     )
     item_done <- tibble(
       "type" = "queue",
@@ -325,8 +325,8 @@ task_run <- function(taskId,
       "params" = NA,
       "globalVars" = list(list("taskId" = taskId, "batchId" = batchId,
                            "yamlParams" = paramInfo |> yaml::as.yaml())),
-      "inputAsign" = NA,
-      "outputAsign" = NA
+      "inputAssign" = NA,
+      "outputAssign" = NA
     )
     items <- rbind(
       item_run,
@@ -351,11 +351,11 @@ task_run <- function(taskId,
 
 ## 预定义schema中有默认的映射规则，且在任务定义中未指定新的映射
 ## 允许映射多个输入参数
-getFuncInputAsign <- function(script, inputAsign) {
-  result <- inputAsign
+getFuncInputAssign <- function(script, inputAssign) {
+  result <- inputAssign
   get_fun_schema(script, "params")$items |> purrr::walk(function(item) {
-    if(is.null(inputAsign[[item]])) {
-      schemaAsgin <- get_fun_schema(script, "params", item)$inputAsign
+    if(is.null(inputAssign[[item]])) {
+      schemaAsgin <- get_fun_schema(script, "params", item)$inputAssign
       if(!is.null(schemaAsgin)) {
         result[[item]] <<- schemaAsgin
       }
@@ -365,12 +365,12 @@ getFuncInputAsign <- function(script, inputAsign) {
 }
 
 ## 仅一个输出参数
-getFuncOutputAsign <- function(script, outputAsign) {
-  oa <- get_fun_schema(script, "outputAsign")$value
-  if(!is.null(oa) && is_empty(outputAsign)) {
+getFuncOutputAssign <- function(script, outputAssign) {
+  oa <- get_fun_schema(script, "outputAssign")$value
+  if(!is.null(oa) && is_empty(outputAssign)) {
     oa
   } else {
-    outputAsign
+    outputAssign
   }
 }
 
@@ -387,7 +387,7 @@ taskToRun <- function(taskItems, withEnv, ...) {
   ## 逐项执行子任务
   taskItems |>
     tibble::rowid_to_column("rowId") |>
-    purrr::pwalk(function(rowId, script, params, globalVars, type, inputAsign, outputAsign) {
+    purrr::pwalk(function(rowId, script, params, globalVars, type, inputAssign, outputAssign) {
       ## 设置执行环境变量值
       myParams <- params %na% list()
       names(globalVars) |> purrr::walk(function(i) {
@@ -398,15 +398,15 @@ taskToRun <- function(taskItems, withEnv, ...) {
         if(is_empty(get_fun_schema(script))) {
           stop("No Schema Defined for Function: ", script)
         }
-        inputAsign <- getFuncInputAsign(script, inputAsign %na% list())
-        outputAsign <- getFuncOutputAsign(script, outputAsign %na% NULL)
+        inputAssign <- getFuncInputAssign(script, inputAssign %na% list())
+        outputAssign <- getFuncOutputAssign(script, outputAssign %na% NULL)
         ## 使用环境内全局变量映射入参
-        names(inputAsign |> unlist()) |> purrr::walk(function(i) {
+        names(inputAssign |> unlist()) |> purrr::walk(function(i) {
           ## 如果映射目标不存在：函数参数列表中无此参数或执行环境中无此全局变量，就忽略
-          if(i %in% formalArgs(script) && inputAsign[[i]] %in% ls(TaskRun.ENV)) {
-            myParams[[i]] <<- get(inputAsign[[i]], envir = TaskRun.ENV)
+          if(i %in% formalArgs(script) && inputAssign[[i]] %in% ls(TaskRun.ENV)) {
+            myParams[[i]] <<- get(inputAssign[[i]], envir = TaskRun.ENV)
           } else {
-            warning("item ", rowId, ": ", type, "/", script, " >> Input Asign had been Ignored: ", i)
+            warning("item ", rowId, ": ", type, "/", script, " >> Input Assign had been Ignored: ", i)
           }
         })
         ## 将输出值保存在"result"
@@ -453,7 +453,7 @@ taskToRun <- function(taskItems, withEnv, ...) {
         }        
       }
       ## 覆盖或创建输出目标
-      outputAsign |> purrr::walk(function(i) {
+      outputAssign |> purrr::walk(function(i) {
         if(is.character(i) && length(i) == 1) {
           assign(i, curResult, envir = TaskRun.ENV)
         }

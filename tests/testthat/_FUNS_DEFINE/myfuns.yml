@@ -1,24 +1,24 @@
 projects:
   functions:
     "gali_import_cars":
-      outputAsign: "@ds"
+      outputAssign: "@ds"
     "gali_ds_filter_cyl":
-      outputAsign: "@ds"
+      outputAssign: "@ds"
       params:
         "d":
           editType: calc
           valType: tibble
-          inputAsign: "@ds"
+          inputAssign: "@ds"
         "i_cyl":
           editType: calc
           valType: integer
     "gali_ds_as_sort":
-      outputAsign: "@ds"
+      outputAssign: "@ds"
       params:
         "d":
           editType: calc
           valType: tibble
-          inputAsign: "@ds"
+          inputAssign: "@ds"
         "sv_columns":
           editType: calc
           valType: tibble_column

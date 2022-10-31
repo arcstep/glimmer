@@ -72,7 +72,7 @@ task_risk_model_create <- function(dsName,
                 riskTip = riskTip,
                 riskLevel = riskLevel)) |>
     ## 从任务运行环境中自定提取taskId并映射为@modelId
-    script_expr_add(expression({`@task`$taskId}), outputAsign = "@modelId") |>
+    script_expr_add(expression({`@task`$taskId}), outputAssign = "@modelId") |>
     ## 自动读取dsName
     script_func_add("ds_read0", params = list("dsName" = dsName))
 }

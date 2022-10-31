@@ -5,7 +5,7 @@ ds:
   functions:
     ds_demo:
       description: glimmer内置的示例数据集
-      outputAsign: "@ds"
+      outputAssign: "@ds"
       params:
         "demoDataset":
           description: 数据集名称
@@ -15,7 +15,7 @@ ds:
       description: 列举所有数据集
     ds_read0:
       description: 读取已归档数据
-      outputAsign: "@ds"
+      outputAssign: "@ds"
       params:
         "dsName":
           description: 数据集名称
@@ -31,27 +31,27 @@ ds:
         "d":
           description: 要处理的数据框
           valType: tibble
-          inputAsign: "@ds"
+          inputAssign: "@ds"
         "dsName":
           description: 数据集名称
           editType: dataset_search
           valType: string
     ds_collect:
       description: 结束惰性计算，立即执行数据收集
-      outputAsign: "@ds"
+      outputAssign: "@ds"
       params:
         "d":
           description: 要处理的数据框
           valType: tibble
-          inputAsign: "@ds"
+          inputAssign: "@ds"
     ds_filter:
       description: 过滤数据框
-      outputAsign: "@ds"
+      outputAssign: "@ds"
       params:
         "d":
           description: 要处理的数据框
           valType: tibble
-          inputAsign: "@ds"
+          inputAssign: "@ds"
         "column":
           description: 比较列
           valType: column_name
@@ -67,12 +67,12 @@ ds:
           valType: any
     ds_head:
       description: 获取头部N行数据
-      outputAsign: "@ds"
+      outputAssign: "@ds"
       params:
         "d":
           description: 要处理的数据框
           valType: tibble
-          inputAsign: "@ds"
+          inputAssign: "@ds"
         "n":
           description: 行数
           editType: integer_edit
@@ -80,12 +80,12 @@ ds:
           min: 0
     ds_tail:
       description: 获取尾部N行数据
-      outputAsign: "@ds"
+      outputAssign: "@ds"
       params:
         "d":
           description: 要处理的数据框
           valType: tibble
-          inputAsign: "@ds"
+          inputAssign: "@ds"
         "n":
           description: 行数
           editType: integer_edit
@@ -93,12 +93,12 @@ ds:
           min: 0
     ds_n_max:
       description: 获取值最大的N行数据
-      outputAsign: "@ds"
+      outputAssign: "@ds"
       params:
         "d":
           description: 要处理的数据框
           valType: tibble
-          inputAsign: "@ds"
+          inputAssign: "@ds"
         "olderColumn":
           description: 权重列
           valType: column_name
@@ -115,12 +115,12 @@ ds:
           valType: boolean
     ds_n_min:
       description: 获取值最小的N行数据
-      outputAsign: "@ds"
+      outputAssign: "@ds"
       params:
         "d":
           description: 要处理的数据框
           valType: tibble
-          inputAsign: "@ds"
+          inputAssign: "@ds"
         "olderColumn":
           description: 权重列
           valType: column_name
@@ -137,12 +137,12 @@ ds:
           valType: boolean
     ds_arrange:
       description: 重新排列数据行
-      outputAsign: "@ds"
+      outputAssign: "@ds"
       params:
         "d":
           description: 要处理的数据框
           valType: tibble
-          inputAsign: "@ds"
+          inputAssign: "@ds"
         "columns":
           description: 一组列名
           valType: column_name_list
@@ -158,12 +158,12 @@ ds:
           valType: boolean
     ds_select:
       description: 重新排列数据行
-      outputAsign: "@ds"
+      outputAssign: "@ds"
       params:
         "d":
           description: 要处理的数据框
           valType: tibble
-          inputAsign: "@ds"
+          inputAssign: "@ds"
         "columns":
           description: 一组列名
           valType: column_name_list
@@ -179,12 +179,12 @@ ds:
           editType: regex_edit
     ds_rename:
       description: 修改列名
-      outputAsign: "@ds"
+      outputAssign: "@ds"
       params:
         "d":
           description: 要处理的数据框
           valType: tibble
-          inputAsign: "@ds"
+          inputAssign: "@ds"
         "newColumn":
           description: 新列名
           valType: column_name
@@ -196,13 +196,13 @@ ds:
           enumateFrom: "@ds"
     ds_count:
       description: 统计值出现次数
-      outputAsign: "@ds"
+      outputAssign: "@ds"
       params:
         "d":
           description: 要处理的数据框
           editType: calc
           valType: tibble
-          inputAsign: "@ds"
+          inputAssign: "@ds"
         "columns":
           description: 一组列名
           valType: column_name_list
@@ -218,13 +218,13 @@ ds:
           editType: string_edit
     ds_add_count:
       description: 计数统计，并将结果追加到原数据集
-      outputAsign: "@ds"
+      outputAssign: "@ds"
       params:
         "d":
           description: 要处理的数据框
           editType: calc
           valType: tibble
-          inputAsign: "@ds"
+          inputAssign: "@ds"
         "columns":
           description: 一组列名
           valType: column_name_list
