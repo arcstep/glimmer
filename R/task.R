@@ -374,6 +374,9 @@ getFuncOutputAssign <- function(script, outputAssign) {
   }
 }
 
+##
+## 变量赋值顺序：globalVars, inputAssign, outputAssign
+##
 taskToRun <- function(taskItems, withEnv, ...) {
   ## 子函数内定义一个设置返回值的函数，供执行环境使用
   TaskRun.ENV <- new.env(hash = TRUE)

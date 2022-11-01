@@ -1,12 +1,16 @@
 #' @title 导入score数据
 #' @param importTopic IMPORT
-#' @param files 导入素材文件名
+#' @param filesMatched 导入素材文件名
 
-if(!rlang::is_empty(files)) {
-  files |> purrr::walk(function(f) {
-    readr::read_csv(get_path(importTopic, f)) |>
-      mutate(`@from` = f) |>
-      ds_append("score")
+if(!rlang::is_empty(filesMatched)) {
+  filesMatched |>
+    select(batchFolder, filePath) |>
+    purrr::pwalk(function(batchFolder, filePath) {
+      f <- get_path(importTopic, batchFolder, filePath)
+      f |>
+        readr::read_csv() |>
+        ds_as_from(f) |>
+        ds_append("score")
   })
   ds_submit("score")
 }

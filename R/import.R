@@ -124,10 +124,10 @@ import_search <- function(fileMatch = ".*",
                          importDataset = "__IMPORT_FILES__",
                          cacheTopic = "CACHE",
                          ignoreFlag = FALSE,
-                         b_todo = TRUE) {
+                         todoFlag = TRUE) {
   filesToRead <- ds_read(dsName = importDataset, topic = cacheTopic)
   if(!is_empty(filesToRead)) {
-    d0 <- filesToRead |> filter(todo %in% b_todo)
+    d0 <- filesToRead |> filter(todo %in% todoFlag)
     d0 |> filter(ignore == ignoreFlag) |>
       collect() |>
       filter(stringr::str_detect(filePath, fileMatch)) |>
@@ -182,26 +182,33 @@ import_run <- function(files = tibble(),
       resp <- tasksToMatch |>
         filter(online) |>
         select(taskTopic, taskId) |>
-        purrr::pmap_df(function(taskTopic, taskId) {
+        purrr::pmap(function(taskTopic, taskId) {
           pat <- paste0("^", taskId, "[./]")
           matched <- filesToRead |>
-            mutate(path = paste(batchFolder, filePath, sep = "/")) |>
             filter(stringr::str_detect(filePath, pat))
           message("Task Define", " <", taskTopic, ": ", taskId, "> matched ",  nrow(matched), " files !!")
           ## 如果任务可以匹配到导入素材，则执行该任务
           if(nrow(matched) > 0) {
             if(toImport) {
-              task_run(taskId = taskId, taskTopic = taskTopic, importTopic = importTopic, files = matched$path)
-              filesToRead |>
+              task_run(taskId = taskId,
+                       taskTopic = taskTopic,
+                       importTopic = importTopic,
+                       filesMatched = matched)
+              matched |>
                 mutate(todo = FALSE, doneAt = now(tzone = "Asia/Shanghai")) |>
                 ds_append(importDataset, cacheTopic)
             }
             hasMatched <<- hasMatched + nrow(matched)
           }
-          list("taskId" = taskId, "taskTopic" = taskTopic, "files" = matched$path)
+          list("taskId" = taskId,
+               "taskTopic" = taskTopic,
+               "importTopic" = importTopic,
+               "filesMatched" = matched)
         })
       if(hasMatched == 0) {
         message("Zero import files to MATCH task defined!!")
+      } else {
+        ds_submit(importDataset, topic = cacheTopic)
       }
       resp
     } else {
