@@ -55,8 +55,6 @@
   if(identical(NA, a)) a else b
 }
 
-
-
 #' @title 删除文件夹
 #' @family utils function
 #' @export

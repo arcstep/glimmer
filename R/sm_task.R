@@ -87,8 +87,8 @@ sm_task_server <- function(id, taskId, displayMode = "editor") {
       if(!is.null(taskInfo())) {
         message(taskInfo())
         items <- taskInfo()$items |> tibble::rowid_to_column()
-        sm_scripts_server("scripts", items)
         output$`task-scripts-items` <- renderUI({ sm_scripts_ui(ns("scripts"), items) })
+        sm_scripts_server("scripts", items)
       }
     })
     # 执行任务
