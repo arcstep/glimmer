@@ -12,3 +12,4 @@ gali_ds_filter_cyl <- function(d, i_cyl = 4) { d |> as_tibble() |> filter(cyl ==
 gali_ds_as_sort <- function(d, sv_columns) {
   d |> arrange(!!!syms(sv_columns))
 }
+

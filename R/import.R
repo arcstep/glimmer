@@ -220,3 +220,38 @@ import_run <- function(files = tibble(),
     tibble()
   }
 }
+
+#' @title 导入csv文件
+#' @param dsName
+#' @param keyColumns
+#' @param importTopic IMPORT
+#' @param filesMatched 导入素材文件名
+#' @family import function
+#' @export
+import_csv_files <- function(dsName, keyColumns, filesMatched, importTopic) {
+  if(nrow(filesMatched) > 0) {
+    # print(filesMatched)
+    filesMatched |>
+      select(batchFolder, filePath) |>
+      purrr::pwalk(function(batchFolder, filePath) {
+        path <- get_path(importTopic, batchFolder, filePath)
+        d <- readr::read_csv(path, show_col_types = FALSE, col_types = readr::cols(.default = "c")) |>
+          select(!contains("..."))
+        if(!rlang::is_empty(d)) {
+          if(TRUE %in% (keyColumns %nin% names(d))) {
+            stop("Keycolumns not in csv: ", importTopic, "/", path)
+          }
+          ## 自动创建数据集
+          if(!ds_exists(dsName)) {
+            ds_init(dsName, data = d, type = "__IMPORT__", keyColumns = keyColumns)
+          }
+          ##
+          if(d[[1]][[1]] == "占位") {d <- d |> slice(-1)}
+          ##
+          d |> ds_as_unique(keyColumns) |> ds_as_from(path) |>
+            ds_append(dsName)
+        }
+      })
+    ds_submit(dsName)
+  }
+}

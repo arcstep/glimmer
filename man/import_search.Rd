@@ -19,6 +19,7 @@ import_search(
 \seealso{
 Other import function: 
 \code{\link{import_changed}()},
+\code{\link{import_csv_files}()},
 \code{\link{import_init}()},
 \code{\link{import_run}()},
 \code{\link{import_scan}()},

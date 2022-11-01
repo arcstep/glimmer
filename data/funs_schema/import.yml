@@ -1,0 +1,21 @@
+import:
+  tags:
+    - 数据导入
+  description: 导入函数
+  functions:
+    "import_csv_files":
+      params:
+        "dsName":
+          editType: calc
+          valType: string
+        "keyColumns":
+          editType: calc
+          valType: string
+        "filesMatched":
+          editType: calc
+          valType: tibble
+          inputAssign: "filesMatched"
+        "importTopic":
+          editType: calc
+          valType: string
+          inputAssign: "importTopic"

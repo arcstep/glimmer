@@ -78,3 +78,17 @@ test_that("<import_run> 导入流程", {
   
   temp_remove()
 })
+
+test_that("<import_run> 导入同时创建", {
+  sample_init()
+  import_scan()
+
+  task_create("A/1", online = T, taskType = "__IMPORT__") |>
+    script_func_add("import_csv_files", params = list(dsName = "A/1", keyColumns = c("name")))
+  import_search("^A/1") |>
+    import_run(task_search("A/1"), toImport = T)
+  ds_read("A/1") |> collect() |> nrow() |>
+    testthat::expect_equal(6)
+
+  temp_remove()
+})
