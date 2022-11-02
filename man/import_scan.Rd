@@ -26,7 +26,6 @@ Other import function:
 \code{\link{import_files}()},
 \code{\link{import_init}()},
 \code{\link{import_search}()},
-\code{\link{import_task_create}()},
 \code{\link{import_todo_flag}()}
 }
 \concept{import function}

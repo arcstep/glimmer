@@ -138,26 +138,6 @@ import_search <- function(fileMatch = ".*",
   }
 }
 
-#' @title 定义导入任务
-#' @family import function
-#' @export
-import_task_create <- function(taskId,
-                               importFileMatch,
-                               targetDataset,
-                               importTopic = "IMPORT",
-                               cacheTopic = "CACHE",
-                               taskTopic = "TASK_DEFINE",
-                               scriptsTopic = "TASK_SCRIPTS") {
-  task_create(taskId = modelId,
-              taskType = "__IMPORT__",
-              taskTopic = taskTopic,
-              extention = list(
-                importFileMatch = importFileMatch,
-                importTopic = importTopic,
-                targetDataset = targetDataset,
-                cacheTopic = cacheTopic))
-}
-
 #' @title 批量导入文件
 #' @param filesMatched 导入素材文件名
 #' @param dsName 导出目标数据集名称
