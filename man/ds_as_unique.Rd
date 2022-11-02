@@ -4,12 +4,12 @@
 \alias{ds_as_unique}
 \title{去除重复行}
 \usage{
-ds_as_unique(ds, keyColumns)
+ds_as_unique(ds, keyColumns = c())
 }
 \arguments{
 \item{ds}{要确认的数据集}
 
-\item{columns}{要确认的列名或其向量、列表}
+\item{keyColumns}{要确认的列名或其向量、列表}
 }
 \description{
 按键值列去除重复行，保留最先发现的行

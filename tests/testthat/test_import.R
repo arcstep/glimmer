@@ -64,15 +64,16 @@ test_that("<import_run> 导入流程", {
   files |> nrow() |>
     testthat::expect_equal(5)
 
-  ## 匹配任务
-  tasks <- task_search(typeMatch = "IMPORT")
-  
   ## 执行任务
   ds_read("score") |> collect() |> nrow() |>
     testthat::expect_equal(0)
-  import_run(files, tasks)
+  ##
+  import_csv_files(import_search("score.csv$"), dsName = "score")
   ds_read("score") |> collect() |> nrow() |>
-    testthat::expect_equal(3)
+    testthat::expect_equal(5)
+
+  ##  
+  import_csv_files(import_search("student.csv$"), dsName = "student")
   ds_read("student") |> collect() |> nrow() |>
     testthat::expect_equal(3)
   
@@ -83,10 +84,9 @@ test_that("<import_run> 导入同时创建", {
   sample_init()
   import_scan()
 
-  task_create("A/1", online = T, taskType = "__IMPORT__") |>
-    script_func_add("import_csv_files", params = list(dsName = "A/1", keyColumns = c("name")))
   import_search("^A/1") |>
-    import_run(task_search("A/1"), toImport = T)
+    import_csv_files(dsName = "A/1", keyColumns = c("name")) |>
+    import_todo_flag()
   ds_read("A/1") |> collect() |> nrow() |>
     testthat::expect_equal(6)
 

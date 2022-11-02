@@ -158,82 +158,18 @@ import_task_create <- function(taskId,
                 cacheTopic = cacheTopic))
 }
 
-#' @title 执行所有导入任务
-#' @description 
-#' 对于新素材，或指定素材文件，执行所有任务检查。
-#' 
-#' @family import function
-#' @export
-import_run <- function(files = tibble(),
-                       tasks = tibble(),
-                       toImport = TRUE,
-                       taskTopic = "TASK_DEFINE",
-                       importTopic = "IMPORT",
-                       importDataset = "__IMPORT_FILES__",
-                       cacheTopic = "CACHE") {
-  ##
-  filesToRead <- files %empty% import_search(importDataset = importDataset, cacheTopic = cacheTopic)
-  tasksToMatch <- tasks %empty% task_search(typeMatch = "IMPORT", taskTopic = taskTopic)
-
-  ## 按照约定，使用taskId匹配导入素材的filePath
-  if(!is_empty(filesToRead)) {
-    if(!is_empty(tasksToMatch)) {
-      hasMatched <- 0
-      resp <- tasksToMatch |>
-        filter(online) |>
-        select(taskTopic, taskId) |>
-        purrr::pmap(function(taskTopic, taskId) {
-          pat <- paste0("^", taskId, "[./]")
-          matched <- filesToRead |>
-            filter(stringr::str_detect(filePath, pat))
-          message("Task Define", " <", taskTopic, ": ", taskId, "> matched ",  nrow(matched), " files !!")
-          ## 如果任务可以匹配到导入素材，则执行该任务
-          if(nrow(matched) > 0) {
-            if(toImport) {
-              task_run(taskId = taskId,
-                       taskTopic = taskTopic,
-                       importTopic = importTopic,
-                       filesMatched = matched)
-              matched |>
-                mutate(todo = FALSE, doneAt = now(tzone = "Asia/Shanghai")) |>
-                ds_append(importDataset, cacheTopic)
-            }
-            hasMatched <<- hasMatched + nrow(matched)
-          }
-          list("taskId" = taskId,
-               "taskTopic" = taskTopic,
-               "importTopic" = importTopic,
-               "filesMatched" = matched)
-        })
-      if(hasMatched == 0) {
-        message("Zero import files to MATCH task defined!!")
-      } else {
-        ds_submit(importDataset, topic = cacheTopic)
-      }
-      resp
-    } else {
-      warning("No Tasks been selected!!")
-      tibble()
-    }
-  } else {
-    warning("No Import Files been selected!!")
-    tibble()
-  }
-}
-
 #' @title 导入csv文件
-#' @param dsName
-#' @param keyColumns
-#' @param importTopic IMPORT
 #' @param filesMatched 导入素材文件名
+#' @param dsName 导出目标数据集名称
+#' @param keyColumns 数据集的关键字段
 #' @family import function
 #' @export
-import_csv_files <- function(dsName, keyColumns, filesMatched, importTopic) {
+import_csv_files <- function(filesMatched, dsName, keyColumns = c()) {
   if(nrow(filesMatched) > 0) {
     # print(filesMatched)
     filesMatched |>
-      select(batchFolder, filePath) |>
-      purrr::pwalk(function(batchFolder, filePath) {
+      select(importTopic, batchFolder, filePath) |>
+      purrr::pwalk(function(importTopic, batchFolder, filePath) {
         path <- get_path(importTopic, batchFolder, filePath)
         d <- readr::read_csv(path, show_col_types = FALSE, col_types = readr::cols(.default = "c")) |>
           select(!contains("..."))
@@ -254,4 +190,20 @@ import_csv_files <- function(dsName, keyColumns, filesMatched, importTopic) {
       })
     ds_submit(dsName)
   }
+  return(filesMatched)
+}
+
+#' @title 修改todo标记
+#' @param filesMatched 导入素材文件名
+#' @param cacheTopic 数据集存储主题文件夹
+#' @param importDataset 导入素材库所在的数据集
+#' @family import function
+#' @export
+import_todo_flag <- function(filesMatched,
+                             todoFlag = FALSE,
+                             cacheTopic = "CACHE",
+                             importDataset = "__IMPORT_FILES__") {
+  filesMatched |>
+    mutate(todo = todoFlag, doneAt = now(tzone = "Asia/Shanghai")) |>
+    ds_write(importDataset, cacheTopic)
 }

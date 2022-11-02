@@ -481,11 +481,15 @@ ds_diff_dataset <- function(ds1, ds2) {
 #' @description
 #' 按键值列去除重复行，保留最先发现的行
 #' @param ds 要确认的数据集
-#' @param columns 要确认的列名或其向量、列表
+#' @param keyColumns 要确认的列名或其向量、列表
 #' @family dataset function
 #' @export
-ds_as_unique <- function(ds, keyColumns) {
-  ds[!duplicated(ds[,keyColumns]),]
+ds_as_unique <- function(ds, keyColumns = c()) {
+  if(length(keyColumns) > 0) {
+    ds[!duplicated(ds[,keyColumns]),]
+  } else {
+    ds
+  }
 }
 
 #' @title 转换字符串为时间日期类型

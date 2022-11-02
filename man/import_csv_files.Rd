@@ -4,12 +4,14 @@
 \alias{import_csv_files}
 \title{导入csv文件}
 \usage{
-import_csv_files(dsName, keyColumns, filesMatched, importTopic)
+import_csv_files(filesMatched, dsName, keyColumns = c())
 }
 \arguments{
 \item{filesMatched}{导入素材文件名}
 
-\item{importTopic}{IMPORT}
+\item{dsName}{导出目标数据集名称}
+
+\item{keyColumns}{数据集的关键字段}
 }
 \description{
 导入csv文件
@@ -18,9 +20,9 @@ import_csv_files(dsName, keyColumns, filesMatched, importTopic)
 Other import function: 
 \code{\link{import_changed}()},
 \code{\link{import_init}()},
-\code{\link{import_run}()},
 \code{\link{import_scan}()},
 \code{\link{import_search}()},
-\code{\link{import_task_create}()}
+\code{\link{import_task_create}()},
+\code{\link{import_todo_flag}()}
 }
 \concept{import function}

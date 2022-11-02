@@ -15,7 +15,3 @@ import:
           editType: calc
           valType: tibble
           inputAssign: "filesMatched"
-        "importTopic":
-          editType: calc
-          valType: string
-          inputAssign: "importTopic"
