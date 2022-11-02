@@ -57,7 +57,7 @@ test_that("<import_scan> 过滤要导入的文件", {
   temp_remove()
 })
 
-test_that("<import_run> 导入流程", {
+test_that("<import_run> scrore/student", {
   sample_init()
   import_scan()
   files <- import_search()
@@ -80,7 +80,7 @@ test_that("<import_run> 导入流程", {
   temp_remove()
 })
 
-test_that("<import_run> 导入同时创建", {
+test_that("<import_run> 导入多个批次中的csv文件", {
   sample_init()
   import_scan()
 
@@ -90,5 +90,24 @@ test_that("<import_run> 导入同时创建", {
   ds_read("A/1") |> collect() |> nrow() |>
     testthat::expect_equal(6)
 
+  temp_remove()
+})
+
+
+test_that("<import_run> 自定义导入文件", {
+  sample_init()
+  import_scan()
+  
+  # import_search("^A/1") |> import_files_preview(function(path) {
+  #   arrow::read_csv_arrow(path) |> as_tibble() |> slice(-1)
+  # })
+  import_search("^A/1", todoFlag = c(T, F)) |>
+    import_files(dsName = "A/1", keyColumns = c("name"), func = function(path) {
+      arrow::read_csv_arrow(path) |> slice(-1)
+    }) |>
+    import_todo_flag()
+  ds_read("A/1") |> collect() |> nrow() |>
+    testthat::expect_equal(6)
+  
   temp_remove()
 })

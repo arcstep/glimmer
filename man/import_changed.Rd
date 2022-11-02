@@ -13,6 +13,8 @@ import_changed(importTopic = "IMPORT", snapTopic = "SNAP")
 Other import function: 
 \code{\link{import_csv_preview}()},
 \code{\link{import_csv}()},
+\code{\link{import_files_preview}()},
+\code{\link{import_files}()},
 \code{\link{import_init}()},
 \code{\link{import_scan}()},
 \code{\link{import_search}()},

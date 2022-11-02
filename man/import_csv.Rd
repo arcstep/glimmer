@@ -2,24 +2,19 @@
 % Please edit documentation in R/import.R
 \name{import_csv}
 \alias{import_csv}
-\title{导入csv文件}
+\title{导入多个CSV文件}
 \usage{
-import_csv(filesMatched, dsName, keyColumns = c(), func = NULL)
-}
-\arguments{
-\item{filesMatched}{导入素材文件名}
-
-\item{dsName}{导出目标数据集名称}
-
-\item{keyColumns}{数据集的关键字段}
+import_csv(...)
 }
 \description{
-导入csv文件
+导入多个CSV文件
 }
 \seealso{
 Other import function: 
 \code{\link{import_changed}()},
 \code{\link{import_csv_preview}()},
+\code{\link{import_files_preview}()},
+\code{\link{import_files}()},
 \code{\link{import_init}()},
 \code{\link{import_scan}()},
 \code{\link{import_search}()},

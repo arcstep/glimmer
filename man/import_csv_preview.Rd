@@ -2,20 +2,19 @@
 % Please edit documentation in R/import.R
 \name{import_csv_preview}
 \alias{import_csv_preview}
-\title{导入csv文件}
+\title{预览多个CSV文件}
 \usage{
-import_csv_preview(filesMatched, func = NULL)
-}
-\arguments{
-\item{filesMatched}{导入素材文件名}
+import_csv_preview(...)
 }
 \description{
-导入csv文件
+预览多个CSV文件
 }
 \seealso{
 Other import function: 
 \code{\link{import_changed}()},
 \code{\link{import_csv}()},
+\code{\link{import_files_preview}()},
+\code{\link{import_files}()},
 \code{\link{import_init}()},
 \code{\link{import_scan}()},
 \code{\link{import_search}()},

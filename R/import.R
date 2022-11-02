@@ -158,37 +158,26 @@ import_task_create <- function(taskId,
                 cacheTopic = cacheTopic))
 }
 
-##
-read_csv_default <- function(path) {
-  d <- readr::read_csv(path, show_col_types = FALSE, col_types = readr::cols(.default = "c")) |>
-    select(!contains("..."))
-  if(!rlang::is_empty(d)) {
-    ##
-    if(d[[1]][[1]] == "占位") {d <- d |> slice(-1)}
-  }
-  d
-}
-
-#' @title 导入csv文件
+#' @title 批量导入文件
 #' @param filesMatched 导入素材文件名
 #' @param dsName 导出目标数据集名称
 #' @param keyColumns 数据集的关键字段
 #' @family import function
 #' @export
-import_csv <- function(filesMatched, dsName, keyColumns = c(), func = NULL) {
+import_files <- function(filesMatched, dsName, keyColumns = c(), func = function(path){}) {
   nrows <- 0
   if(nrow(filesMatched) > 0) {
     filesMatched |>
       select(importTopic, batchFolder, filePath) |>
       purrr::pwalk(function(importTopic, batchFolder, filePath) {
         path <- get_path(importTopic, batchFolder, filePath)
-        ## 调用默认的CSV导入函数
-        d <- (func %empty% read_csv_default)(path)
+        ## 调用单个文件的导入函数
+        d <- func(path)
         nrows <<- nrows + nrow(d)
         if(!rlang::is_empty(d) && nrow(d) > 0) {
           ## 确定数据框中包含主键
           if(TRUE %in% (keyColumns %nin% names(d))) {
-            stop("Keycolumns not in csv: ", importTopic, "/", path)
+            stop("Keycolumns not in file: ", importTopic, "/", path)
           }
           ## 自动创建数据集
           if(!ds_exists(dsName)) {
@@ -204,18 +193,29 @@ import_csv <- function(filesMatched, dsName, keyColumns = c(), func = NULL) {
   return(filesMatched)
 }
 
-#' @title 导入csv文件
+##
+import_csv_default <- function(path) {
+  d <- readr::read_csv(path, show_col_types = FALSE, col_types = readr::cols(.default = "c")) |>
+    select(!contains("..."))
+  if(!rlang::is_empty(d)) {
+    ##
+    if(d[[1]][[1]] == "占位") {d <- d |> slice(-1)}
+  }
+  d
+}
+
+#' @title 预览多个文件
 #' @param filesMatched 导入素材文件名
 #' @family import function
 #' @export
-import_csv_preview <- function(filesMatched, func = NULL) {
+import_files_preview <- function(filesMatched, func = function(path){}) {
   resp <- tibble()
   if(nrow(filesMatched) > 0) {
     filesMatched |>
       select(importTopic, batchFolder, filePath) |>
       purrr::pwalk(function(importTopic, batchFolder, filePath) {
         path <- get_path(importTopic, batchFolder, filePath)
-        d <- (func %empty% read_csv_default)(path)
+        d <- func(path)
         if(!rlang::is_empty(d)) {
           resp <<- rbind(resp, d)
         }
@@ -223,6 +223,18 @@ import_csv_preview <- function(filesMatched, func = NULL) {
   }
   return(resp)
 }
+
+#' @title 导入多个CSV文件
+#' @family import function
+#' @export
+import_csv <- purrr::partial(import_files, func = import_csv_default)
+
+#' @title 预览多个CSV文件
+#' @family import function
+#' @export
+import_csv_preview <- purrr::partial(import_files_preview, func = import_csv_default)
+
+
 
 #' @title 修改todo标记
 #' @param filesMatched 导入素材文件名
