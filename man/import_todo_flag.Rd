@@ -24,7 +24,8 @@ import_todo_flag(
 \seealso{
 Other import function: 
 \code{\link{import_changed}()},
-\code{\link{import_csv_files}()},
+\code{\link{import_csv_preview}()},
+\code{\link{import_csv}()},
 \code{\link{import_init}()},
 \code{\link{import_scan}()},
 \code{\link{import_search}()},

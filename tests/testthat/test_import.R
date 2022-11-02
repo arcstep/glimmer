@@ -68,12 +68,12 @@ test_that("<import_run> 导入流程", {
   ds_read("score") |> collect() |> nrow() |>
     testthat::expect_equal(0)
   ##
-  import_csv_files(import_search("score.csv$"), dsName = "score")
+  import_csv(import_search("score.csv$"), dsName = "score")
   ds_read("score") |> collect() |> nrow() |>
     testthat::expect_equal(5)
 
   ##  
-  import_csv_files(import_search("student.csv$"), dsName = "student")
+  import_csv(import_search("student.csv$"), dsName = "student")
   ds_read("student") |> collect() |> nrow() |>
     testthat::expect_equal(3)
   
@@ -85,7 +85,7 @@ test_that("<import_run> 导入同时创建", {
   import_scan()
 
   import_search("^A/1") |>
-    import_csv_files(dsName = "A/1", keyColumns = c("name")) |>
+    import_csv(dsName = "A/1", keyColumns = c("name")) |>
     import_todo_flag()
   ds_read("A/1") |> collect() |> nrow() |>
     testthat::expect_equal(6)

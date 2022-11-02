@@ -158,22 +158,35 @@ import_task_create <- function(taskId,
                 cacheTopic = cacheTopic))
 }
 
+##
+read_csv_default <- function(path) {
+  d <- readr::read_csv(path, show_col_types = FALSE, col_types = readr::cols(.default = "c")) |>
+    select(!contains("..."))
+  if(!rlang::is_empty(d)) {
+    ##
+    if(d[[1]][[1]] == "占位") {d <- d |> slice(-1)}
+  }
+  d
+}
+
 #' @title 导入csv文件
 #' @param filesMatched 导入素材文件名
 #' @param dsName 导出目标数据集名称
 #' @param keyColumns 数据集的关键字段
 #' @family import function
 #' @export
-import_csv_files <- function(filesMatched, dsName, keyColumns = c()) {
+import_csv <- function(filesMatched, dsName, keyColumns = c(), func = NULL) {
+  nrows <- 0
   if(nrow(filesMatched) > 0) {
-    # print(filesMatched)
     filesMatched |>
       select(importTopic, batchFolder, filePath) |>
       purrr::pwalk(function(importTopic, batchFolder, filePath) {
         path <- get_path(importTopic, batchFolder, filePath)
-        d <- readr::read_csv(path, show_col_types = FALSE, col_types = readr::cols(.default = "c")) |>
-          select(!contains("..."))
-        if(!rlang::is_empty(d)) {
+        ## 调用默认的CSV导入函数
+        d <- (func %empty% read_csv_default)(path)
+        nrows <<- nrows + nrow(d)
+        if(!rlang::is_empty(d) && nrow(d) > 0) {
+          ## 确定数据框中包含主键
           if(TRUE %in% (keyColumns %nin% names(d))) {
             stop("Keycolumns not in csv: ", importTopic, "/", path)
           }
@@ -182,15 +195,33 @@ import_csv_files <- function(filesMatched, dsName, keyColumns = c()) {
             ds_init(dsName, data = d, type = "__IMPORT__", keyColumns = keyColumns)
           }
           ##
-          if(d[[1]][[1]] == "占位") {d <- d |> slice(-1)}
-          ##
           d |> ds_as_unique(keyColumns) |> ds_as_from(path) |>
             ds_append(dsName)
         }
       })
-    ds_submit(dsName)
+    if(nrows > 0) ds_submit(dsName)
   }
   return(filesMatched)
+}
+
+#' @title 导入csv文件
+#' @param filesMatched 导入素材文件名
+#' @family import function
+#' @export
+import_csv_preview <- function(filesMatched, func = NULL) {
+  resp <- tibble()
+  if(nrow(filesMatched) > 0) {
+    filesMatched |>
+      select(importTopic, batchFolder, filePath) |>
+      purrr::pwalk(function(importTopic, batchFolder, filePath) {
+        path <- get_path(importTopic, batchFolder, filePath)
+        d <- (func %empty% read_csv_default)(path)
+        if(!rlang::is_empty(d)) {
+          resp <<- rbind(resp, d)
+        }
+      })
+  }
+  return(resp)
 }
 
 #' @title 修改todo标记
@@ -203,7 +234,9 @@ import_todo_flag <- function(filesMatched,
                              todoFlag = FALSE,
                              cacheTopic = "CACHE",
                              importDataset = "__IMPORT_FILES__") {
-  filesMatched |>
-    mutate(todo = todoFlag, doneAt = now(tzone = "Asia/Shanghai")) |>
-    ds_write(importDataset, cacheTopic)
+  if(nrow(filesMatched) > 0) {
+    filesMatched |>
+      mutate(todo = todoFlag, doneAt = now(tzone = "Asia/Shanghai")) |>
+      ds_write(importDataset, cacheTopic)
+  }
 }
