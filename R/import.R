@@ -55,7 +55,7 @@ import_changed <- function(importTopic = "IMPORT", snapTopic = "SNAP") {
   if(!is_empty(batchFolders)) {
     batchFolders |>
       sort() |>
-      purrr::map(function(batchPath) {
+      purrr::map_dfr(function(batchPath) {
         ## 提取批次文件夹名称
         batchFolderName <- stringr::str_remove(batchPath, paste0(get_path(importTopic), "/"))
         ## 提取所有素材文件
@@ -70,7 +70,7 @@ import_changed <- function(importTopic = "IMPORT", snapTopic = "SNAP") {
           select(importTopic, createdAt, scanedAt, lastmodifiedAt, batchFolder, filePath, fileSize) |>
           mutate(year = as.integer(lubridate::year(createdAt))) |>
           mutate(month = as.integer(lubridate::month(createdAt)))
-      }) |> purrr::reduce(rbind)
+      })
   } else {
     warning("No Batch Folder need to Import!!!")
     tibble()
@@ -189,19 +189,16 @@ import_csv_default <- function(path) {
 #' @family import function
 #' @export
 import_files_preview <- function(filesMatched, func = function(path){}) {
-  resp <- tibble()
   if(nrow(filesMatched) > 0) {
     filesMatched |>
       select(importTopic, batchFolder, filePath) |>
-      purrr::pwalk(function(importTopic, batchFolder, filePath) {
-        path <- get_path(importTopic, batchFolder, filePath)
-        d <- func(path)
-        if(!rlang::is_empty(d)) {
-          resp <<- rbind(resp, d)
-        }
+      purrr::pmap_dfr(function(importTopic, batchFolder, filePath) {
+        get_path(importTopic, batchFolder, filePath) |>
+          func()
       })
+  } else {
+    tibble()
   }
-  return(resp)
 }
 
 #' @title 导入多个CSV文件
