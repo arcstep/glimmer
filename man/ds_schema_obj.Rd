@@ -4,7 +4,7 @@
 \alias{ds_schema_obj}
 \title{构造Arrow的schema}
 \usage{
-ds_schema_obj(dsName, topic = "CACHE")
+ds_schema_obj(dsName, topic = "CACHE", metaColumns = TRUE)
 }
 \arguments{
 \item{dsName}{数据集名称}

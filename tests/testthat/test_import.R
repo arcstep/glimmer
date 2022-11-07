@@ -84,11 +84,30 @@ test_that("<import_run> 导入多个批次中的csv文件", {
   sample_init()
   import_scan()
   
+  ## 预览模式
   import_search("^A/1") |>
     import_csv_preview(keyColumns = c("name")) |>
     nrow() |>
     testthat::expect_equal(6)
-
+  
+  ## 指定schema
+  demo <- import_search("^A/1") |>
+    import_csv_preview(keyColumns = c("name")) |>
+    mutate(age = as.integer(age)) |>
+    select(-`@from`)
+  ds_init("mystudent", data = demo)
+  ds_yaml_schema("mystudent")
+  
+  resp <- import_search("^A/1", todoFlag = c(T, F)) |>
+    import_files_preview(keyColumns = c("name"), func = function(path) {
+      arrow::read_csv_arrow(path, skip = 2,
+                            col_names = ds_schema_obj("mystudent", metaColumns = F) |> names(),
+                            schema = ds_schema_obj("mystudent", metaColumns = F))
+    })
+  resp$age |> is.integer() |>
+    testthat::expect_true()
+    
+  ## 导入数据
   import_search("^A/1") |>
     import_csv(dsName = "A/1", keyColumns = c("name")) |>
     import_todo_flag()

@@ -203,7 +203,7 @@ import_files_preview <- function(filesMatched, keyColumns = c(), func = function
       if(!rlang::is_empty(d) && nrow(d) > 0) {
         ## 确定数据框中包含主键
         if(length(keyColumns) > 0 && (TRUE %in% (keyColumns %nin% names(d)))) {
-          stop("Keycolumns not in file: ", importTopic, "/", path)
+          stop("Invalid Keycolumns: ", paste(keyColumns, collapse = ","))
         }
         ##
         d |> ds_as_unique(keyColumns)

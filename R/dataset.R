@@ -430,18 +430,20 @@ ds_schema <- function(ds) {
 #' @param topic 数据集保存的主题目录，默认为CACHE
 #' @family dataset function
 #' @export
-ds_schema_obj <- function(dsName, topic = "CACHE") {
+ds_schema_obj <- function(dsName, topic = "CACHE", metaColumns = TRUE) {
   s <- list()
   yml <- ds_yaml(dsName, topic)
   if(!is_empty(yml$schema)) {
     yml$schema |> purrr::walk(function(item) {
       s[[item$fieldName]] <<- dt_field(item$fieldType)
     }) 
-    s$`@from` <- dt_field("string")
-    s$`@deleted` <- dt_field("bool")
-    s$`@action` <- dt_field("string")
-    s$`@batchId` <- dt_field("string")
-    s$`@lastmodifiedAt` <- dt_field("timestamp[us, tz=Asia/Shanghai]")
+    if(metaColumns) {
+      s$`@from` <- dt_field("string")
+      s$`@deleted` <- dt_field("bool")
+      s$`@action` <- dt_field("string")
+      s$`@batchId` <- dt_field("string")
+      s$`@lastmodifiedAt` <- dt_field("timestamp[us, tz=Asia/Shanghai]")
+    }
   } else {
     stop("No Schema in metada: ", topic, "/", dsName, "/.metadata.yml")
   }
