@@ -30,6 +30,8 @@ Other dataset function:
 \code{\link{ds_demo}()},
 \code{\link{ds_diff_dataset}()},
 \code{\link{ds_diff_schema}()},
+\code{\link{ds_distinct}()},
+\code{\link{ds_dup_count}()},
 \code{\link{ds_exists}()},
 \code{\link{ds_files}()},
 \code{\link{ds_filter}()},

@@ -154,10 +154,31 @@ ds_rename <- function(d, newName, oldName) {
 #' @title 计数统计
 #' @family dataset function
 #' @export
-ds_count <- function(d, columns = c(), sort = FALSE, name = "n") {
+ds_count <- function(d, columns = c(), sort = TRUE, name = "n") {
   d |>
     select(columns) |>
     collect() |>
+    count(!!!syms(columns), sort = sort, name = name)
+}
+
+#' @title 去重
+#' @family dataset function
+#' @export
+ds_distinct <- function(d, columns = c()) {
+  d |>
+    select(columns) |>
+    collect() |>
+    distinct(!!!syms(columns))
+}
+
+#' @title 列值重复统计
+#' @family dataset function
+#' @export
+ds_dup_count <- function(d, columns = c(), dupColumns = c(), sort = TRUE, name = "n") {
+  d |>
+    select(c(columns, dupColumns)) |>
+    collect() |>
+    distinct(!!!syms(c(columns, dupColumns))) |>
     count(!!!syms(columns), sort = sort, name = name)
 }
 
