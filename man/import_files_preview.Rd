@@ -4,7 +4,7 @@
 \alias{import_files_preview}
 \title{预览多个文件}
 \usage{
-import_files_preview(filesMatched, func = function(path) {
+import_files_preview(filesMatched, keyColumns = c(), func = function(path) {
 })
 }
 \arguments{

@@ -83,6 +83,11 @@ test_that("<import_run> scrore/student", {
 test_that("<import_run> 导入多个批次中的csv文件", {
   sample_init()
   import_scan()
+  
+  import_search("^A/1") |>
+    import_csv_preview(keyColumns = c("name")) |>
+    nrow() |>
+    testthat::expect_equal(6)
 
   import_search("^A/1") |>
     import_csv(dsName = "A/1", keyColumns = c("name")) |>

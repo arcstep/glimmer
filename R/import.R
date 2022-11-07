@@ -156,7 +156,7 @@ import_files <- function(filesMatched, dsName, keyColumns = c(), func = function
         nrows <<- nrows + nrow(d)
         if(!rlang::is_empty(d) && nrow(d) > 0) {
           ## 确定数据框中包含主键
-          if(TRUE %in% (keyColumns %nin% names(d))) {
+          if(length(keyColumns) > 0 && (TRUE %in% (keyColumns %nin% names(d)))) {
             stop("Keycolumns not in file: ", importTopic, "/", path)
           }
           ## 自动创建数据集
@@ -164,7 +164,9 @@ import_files <- function(filesMatched, dsName, keyColumns = c(), func = function
             ds_init(dsName, data = d, type = "__IMPORT__", keyColumns = keyColumns)
           }
           ##
-          d |> ds_as_unique(keyColumns) |> ds_as_from(path) |>
+          d |>
+            ds_as_unique(keyColumns) |>
+            ds_as_from(path) |>
             ds_append(dsName)
         }
       })
@@ -188,14 +190,25 @@ import_csv_default <- function(path) {
 #' @param filesMatched 导入素材文件名
 #' @family import function
 #' @export
-import_files_preview <- function(filesMatched, func = function(path){}) {
+import_files_preview <- function(filesMatched, keyColumns = c(), func = function(path){}) {
   if(nrow(filesMatched) > 0) {
-    filesMatched |>
+    d <- filesMatched |>
       select(importTopic, batchFolder, filePath) |>
       purrr::pmap_dfr(function(importTopic, batchFolder, filePath) {
-        get_path(importTopic, batchFolder, filePath) |>
-          func()
+        path <- get_path(importTopic, batchFolder, filePath)
+        func(path) |> ds_as_from(path)
       })
+    ## 全部提取后使主键唯一
+    if(nrow(d) > 0) {
+      if(!rlang::is_empty(d) && nrow(d) > 0) {
+        ## 确定数据框中包含主键
+        if(length(keyColumns) > 0 && (TRUE %in% (keyColumns %nin% names(d)))) {
+          stop("Keycolumns not in file: ", importTopic, "/", path)
+        }
+        ##
+        d |> ds_as_unique(keyColumns)
+      }
+    }
   } else {
     tibble()
   }
