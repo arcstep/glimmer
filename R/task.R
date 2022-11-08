@@ -239,6 +239,16 @@ task_read <- function(taskId, snap = FALSE, taskTopic = "TASK_DEFINE", snapTopic
   }
 }
 
+#' @title 判断任务定义文件是否存在
+#' @param taskId 任务标识
+#' @param taskTopic 主题域
+#' @family task-define function
+#' @export
+task_exists <- function(taskId, taskTopic = "TASK_DEFINE") {
+  path <- getTaskPath(taskId, taskTopic)
+  fs::file_exists(path)
+}
+
 #' @title 列举所有任务定义
 #' @param topic 主题域
 #' @family task-define function

@@ -4,7 +4,7 @@
 \alias{sm_task_server}
 \title{Shiny Modules Server - 任务管理}
 \usage{
-sm_task_server(id, taskId, displayMode = "editor")
+sm_task_server(id, choosedTaskId, displayMode = "editor")
 }
 \description{
 Shiny Modules Server - 任务管理

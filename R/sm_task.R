@@ -5,10 +5,10 @@ sm_task_ui <- function(id) {
   ns <- NS(id)
   shiny::tagList(
     ##
-    uiOutput(ns("head")),
+    div(uiOutput(ns("head")), style = "margin-left: 10px"),
     wellPanel(uiOutput(ns("task-action"))),
     ##
-    sm_choose_task_ui(ns("choose-task")),
+    # sm_choose_task_ui(ns("choose-task")),
     hr(),
     sidebarLayout(
       sidebarPanel(
@@ -29,15 +29,15 @@ sm_task_ui <- function(id) {
 #' @title Shiny Modules Server - 任务管理
 #' @family Shiny Modules functions
 #' @export
-sm_task_server <- function(id, taskId, displayMode = "editor") {
+sm_task_server <- function(id, choosedTaskId, displayMode = "editor") {
   ns <- NS(id)
   moduleServer(id, function(input, output, session) {
     ##
-    taskId <- reactiveVal(NULL)
+    taskId <- reactiveVal(choosedTaskId)
     taskInfo <- reactiveVal(NULL)
     ## 切换任务
     observe({
-      taskId(sm_choose_task_server("choose-task"))
+      # taskId(sm_choose_task_server("choose-task"))
       if(!is.null(taskId())) {
         taskId() |> print()
         taskInfo(task_read(taskId()))
