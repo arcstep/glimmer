@@ -72,7 +72,7 @@ server <- function(input, output, session) {
   }
   observeEvent(input$chooseTask, {
     if(task_exists(input$`choose-task-id`)) {
-      message("CHOOSE: ", input$`choose-task-id`)
+      # message("CHOOSE: ", input$`choose-task-id`)
       choosedTaskIdVal(input$`choose-task-id`)
       removeModal()
     } else {

@@ -6,7 +6,7 @@ sm_global_vars_ui <- function(id, globalVars) {
   tags$div(
     textOutput(ns("title")),
     if(!identical(NA, globalVars)) {
-      message("globalVars: ",globalVars)
+      # message("globalVars: ",globalVars)
       ## 参数清单
       tags$ul(
         !!!(names(globalVars) |> purrr::map(function(j) {

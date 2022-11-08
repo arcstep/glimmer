@@ -35,11 +35,10 @@ sm_task_server <- function(id, choosedTaskId, displayMode = "editor") {
     ##
     taskId <- reactiveVal(choosedTaskId)
     taskInfo <- reactiveVal(NULL)
+    taskStepToRun <- reactiveVal(1e4)
     ## 切换任务
     observe({
-      # taskId(sm_choose_task_server("choose-task"))
       if(!is.null(taskId())) {
-        taskId() |> print()
         taskInfo(task_read(taskId()))
       }
     })
@@ -55,7 +54,8 @@ sm_task_server <- function(id, choosedTaskId, displayMode = "editor") {
     })
     # 更新编辑工具栏
     basicActions1 <- tagList(
-      actionButton(ns("run"), label = "执行", class = "btn btn-primary", style = "margin-right:10px")
+      actionButton(ns("run"), label = "执行", class = "btn btn-primary", style = "margin-right:10px"),
+      numericInput(ns("stepToRun"), label = "执行到第n步骤", value = 10, step = 1, min = 0)
     )
     basicActions2 <- tagList(
       span("-", style = "margin-left:15px;margin-right:15px"),
@@ -85,7 +85,7 @@ sm_task_server <- function(id, choosedTaskId, displayMode = "editor") {
     # 更新任务内容
     observe({
       if(!is.null(taskInfo())) {
-        message(taskInfo())
+        # message(taskInfo())
         items <- taskInfo()$items |> tibble::rowid_to_column()
         output$`task-scripts-items` <- renderUI({ sm_scripts_ui(ns("scripts"), items) })
         sm_scripts_server("scripts", items)
@@ -93,8 +93,8 @@ sm_task_server <- function(id, choosedTaskId, displayMode = "editor") {
     })
     # 执行任务
     observeEvent(input$run, {
-      resp <- task_run(taskId())
-      print(resp)
+      resp <- task_run(taskId(), stepToRun = isolate(input$stepToRun |> as.integer()))
+      # print(resp)
       sm_preview_server("preview", resp, title = paste("运行结果: ", taskId()))
     }, ignoreInit = TRUE)
     # 编辑任务

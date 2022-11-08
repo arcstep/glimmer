@@ -13,7 +13,8 @@ sm_scripts_ui <- function(id, scriptItems) {
         sm_input_assign_ui(ns("input-assign", rowid), inputAssign),
         sm_output_assign_ui(ns("output-assign", rowid), unlist(outputAssign)),
         sm_params_ui(ns("params", rowid), params),
-        p()
+        p(),
+        style = "margin: 3px; padding: 2px; background-color: lightyellow"
       )
     }))
   )
