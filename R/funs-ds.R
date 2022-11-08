@@ -13,7 +13,7 @@ fs::dir_ls("data/demo") |>
 #' @export
 ds_demo <- function(demoDataset = NULL) {
   if(is.null(demoDataset)) {
-    Demo.Env |> as.list()
+    Demo.Env |> as.list() |> names()
   } else {
     get(demoDataset, envir = Demo.Env)
   }
