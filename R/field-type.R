@@ -28,6 +28,7 @@ allFields <- list(
   "date32[day]" = function()date32(),
   "date64" = function()date64(),
   "time32" = function()time32(),
+  "time32[ms]" = function()time32(),
   "time64" = function()time64(),
   "null" = function()null(),
   "timestamp" = function()timestamp(unit = c("s", "ms", "us", "ns")),
