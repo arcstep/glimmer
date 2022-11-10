@@ -186,10 +186,16 @@ test_that("<ds_select>", {
     testthat::expect_equal(17)
 
   ds_read("车数据") |>
-    ds_select(c("cyl", "disp"), regex = "^@") |>
+    ds_select(c("cyl", "disp"), pattern = "^@") |>
     ds_collect() |>
     ncol() |>
     testthat::expect_equal(7)
+  
+  ds_read("车数据") |>
+    ds_select(c("cyl", "disp"), pattern = "^[^@]") |>
+    ds_collect() |>
+    ncol() |>
+    testthat::expect_equal(12)
   
   temp_remove()
 })

@@ -132,7 +132,8 @@ import_search <- function(fileMatch = ".*",
       collect() |>
       filter(stringr::str_detect(filePath, fileMatch)) |>
       filter(stringr::str_detect(batchFolder, batchMatch)) |>
-      mutate(fileSize = fs::as_fs_bytes(fileSize))
+      mutate(fileSize = fs::as_fs_bytes(fileSize)) |>
+      mutate(batchDay = lubridate::ymd(batchFolder |> stringr::str_replace_all("[^0-9]", "-"), quiet = T))
   } else {
     tibble()
   }

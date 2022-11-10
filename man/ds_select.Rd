@@ -4,7 +4,7 @@
 \alias{ds_select}
 \title{选择列，支持惰性计算}
 \usage{
-ds_select(d, columns = list(), showOthers = FALSE, regex = NULL)
+ds_select(d, columns = list(), showOthers = FALSE, pattern = NULL)
 }
 \description{
 选择列，支持惰性计算
