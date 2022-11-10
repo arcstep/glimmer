@@ -136,10 +136,18 @@ ds_arrange <- function(d, columns = list(), desc = FALSE, by_group = FALSE) {
 #' @title 选择列，支持惰性计算
 #' @family dataset function
 #' @export
-ds_select <- function(d, columns = list(), showOthers = FALSE, regex = NULL) {
-  d |>
-    select(contains(columns |> unlist()),
-           matches(regex %empty% "^mamaxiannichifanman$"), if(showOthers) everything() else NULL)
+ds_select <- function(d, columns = list(), showOthers = FALSE, pattern = NULL) {
+  if(length(columns) == 0) {
+    d |>
+      select(
+        matches(pattern %empty% "^mamaxiannichifanman$"),
+        if(showOthers) everything() else NULL)
+  } else {
+    d |>
+      select(contains(columns |> unlist()),
+             matches(pattern %empty% "^mamaxiannichifanman$"),
+             if(showOthers) everything() else NULL)
+  }
 }
 
 #' @title 列改名
