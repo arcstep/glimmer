@@ -19,19 +19,46 @@ mod_preview_ui <- function(id, type = "tibble") {
   ns <- NS(id)
   switch(
     type,
-    "tibble" = semantic_DTOutput(ns("DT")),
-    textOutput(ns("unknown")))
+    "tibble" = mod_preview_DT_ui(ns("tibble")),
+    textOutput(ns("unknown"))
+  )
 }
 #
 mod_preview_server <- function(id, data, type = "tibble") {
   moduleServer(id, function(input, output, session) {
     switch(
       type,
-      "tibble" = {
-        output$DT <- DT::renderDataTable({
-          data |> semantic_DT()
-        })}
+      "tibble" = mod_preview_DT_server("tibble", data),
+      output$unknown <- shiny::renderText(
+        paste0("< ", paste(class(data) |> unlist(), collapse = ", "), " >"))
     )
+  })
+}
+#
+mod_preview_DT_ui <- function(id) {
+  ns <- NS(id)
+  tabset(
+    tabs = list(
+      list(
+        menu = "摘要",
+        id = ns("first_tab")),
+      content = plotOutput(ns("plot1")),
+      list(
+        menu = "明细",
+        id = ns("second_tab"),
+        content = semantic_DTOutput(ns("DT")))
+    ),
+    active = ns("second_tab"),
+    id = ns("exampletabset")
+  )
+  
+}
+#
+mod_preview_DT_server <- function(id, data) {
+  moduleServer(id, function(input, output, session) {
+    output$DT <- DT::renderDataTable({
+      data |> semantic_DT()
+    })
   })
 }
 
@@ -126,12 +153,13 @@ page_dataset_show_ui <- function(id) {
     titlePanel(textOutput(ns("show-datasetName"))),
     segment(
       class = "basic",
-      semantic_DTOutput(ns("dataset-preview"))
+      mod_preview_ui(ns("detail"))
     )
   )
 }
 page_dataset_show_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    #
     dsNameRv <- reactive({
       dsId <-shiny.router::get_query_param("datasetId")
       if(!is.null(dsId)) {
@@ -141,13 +169,15 @@ page_dataset_show_server <- function(id) {
         "-"
       }
     })
+    #
     output$`show-datasetName` <- renderText(paste("数据集:", dsNameRv()))
-    output$`dataset-preview` <- DT::renderDataTable({
+    #
+    observe({
       if(dsNameRv() != "-") {
-        ds_read0(dsNameRv()) |>
+        d <- ds_read0(dsNameRv()) |>
           collect() |>
-          select(-contains("@")) |>
-          semantic_DT()
+          select(-contains("@"))
+        mod_preview_server("detail", d)
       }
     })
   })
