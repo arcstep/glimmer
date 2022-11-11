@@ -1,0 +1,7 @@
+ROOT_PATH: /Users/xuehongwei/R-workspace/glimmer-shiny/渣土专题
+SNAP: ./SNAP
+IMPORT: /Users/xuehongwei/docker-data/intelligent-todo-dataset/spb.intodas.com/data/DATA-LAKE/IMPORT
+CACHE: ./CACHE
+TASK_SCRIPTS: ./TASK_SCRIPTS
+TASK_DEFINE: ./TASK_DEFINE
+FUNS_DEFINE: ./FUNS_DEFINE

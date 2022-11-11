@@ -25,6 +25,9 @@ Imports:
     digest,
     stringr,
     shiny,
+    shiny.router,
+    shiny.semantic,
+    sortable,
     DT,
     plotly,
     callr
