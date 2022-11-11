@@ -14,160 +14,205 @@ task_queue_init()
 
 ## page ----
 
-### home_page ----
-home_page <- semanticPage(
-  titlePanel("Home page"),
-  p("This is the home page!")
-)
-
-### import_page ----
-import_page <- semanticPage(
-  titlePanel("所有导入素材"),
-  segment(
-    class = "basic",
-    dropdown_input(
-      "import-fileMatch",
-      choices = c(
-        ".*",
-        "^渣土工程/违规处置/违规报警",
-        "^渣土工程/档案管理/渣车档案",
-        "^渣土工程/档案管理/运输单位档案",
-        "^渣土工程/档案管理/消纳单位档案",
-        "^渣土工程/档案管理/施工单位档案",
-        "^渣土工程/档案管理/工地信息档案",
-        "^渣土工程/办证审批/排放证/排放证查看",
-        "^渣土工程/办证审批/排放证/办证进度查询",
-        "^渣土工程/办证审批/排放证/排放证发放流程环节",
-        "^渣土工程/办证审批/排放证/排放证发放查看详情_v2",
-        "^渣土工程/办证审批/运输证/运输证查看",
-        "^渣土工程/办证审批/运输证/办证进度查询",
-        "^渣土工程/办证审批/运输证/运输证发放流程环节",
-        "^渣土工程/办证审批/运输证/运输证发放查看详情_v2"),
-      value = ".*",
-      type = "search selection fluid"),
-    semantic_DTOutput("import-table")
-  )
-)
-import_page_callback <- function(input, output, session) {
-  output$`import-table` <- DT::renderDataTable(
-    import_search(fileMatch = input$`import-fileMatch`,
-                  todoFlag = c(T, F)) |>
-      select(-contains("@")) |>
-      mutate(fileSize = as.integer(fileSize / 1024)) |>
-      rename(`fileSize(Kb)` = fileSize) |>
-      semantic_DT()
+### page_home ----
+page_home_ui <- function(id) {
+  ns <- NS(id)
+  semanticPage(
+    titlePanel("Home page"),
+    p("This is the home page!")
   )
 }
 
-### datasets_page ----
-datasets_page <- semanticPage(
-  titlePanel("所有数据集"),
-  segment(
-    class = "basic",
-    semantic_DTOutput("dataset-table")
-  )
-)
-datasets_page_callback <- function(input, output, session) {
-  datasetToPreview <- reactiveVal(NULL)
-  output$`dataset-table` <- DT::renderDataTable({
-    btns <- ds_all() |> select(datasetId) |> 
-      purrr::pmap_df(~ list(
-        "操作" = as.character(a(href = route_link(paste0("dataset/show?datasetId=", .x)), "预览"))))
-    ds_all() |> cbind(btns) |> semantic_DT(escape = F, selection = "none")
-  })
+### page_import ----
+page_import_ui <- function(id) {
+  ns <- NS(id)
+  semanticPage(
+    titlePanel("所有导入素材"),
+    segment(
+      class = "basic",
+      dropdown_input(
+        ns("import-fileMatch"),
+        choices = c(
+          ".*",
+          "^渣土工程/违规处置/违规报警",
+          "^渣土工程/档案管理/渣车档案",
+          "^渣土工程/档案管理/运输单位档案",
+          "^渣土工程/档案管理/消纳单位档案",
+          "^渣土工程/档案管理/施工单位档案",
+          "^渣土工程/档案管理/工地信息档案",
+          "^渣土工程/办证审批/排放证/排放证查看",
+          "^渣土工程/办证审批/排放证/办证进度查询",
+          "^渣土工程/办证审批/排放证/排放证发放流程环节",
+          "^渣土工程/办证审批/排放证/排放证发放查看详情_v2",
+          "^渣土工程/办证审批/运输证/运输证查看",
+          "^渣土工程/办证审批/运输证/办证进度查询",
+          "^渣土工程/办证审批/运输证/运输证发放流程环节",
+          "^渣土工程/办证审批/运输证/运输证发放查看详情_v2"),
+        value = ".*",
+        type = "search selection fluid"),
+      semantic_DTOutput(ns("import-table"))
+    ))
 }
-
-### dataset_show_page ----
-dataset_show_page <- semanticPage(
-  titlePanel(textOutput("show-datasetName")),
-  segment(
-    class = "basic",
-    semantic_DTOutput("dataset-preview")
-  )
-)
-dataset_show_page_callback <- function(input, output, session) {
-  dsNameRv <- reactive({
-    dsId <-shiny.router::get_query_param("datasetId")
-    if(!is.null(dsId)) {
-      all <- ds_all()
-      all$name[[all$datasetId |> purrr::detect_index(~ .x == dsId)]]
-    } else {
-      "-"
-    }
-  })
-  output$`show-datasetName` <- renderText(paste("数据集:", dsNameRv()))
-  output$`dataset-preview` <- DT::renderDataTable({
-    if(dsNameRv() != "-") {
-      ds_read0(dsNameRv()) |>
-        collect() |>
+#
+page_import_server <- function(id) {
+  moduleServer(id, function(input, output, session) {
+    output$`import-table` <- DT::renderDataTable(
+      import_search(fileMatch = input$`import-fileMatch`,
+                    todoFlag = c(T, F)) |>
         select(-contains("@")) |>
+        mutate(fileSize = as.integer(fileSize / 1024)) |>
+        rename(`fileSize(Kb)` = fileSize) |>
         semantic_DT()
-    }
+    )
   })
 }
 
-### tasks_page ----
-tasks_page <- semanticPage(
-  titlePanel("tasks page"),
-  segment(
-    class = "basic",
-    actionLink("BC", a(href = route_link("task/show?taskId=BC"), "BC")),
-    p(),
-    actionLink("AA", a(href = route_link("task/edit?taskId=AA"), "AA"))
+### page_datasets ----
+page_datasets_ui <- function(id) {
+  ns <- NS(id)
+  semanticPage(
+    titlePanel("所有数据集"),
+    segment(
+      class = "basic",
+      semantic_DTOutput(ns("dataset-table"))
+    )
   )
-)
-
-### task_show_page ----
-task_show_page <- semanticPage(
-  titlePanel("show page"),
-  segment(
-    class = "basic",
-    textOutput("show-taskId"),
-    action_button("show-to-edit", "toEdit")
-  )
-)
-task_show_page_callback <- function(input, output, session) {
-  output$`show-taskId` <- renderText(
-    shiny.router::get_query_param("taskId")
-  )
-  observeEvent(input$`show-to-edit`, {
-    taskId <- shiny.router::get_query_param("taskId")
-    shiny.router::change_page(paste0("task/edit?taskId=", taskId))
+}
+page_datasets_server <- function(id) {
+  moduleServer(id, function(input, output, session) {
+    datasetToPreview <- reactiveVal(NULL)
+    output$`dataset-table` <- DT::renderDataTable({
+      btns <- ds_all() |> select(datasetId) |> 
+        purrr::pmap_df(~ list(
+          "操作" = as.character(a(href = route_link(paste0("dataset/show?datasetId=", .x)), "预览"))))
+      ds_all() |> cbind(btns) |> semantic_DT(escape = F, selection = "none")
+    })
   })
 }
 
-### task_edit_page ----
-task_edit_page <- semanticPage(
-  titlePanel("edit page"),
-  segment(
-    class = "basic",
-    textOutput("edit-taskId")
+### page_dataset_show ----
+page_dataset_show_ui <- function(id) {
+  ns <- NS(id)
+  semanticPage(
+    titlePanel(textOutput(ns("show-datasetName"))),
+    segment(
+      class = "basic",
+      semantic_DTOutput(ns("dataset-preview"))
+    )
   )
-)
-task_edit_page_callback <- function(input, output, session) {
-  output$`edit-taskId` <- renderText(
-    shiny.router::get_query_param("taskId")
+}
+page_dataset_show_server <- function(id) {
+  moduleServer(id, function(input, output, session) {
+    dsNameRv <- reactive({
+      dsId <-shiny.router::get_query_param("datasetId")
+      if(!is.null(dsId)) {
+        all <- ds_all()
+        all$name[[all$datasetId |> purrr::detect_index(~ .x == dsId)]]
+      } else {
+        "-"
+      }
+    })
+    output$`show-datasetName` <- renderText(paste("数据集:", dsNameRv()))
+    output$`dataset-preview` <- DT::renderDataTable({
+      if(dsNameRv() != "-") {
+        ds_read0(dsNameRv()) |>
+          collect() |>
+          select(-contains("@")) |>
+          semantic_DT()
+      }
+    })
+  })
+}
+  
+
+### page_tasks ----
+page_tasks_ui <- function(id) {
+  ns <- NS(id)
+  semanticPage(
+    titlePanel("tasks page"),
+    segment(
+      class = "basic",
+      actionLink("BC", a(href = route_link("task/show?taskId=BC"), "BC")),
+      p(),
+      actionLink("AA", a(href = route_link("task/edit?taskId=AA"), "AA"))
+    )
   )
 }
 
-### task_new_page ----
-task_new_page <- semanticPage(
-  segment(
-    class = "basic",
-    titlePanel("new page"),
+### page_task_show ----
+page_task_show_ui <- function(id) {
+  ns <- NS(id)
+  semanticPage(
+    titlePanel("show page"),
+    segment(
+      class = "basic",
+      textOutput(ns("show-taskId")),
+      action_button(ns("show-to-edit"), "toEdit")
+    )
   )
-)
+}
+page_task_show_server <- function(id) {
+  moduleServer(id, function(input, output, session) {
+    output$`show-taskId` <- renderText(
+      shiny.router::get_query_param("taskId")
+    )
+    observeEvent(input$`show-to-edit`, {
+      taskId <- shiny.router::get_query_param("taskId")
+      shiny.router::change_page(paste0("task/edit?taskId=", taskId))
+    })
+  })
+}
+
+### page_task_edit ----
+page_task_edit_ui <- function(id) {
+  ns <- NS(id)
+  semanticPage(
+    titlePanel("edit page"),
+    segment(
+      class = "basic",
+      textOutput(ns("edit-taskId"))
+    )
+  )
+}
+page_task_edit_server <- function(id) {
+  moduleServer(id, function(input, output, session) {
+    output$`edit-taskId` <- renderText(
+      shiny.router::get_query_param("taskId")
+    )
+  })
+}
+
+### page_task_new ----
+page_task_new_ui <- function(id) {
+  ns <- NS(id)
+  semanticPage(
+    segment(
+      class = "basic",
+      titlePanel("new page"),
+    )
+  )
+}
+
 
 ## router ----
+my_router <- function(urlName, nameFix, serverModule = TRUE) {
+  uiName <- do.call(paste0("page_", nameFix, "_ui"), list(nameFix))
+  if(serverModule) {
+    serverName <- function(...) do.call(paste0("page_", nameFix, "_server"), list(nameFix))
+  } else {
+    serverName <- NA
+  }
+  route(urlName, uiName, serverName)
+}
 router <- make_router(
-  route("/", home_page, NA),
-  route("import", import_page, import_page_callback),
-  route("datasets", datasets_page, datasets_page_callback),
-  route("dataset/show", dataset_show_page, dataset_show_page_callback),
-  route("tasks", tasks_page, NA),
-  route("task/show", task_show_page, task_show_page_callback),
-  route("task/edit", task_edit_page, task_edit_page_callback),
-  route("task/new", task_new_page, NA)
+  my_router("/", "home", F),
+  my_router("import", "import"),
+  my_router("datasets", "datasets"),
+  my_router("dataset/show", "dataset_show"),
+  my_router("tasks", "tasks", F),
+  my_router("task/show", "task_show"),
+  my_router("task/edit", "task_edit"),
+  my_router("task/new", "task_new", F)
 )
 
 ## menu ----
