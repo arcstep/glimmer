@@ -12,6 +12,29 @@ import_init()
 risk_data_init()
 task_queue_init()
 
+## compenent ----
+
+### preview ----
+mod_preview_ui <- function(id, type = "tibble") {
+  ns <- NS(id)
+  switch(
+    type,
+    "tibble" = semantic_DTOutput(ns("DT")),
+    textOutput(ns("unknown")))
+}
+#
+mod_preview_server <- function(id, data, type = "tibble") {
+  moduleServer(id, function(input, output, session) {
+    switch(
+      type,
+      "tibble" = {
+        output$DT <- DT::renderDataTable({
+          data |> semantic_DT()
+        })}
+    )
+  })
+}
+
 ## page ----
 
 ### page_home ----
@@ -31,7 +54,7 @@ page_import_ui <- function(id) {
     segment(
       class = "basic",
       dropdown_input(
-        ns("import-fileMatch"),
+        ns("fileMatch"),
         choices = c(
           ".*",
           "^渣土工程/违规处置/违规报警",
@@ -50,20 +73,26 @@ page_import_ui <- function(id) {
           "^渣土工程/办证审批/运输证/运输证发放查看详情_v2"),
         value = ".*",
         type = "search selection fluid"),
-      semantic_DTOutput(ns("import-table"))
+      mod_preview_ui(ns("files"))
     ))
 }
 #
 page_import_server <- function(id) {
   moduleServer(id, function(input, output, session) {
-    output$`import-table` <- DT::renderDataTable(
-      import_search(fileMatch = input$`import-fileMatch`,
-                    todoFlag = c(T, F)) |>
+    filesVal <- reactiveVal(NULL)
+    observe({
+      message(input$fileMatch)
+      import_search(fileMatch = input$fileMatch, todoFlag = c(T, F)) |>
         select(-contains("@")) |>
         mutate(fileSize = as.integer(fileSize / 1024)) |>
-        rename(`fileSize(Kb)` = fileSize) |>
-        semantic_DT()
-    )
+        rename(`fileSize(K)` = fileSize) |>
+        filesVal()
+    })
+    observe({
+      if(!is.null(filesVal())) {
+        mod_preview_server("files", filesVal())
+      }
+    })
   })
 }
 
