@@ -24,6 +24,7 @@ page_import_ui <- function(id) {
           "^渣土工程/办证审批/运输证/运输证发放查看详情_v2"),
         value = ".*",
         type = "search selection fluid"),
+      hr(),
       mod_preview_ui(ns("files"))
     ))
 }

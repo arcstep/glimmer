@@ -30,6 +30,8 @@ router <- make_router(
   my_router("import", "import"),
   my_router("datasets", "datasets"),
   my_router("dataset/show", "dataset_show"),
+  my_router("bucket", "bucket", F),
+  my_router("bucket/show", "bucket_show"),
   my_router("tasks", "tasks", F),
   my_router("task/show", "task_show"),
   my_router("task/edit", "task_edit"),
@@ -42,7 +44,8 @@ menu <- shiny.semantic::horizontal_menu(
     list(name = "首页", link = route_link("/")),
     list(name = "导入素材", link = route_link("import")),
     list(name = "数据成果", link = route_link("datasets")),
-    list(name = "分析任务", link = route_link("tasks"))
+    list(name = "分析任务", link = route_link("tasks")),
+    list(name = "数据篮", link = route_link("bucket"))
     # list(name = "新的分析", link = route_link("task/new"))
     )
 )
@@ -58,6 +61,8 @@ ui <- function() {
 
 ##
 server <- function(input, output, session) {
+  bucket_set(session, "file", "a.csv")
+  session$userData$myval <- "abcdefg"
   router$server(input, output, session)
 }
 
