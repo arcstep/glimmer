@@ -1,25 +1,51 @@
 mod_preview_DT_ui <- function(id) {
   ns <- NS(id)
-  tabset(
-    tabs = list(
-      list(menu = "摘要", id = ns("sum-tab"), content = uiOutput(ns("summary"))),
-      list(menu = "明细", id = ns("detail-tab"), content = semantic_DTOutput(ns("DT")))),
-    active = ns("detail-tab"),
-    id = ns("DT-tab")
+  tagList(
+    wellPanel(
+      uiOutput(ns("columns")),
+      action_button(ns("search"), "查询")
+    ),
+    tabset(
+      tabs = list(
+        list(menu = "摘要", id = ns("sum-tab"), content = uiOutput(ns("summary"))),
+        list(menu = "明细", id = ns("detail-tab"), content = semantic_DTOutput(ns("DT")))),
+      active = ns("detail-tab"),
+      id = ns("DT-tab")
+    )
   )
 }
 #
 mod_preview_DT_server <- function(id, data) {
   moduleServer(id, function(input, output, session) {
+    ns <- session$ns
+    #
+    output$columns <- renderUI({
+      div(
+        class = "option-checkbox",
+        multiple_checkbox(
+          ns("selected"),
+          label = "选择列",
+          choices = names(data),
+          selected = selectedColumnVal() %empty% names(data),
+          position = "inline")
+      )
+    })
+    #
+    selectedColumnVal <- reactiveVal()
+    dsVal <- reactive({
+      print(input$selected)
+      selectedColumnVal(input$selected)
+      data |> ds_select(columns = input$selected)
+    }) |> bindEvent(input$search, ignoreNULL = T)
     # cards-items-ui
-    items <- names(data) |> purrr::map(function(itemName) {
-      columnClass <- class(data[[itemName]]) |> paste(collapse = ", ")
-      columnCount <- length(unique(data[[itemName]]))
-      if(NA %in% data[[itemName]]) {
+    items <- names(dsVal()) |> purrr::map(function(itemName) {
+      columnClass <- class(dsVal()[[itemName]]) |> paste(collapse = ", ")
+      columnCount <- length(unique(dsVal()[[itemName]]))
+      if(NA %in% dsVal()[[itemName]]) {
         flagUI <- a(class = "ui red ribbon label", style = "margin-bottom: 5px;", "NA")
         desc <- sprintf("%s - 包含NA", columnCount)
       } else {
-        if(columnCount == nrow(data)) {
+        if(columnCount == nrow(dsVal())) {
           flagUI <- a(class = "ui blue ribbon label", style = "margin-bottom: 5px;", "Unique")
         } else {
           flagUI <- NULL
@@ -38,7 +64,7 @@ mod_preview_DT_server <- function(id, data) {
     })
     #
     output$summary <- renderUI({
-      infoUI <- sprintf("%d行, %d列", nrow(data), ncol(data))
+      infoUI <- sprintf("%d行, %d列", nrow(dsVal()), ncol(dsVal()))
       tagList(
         div(
           class = "ui raised segment",
@@ -46,10 +72,11 @@ mod_preview_DT_server <- function(id, data) {
             a(class = "ui green ribbon label", style = "margin-bottom: 5px;", "数据框"),
             infoUI
           )),
-        cards(class = "four", !!!items))
+        cards(class = "five", !!!items))
     })
+    #
     output$DT <- DT::renderDataTable({
-      data |> semantic_DT()
+      dsVal() |> semantic_DT()
     })
   })
 }

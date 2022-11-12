@@ -42,15 +42,16 @@ menu <- shiny.semantic::horizontal_menu(
     list(name = "首页", link = route_link("/")),
     list(name = "导入素材", link = route_link("import")),
     list(name = "数据成果", link = route_link("datasets")),
-    list(name = "分析任务", link = route_link("tasks")),
-    list(name = "新的分析", link = route_link("task/new"))),
-  logo = "vis.png"
+    list(name = "分析任务", link = route_link("tasks"))
+    # list(name = "新的分析", link = route_link("task/new"))
+    )
 )
 
 ## shiny ----
 ui <- function() {
   fluidPage(
-    menu,
+    tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "global.css")),
+    div(menu, style = "width: 500px"),
     router$ui
   )
 }
