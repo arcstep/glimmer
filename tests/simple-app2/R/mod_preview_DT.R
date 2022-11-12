@@ -17,15 +17,17 @@ mod_preview_DT_ui <- function(id) {
   )
 }
 #
-mod_preview_DT_server <- function(id, data) {
+mod_preview_DT_server <- function(id, data, varId = "") {
   moduleServer(id, function(input, output, session) {
-    ns <- session$ns
+    # 确保动态创建DOM唯一性
+    nsUI <- NS(session$ns(varId))
+    nsServer <- NS(varId)
     #
     output$columns <- renderUI({
       div(
         class = "option-checkbox",
         multiple_checkbox(
-          ns("selected"),
+          nsUI("selected"),
           label = "选择列",
           choices = names(data),
           selected = selectedColumnVal() %empty% names(data),
@@ -36,8 +38,8 @@ mod_preview_DT_server <- function(id, data) {
     selectedColumnVal <- reactiveVal()
     #
     dsVal <- reactive({
-      print(input$selected)
-      selectedColumnVal(input$selected)
+      print(input[[nsServer("selected")]])
+      selectedColumnVal(input[[nsServer("selected")]])
       data |> ds_select(columns = selectedColumnVal())
     }) |> bindEvent(input$search, ignoreNULL = T)
     #
@@ -87,7 +89,13 @@ mod_preview_DT_server <- function(id, data) {
     })
     #
     output$DT <- DT::renderDataTable({
-      dsVal() |> semantic_DT()
+      dsVal() |> semantic_DT(
+        extensions = 'FixedColumns',
+        options = list(
+          dom = 't',
+          scrollX = TRUE,
+          fixedColumns = F
+        ))
     })
   })
 }

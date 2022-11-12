@@ -11,8 +11,8 @@ page_dataset_show_ui <- function(id) {
 page_dataset_show_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     #
-    dsNameRv <- reactive({
-      dsId <-shiny.router::get_query_param("datasetId")
+    dsNameVal <- reactive({
+      dsId <- shiny.router::get_query_param("datasetId")
       if(!is.null(dsId)) {
         all <- ds_all()
         all$name[[all$datasetId |> purrr::detect_index(~ .x == dsId)]]
@@ -21,14 +21,15 @@ page_dataset_show_server <- function(id) {
       }
     })
     #
-    output$`show-datasetName` <- renderText(paste("数据集:", dsNameRv()))
+    output$`show-datasetName` <- renderText(paste("数据集:", dsNameVal()))
     #
     observe({
-      if(dsNameRv() != "-") {
-        d <- ds_read0(dsNameRv()) |>
+      if(dsNameVal() != "-") {
+        dsId <- shiny.router::get_query_param("datasetId")
+        d <- ds_read0(dsNameVal()) |>
           collect() |>
           select(-contains("@"))
-        mod_preview_server("detail", d)
+        mod_preview_server("detail", d, varId = dsId)
       }
     })
   })
