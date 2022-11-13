@@ -365,8 +365,8 @@ test_that("<task_run>: stepToRun", {
 
 test_that("获取任务执行参数", {
   sample_init()
-  
-  ## 进入编辑模式
+
+  ##  
   taskName <- "mytask1"
 
   task_create(taskName) |>
@@ -374,6 +374,7 @@ test_that("获取任务执行参数", {
     script_item_add(type = "func",
                     script = "ds_head",
                     params = list(n = 2),
+                    ## 注意入参映射表达：name为函数参数、value为任务参数
                     inputAssign = list("n" = "N", "d" = "@ds")) |>
     script_item_add(type = "func",
                     script = "ds_arrange",

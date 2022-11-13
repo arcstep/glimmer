@@ -314,7 +314,7 @@ task_params_assign <- function(taskName, taskTopic = "TASK_DEFINE") {
       list(
         taskParam = assignName,
         value = list("default" = params[[paramName]]),
-        meta = list(get_fun_schema(funcName, "params", assignName)),
+        meta = list(get_fun_schema(funcName, "params", paramName)),
         funcParam = paramName,
         funcName = funcName
       )
