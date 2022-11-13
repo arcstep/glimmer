@@ -25,18 +25,27 @@ script_item_add(
 
 \item{globalVars}{设置全局变量}
 
-\item{inputAssign}{针对function和gali类型，使用执行环境内变量映射入参}
+\item{inputAssign}{使用全局变量或任务参数映射脚本入参}
 
-\item{outputAssign}{保存子任务输出}
+\item{outputAssign}{将输出结果保存为全局变量}
 
 \item{touchFiles}{类型为file,dir时自动创建脚本文件}
 
 \item{taskTopic}{任务主题存储位置}
 
-\item{type}{可以是string,expr,function,gali,file,dir,var等}
+\item{type}{可以是string,expr,function,file,dir,var等}
 }
 \description{
-增加子任务
+创建任务过程中变量赋值顺序是：globalVars, inputAssign, outputAssign
+
+如果添加的func类型，还应当注意：
+\itemize{
+\item 要在func脚本中使用globalVars，需要设置inputAssign映射
+\item func脚本中的inputAssign设置可能有3种来源：
+（1）是\code{@}开头的全局变量；
+（2）是\code{globalVars}或\code{outputAssign}输出的全局变量；
+（3）是执行\code{task_run}时额外提供的参数。
+}
 }
 \seealso{
 Other task-script function: 

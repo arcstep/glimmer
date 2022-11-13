@@ -17,6 +17,7 @@ Other task-define function:
 \code{\link{task_name}()},
 \code{\link{task_offline}()},
 \code{\link{task_online}()},
+\code{\link{task_params_assign}()},
 \code{\link{task_read}()},
 \code{\link{task_run}()},
 \code{\link{task_search}()},

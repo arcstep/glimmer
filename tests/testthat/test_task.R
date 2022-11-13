@@ -207,10 +207,10 @@ test_that("<task_run>: 预定义函数管道", {
     script_string_add(script = "car6 |> head(5)") |>
     task_run() |> nrow() |>
     testthat::expect_equal(5)
-
+  
   task_create(taskName = "fun03", force = TRUE) |>
     script_func_add("gali_import_cars", outputAssign = "mycars") |>
-    script_string_add(script = "mycars |> head(5)", inputAssign = "mycars", outputAssign = "mycars") |>
+    script_string_add(script = "mycars |> head(5)", outputAssign = "mycars") |>
     script_func_add(script = "gali_ds_filter_cyl", params = list(i_cyl = 4), inputAssign = list("d" = "mycars")) |>
     task_run() |> nrow() |>
     testthat::expect_equal(1)
@@ -281,8 +281,7 @@ test_that("编辑任务：正常流程", {
   
   ## 从编辑模式保存
   taskName |> task_save()
-  identical(c("ds_demo", "ds_head"),
-            task_read(taskName)$items$script) |>
+  identical(c("ds_demo", "ds_head"), task_read(taskName)$items$script) |>
     testthat::expect_true()
   taskName |> task_run() |> nrow() |>
     testthat::expect_equal(10)
@@ -367,6 +366,30 @@ test_that("<task_run>: stepToRun", {
 test_that("获取任务执行参数", {
   sample_init()
   
+  ## 进入编辑模式
+  taskName <- "mytask1"
+
+  task_create(taskName) |>
+    script_func_add("ds_demo", params = list("demoDataset" = "mpg")) |>
+    script_item_add(type = "func",
+                    script = "ds_head",
+                    params = list(n = 2),
+                    inputAssign = list("n" = "N", "d" = "@ds")) |>
+    script_item_add(type = "func",
+                    script = "ds_arrange",
+                    params = list(columns = "displ", desc = TRUE, by_group = T),
+                    inputAssign = list(desc = "desc", group = "by_group"))
+  
+  identical(c("ds_demo", "ds_head", "ds_arrange"),
+            task_read(taskName)$items$script) |>
+    testthat::expect_true()
+
+  ##
+  toAssign <- task_params_assign(taskName)
+  toAssign$paramName |> identical(c("n", "desc", "group")) |>
+    testthat::expect_true()
+  toAssign$value[[1]] |> testthat::expect_equal(2)
+  toAssign$value[[2]] |> testthat::expect_true()
   
   temp_remove()
 })

@@ -274,6 +274,45 @@ task_name <- function(taskId, taskTopic = "TASK_DEFINE") {
   }
 }
 
+#' @title 提取任务执行的入参映射
+#' @description 
+#' \code{\link{task_run}}函数执行时允许携带额外参数，
+#' 这可以从func类型脚本中的\code{inputAssign}自动提取。
+#' 
+#' 提取的\code{inputAssign}设置时，自动过滤映射值为@开头的内置参数，
+#' 或映射值为outputAssign或globalVars中已经输出的参数。
+#' 
+#' 返回值中会包含入参映射所在函数的元数据描述。
+#' 
+#' 如果脚本中设置过该参数，则将其设为默认值。
+#' 
+#' @family task-define function
+#' @export
+task_params_assign <- function(taskName, taskTopic = "TASK_DEFINE") {
+  insideAssign <- c()
+  task_read(taskName, taskTopic = taskTopic)$items |>
+    purrr::pmap_df(function(type, script, params, globalVars, inputAssign, outputAssign) {
+      insideAssign <<- c(names(globalVars), unlist(outputAssign)) |> unique()
+      list(
+        "paramName" = names(inputAssign) |>
+          purrr::keep(~ type == "func" &&
+                        stringr::str_detect(inputAssign[[.x]], "^@", negate = T) &&
+                        inputAssign[[.x]] %nin% insideAssign),
+        "funcName" = script,
+        "params" = list(params %empty% list())
+      )
+    }) |>
+    filter(!is.na(paramName)) |>
+    purrr::pmap_df(function(funcName, paramName, params) {
+      list(
+        funcName = funcName,
+        paramName = paramName,
+        value = list("default" = params[[paramName]]),
+        meta = list(get_fun_schema(funcName, "params", paramName))
+      )
+    })
+}
+
 #' @title 列举所有任务定义
 #' @param topic 主题域
 #' @family task-define function
@@ -305,6 +344,7 @@ task_search <- function(taskMatch = ".*", typeMatch = ".*", taskTopic = "TASK_DE
 
 #' @title 运行任务
 #' @description 
+#' 
 #' \code{task_run}可以仅执行到第\code{task_run}步结束，但不包括附加脚本（如队列）
 #' @param taskTopic 保存任务定义的存储主题文件夹
 #' @param taskName 任务标识
