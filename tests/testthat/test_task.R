@@ -364,3 +364,9 @@ test_that("<task_run>: stepToRun", {
   temp_remove()
 })
 
+test_that("获取任务执行参数", {
+  sample_init()
+  
+  
+  temp_remove()
+})

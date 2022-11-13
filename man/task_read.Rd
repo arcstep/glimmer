@@ -24,6 +24,8 @@ Other task-define function:
 \code{\link{task_cancel_snap}()},
 \code{\link{task_create}()},
 \code{\link{task_exists}()},
+\code{\link{task_id}()},
+\code{\link{task_name}()},
 \code{\link{task_offline}()},
 \code{\link{task_online}()},
 \code{\link{task_run}()},

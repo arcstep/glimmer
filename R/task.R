@@ -35,6 +35,7 @@ task_create <- function(taskName, online = FALSE, force = FALSE,
                         cacheTopic = "CACHE", importTopic = "IMPORT", extention = list()) {
   meta <- list(
     "taskName" = taskName,
+    "taskId" = task_id(taskName, taskTopic),
     "online" = online,
     "taskType" = taskType,
     "desc" = desc,
@@ -249,6 +250,30 @@ task_exists <- function(taskName, taskTopic = "TASK_DEFINE") {
   fs::file_exists(path)
 }
 
+#' @title 从任务名称转换任务ID
+#' @family task-define function
+#' @export
+task_id <- function(taskName, taskTopic = "TASK_DEFINE") {
+  digest::digest(fs::path_join(c(taskTopic, taskName)), algo = "xxhash32")
+}
+
+#' @title 从任务ID转换任务名称
+#' @description 
+#' 该操作可能在内存中做大量重复计算，因此做缓存处理
+#' @family task-define function
+#' @export
+task_name <- function(taskId, taskTopic = "TASK_DEFINE") {
+  root_path <- get_path(taskTopic)
+  if(fs::dir_exists(root_path)) {
+    fs::dir_ls(root_path, type = "file", all = T, glob = "*.rds", recurse = T) |>
+      stringr::str_remove(paste0(root_path, "/")) |>
+      stringr::str_remove(".rds") |>
+      purrr::detect(~ task_id(.x, taskTopic) == taskId)
+  } else {
+    NULL
+  }
+}
+
 #' @title 列举所有任务定义
 #' @param topic 主题域
 #' @family task-define function
@@ -269,7 +294,7 @@ task_search <- function(taskMatch = ".*", typeMatch = ".*", taskTopic = "TASK_DE
         }) |>
         filter(stringr::str_detect(taskName, taskMatch)) |>
         filter(stringr::str_detect(taskType, typeMatch)) |>
-        select(taskName, online, taskType, itemsCount, extention, everything())
+        select(taskId, taskName, online, taskType, itemsCount, extention, everything())
     } else {
       tibble()
     }
