@@ -57,7 +57,7 @@ task_risk_model_create <- function(dsName,
   }
 
   ## 创建针对数据集的风险筛查任务  
-  task_create(taskId = modelId,
+  task_create(taskName = modelId,
               taskType = "__RISK__",
               taskTopic = taskTopic,
               desc = modelDesc,
@@ -71,8 +71,8 @@ task_risk_model_create <- function(dsName,
                 riskDataName = riskDataName,
                 riskTip = riskTip,
                 riskLevel = riskLevel)) |>
-    ## 从任务运行环境中自定提取taskId并映射为@modelId
-    script_expr_add(expression({`@task`$taskId}), outputAssign = "@modelId") |>
+    ## 从任务运行环境中自定提取taskName并映射为@modelId
+    script_expr_add(expression({`@task`$taskName}), outputAssign = "@modelId") |>
     ## 自动读取dsName
     script_func_add("ds_read0", params = list("dsName" = dsName))
 }
@@ -107,10 +107,10 @@ task_risk_model_search <- function(modelMatch = ".*", taskTopic = "TASK_DEFINE")
           x$extention <- list(x$extention)
           x
         }) |>
-        filter(stringr::str_detect(taskId, modelMatch)) |>
+        filter(stringr::str_detect(taskName, modelMatch)) |>
         filter(stringr::str_detect(taskType, "__RISK__")) |>
         select(-taskType, -extention) |>
-        select(taskId, online, modelName, tagName, dsName, riskLevel, riskTip, itemsCount, everything())
+        select(taskName, online, modelName, tagName, dsName, riskLevel, riskTip, itemsCount, everything())
     } else {
       tibble()
     }

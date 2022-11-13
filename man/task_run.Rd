@@ -5,7 +5,7 @@
 \title{运行任务}
 \usage{
 task_run(
-  taskId,
+  taskName,
   withQueue = FALSE,
   withEnv = FALSE,
   snap = FALSE,
@@ -16,7 +16,7 @@ task_run(
 )
 }
 \arguments{
-\item{taskId}{任务标识}
+\item{taskName}{任务标识}
 
 \item{withQueue}{是否在运行队列中显示状态}
 

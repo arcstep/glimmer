@@ -4,10 +4,10 @@
 \alias{task_update}
 \title{更新任务配置}
 \usage{
-task_update(taskId, ..., force = FALSE, taskTopic = "TASK_DEFINE")
+task_update(taskName, ..., force = FALSE, taskTopic = "TASK_DEFINE")
 }
 \arguments{
-\item{taskId}{任务唯一标识，每个\code{taskId}会保存为一个独立文件}
+\item{taskName}{任务唯一标识，每个\code{taskName}会保存为一个独立文件}
 
 \item{taskTopic}{保存任务定义的存储主题文件夹}
 

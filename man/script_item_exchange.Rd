@@ -4,10 +4,10 @@
 \alias{script_item_exchange}
 \title{调整任务脚本顺序}
 \usage{
-script_item_exchange(taskId, rowNumA, rowNumB, taskTopic = "TASK_DEFINE")
+script_item_exchange(taskName, rowNumA, rowNumB, taskTopic = "TASK_DEFINE")
 }
 \arguments{
-\item{taskId}{任务标识}
+\item{taskName}{任务标识}
 
 \item{taskTopic}{任务主题存储位置}
 

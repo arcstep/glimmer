@@ -10,31 +10,31 @@ getTaskSnapPath <- function(snapId, taskTopic = "TASK_DEFINE", snapTopic = "SNAP
 }
 
 ##
-getTaskPath <- function(taskId, taskTopic = "TASK_DEFINE") {
-  if(is.null(taskId)) {
-    stop("taskId Not Exist !!")
+getTaskPath <- function(taskName, taskTopic = "TASK_DEFINE") {
+  if(is.null(taskName)) {
+    stop("taskName Not Exist !!")
   }
-  if(length(taskId) != 1) {
-    stop("taskId length MUST be 1 >> ", taskId |> paste(collapse = ","))
+  if(length(taskName) != 1) {
+    stop("taskName length MUST be 1 >> ", taskName |> paste(collapse = ","))
   }
-  get_path(taskTopic, paste0(taskId, ".rds"))
+  get_path(taskTopic, paste0(taskName, ".rds"))
 }
 
 #' @title 创建任务执行框架
 #' @param taskTopic 保存任务定义的存储主题文件夹
 #' @param taskType 任务类型
-#' @param taskId 任务唯一标识，每个\code{taskId}会保存为一个独立文件
+#' @param taskName 任务唯一标识，每个\code{taskName}会保存为一个独立文件
 #' @param online 如果任务下线，在推荐可执行任务时将忽略
 #' @param desc 任务描述
 #' @family task-define function
 #' @export
-task_create <- function(taskId, online = FALSE, force = FALSE,
+task_create <- function(taskName, online = FALSE, force = FALSE,
                         taskType = "__UNKNOWN__", desc = "-",
                         taskTopic = "TASK_DEFINE", scriptsTopic = "TASK_SCRIPTS", snapTopic = "SNAP",
                         queueDataset = "__TASK_QUEUE__",importDataset = "__IMPORT_FILES__",
                         cacheTopic = "CACHE", importTopic = "IMPORT", extention = list()) {
   meta <- list(
-    "taskId" = taskId,
+    "taskName" = taskName,
     "online" = online,
     "taskType" = taskType,
     "desc" = desc,
@@ -48,26 +48,26 @@ task_create <- function(taskId, online = FALSE, force = FALSE,
     "importTopic" = importTopic,
     "createdAt" = as_datetime(lubridate::now(), tz = "Asia/Shanghai") |> as.character()
   )
-  path <- getTaskPath(taskId, taskTopic)
+  path <- getTaskPath(taskName, taskTopic)
   if(force || !fs::file_exists(path)) {
     fs::path_dir(path) |> fs::dir_create()
     saveRDS(meta, path)
-    return(taskId)
+    return(taskName)
   } else {
-    stop("Task Already Exist: ", taskId)
+    stop("Task Already Exist: ", taskName)
   }
 }
 
 #' @title 更新任务配置
 #' @param taskTopic 保存任务定义的存储主题文件夹
 #' @param taskType 任务类型
-#' @param taskId 任务唯一标识，每个\code{taskId}会保存为一个独立文件
+#' @param taskName 任务唯一标识，每个\code{taskName}会保存为一个独立文件
 #' @param online 如果任务下线，在推荐可执行任务时将忽略
 #' @param desc 任务描述
 #' @family task-define function
 #' @export
-task_update <- function(taskId, ..., force = FALSE, taskTopic = "TASK_DEFINE") {
-  path <- getTaskPath(taskId, taskTopic)
+task_update <- function(taskName, ..., force = FALSE, taskTopic = "TASK_DEFINE") {
+  path <- getTaskPath(taskName, taskTopic)
   if(fs::file_exists(path)) {
     meta <- readRDS(path)
     metaInfo <- list(...)
@@ -75,13 +75,13 @@ task_update <- function(taskId, ..., force = FALSE, taskTopic = "TASK_DEFINE") {
       if(force || i %in% names(meta)) {
         meta[[i]] <<- metaInfo[[i]]
       } else {
-        warning("No <", i, "> in Task Meta: ", taskId)
+        warning("No <", i, "> in Task Meta: ", taskName)
       }
     })
     saveRDS(meta, path)
-    return(taskId)
+    return(taskName)
   } else {
-    stop("Task Not Exist for Update: ", taskId)
+    stop("Task Not Exist for Update: ", taskName)
   }
 }
 
@@ -106,8 +106,8 @@ task_cancel_snap <- purrr::partial(task_update, snapId = NULL)
 #' 针对任务中的脚本可使用编辑模式，
 #' 其余任务设置则直接更新任务定义。
 #' @export
-task_edit_snap <- function(taskId, taskTopic = "TASK_DEFINE", snapTopic = "SNAP") {
-  path <- getTaskPath(taskId, taskTopic)
+task_edit_snap <- function(taskName, taskTopic = "TASK_DEFINE", snapTopic = "SNAP") {
+  path <- getTaskPath(taskName, taskTopic)
   if(fs::file_exists(path)) {
     meta <- readRDS(path)
     if(is.null(meta$snapId)) {
@@ -119,36 +119,36 @@ task_edit_snap <- function(taskId, taskTopic = "TASK_DEFINE", snapTopic = "SNAP"
       fs::path_dir(pathSnap) |> fs::dir_create()
       saveRDS(meta, pathSnap)
     } else {
-      warning("Already in Edit-Snap Mode: ", taskId)
+      warning("Already in Edit-Snap Mode: ", taskName)
     }
-    return(taskId)
+    return(taskName)
   } else {
-    stop("No Task Define try to edit-snap: ", taskId)
+    stop("No Task Define try to edit-snap: ", taskName)
   }
 }
 
 #' @title 放弃修改，重新编辑
 #' @export
-task_discard <- function(taskId, taskTopic = "TASK_DEFINE", snapTopic = "SNAP") {
-  path <- getTaskPath(taskId, taskTopic)
+task_discard <- function(taskName, taskTopic = "TASK_DEFINE", snapTopic = "SNAP") {
+  path <- getTaskPath(taskName, taskTopic)
   if(fs::file_exists(path)) {
     meta <- readRDS(path)
     if(!is.null(meta$snapId)) {
       ## 放弃编辑的内容，重新克隆任务到快照
       saveRDS(meta, getTaskSnapPath(meta$snapId, taskTopic, snapTopic))
     } else {
-      warning("Try to Discard But Not in Editing Mode: ", taskId)
+      warning("Try to Discard But Not in Editing Mode: ", taskName)
     }
-    return(taskId)
+    return(taskName)
   } else {
-    stop("No Task Define try to discar: ", taskId)
+    stop("No Task Define try to discar: ", taskName)
   }
 }
 
 #' @title 保存修改内容，并继续编辑
 #' @export
-task_save <- function(taskId, taskTopic = "TASK_DEFINE", snapTopic = "SNAP") {
-  path <- getTaskPath(taskId, taskTopic)
+task_save <- function(taskName, taskTopic = "TASK_DEFINE", snapTopic = "SNAP") {
+  path <- getTaskPath(taskName, taskTopic)
   if(fs::file_exists(path)) {
     meta <- readRDS(path)
     if(!is.null(meta$snapId)) {
@@ -156,18 +156,18 @@ task_save <- function(taskId, taskTopic = "TASK_DEFINE", snapTopic = "SNAP") {
       newMeta <- readRDS(getTaskSnapPath(meta$snapId, taskTopic, snapTopic))
       saveRDS(newMeta, path)
     } else {
-      warning("No Snap Need to Save: ", taskId)
+      warning("No Snap Need to Save: ", taskName)
     }
-    return(taskId)
+    return(taskName)
   } else {
-    stop("No Task Define try to save: ", taskId)
+    stop("No Task Define try to save: ", taskName)
   }
 }
 
 #' @title 克隆任务
 #' @export
-task_clone <- function(taskId, newTaskId, taskTopic = "TASK_DEFINE", snapTopic = "SNAP") {
-  path <- getTaskPath(taskId, taskTopic)
+task_clone <- function(taskName, newTaskId, taskTopic = "TASK_DEFINE", snapTopic = "SNAP") {
+  path <- getTaskPath(taskName, taskTopic)
   if(fs::file_exists(path)) {
     meta <- readRDS(path)
     meta$snapId <- NULL
@@ -176,14 +176,14 @@ task_clone <- function(taskId, newTaskId, taskTopic = "TASK_DEFINE", snapTopic =
     saveRDS(meta, pathClone)
     return(newTaskId)
   } else {
-    stop("No Task Define: ", taskId)
+    stop("No Task Define: ", taskName)
   }
 }
 
 #' @title 提交修改内容，并结束编辑
 #' @export
-task_submit <- function(taskId, taskTopic = "TASK_DEFINE", snapTopic = "SNAP") {
-  path <- getTaskPath(taskId, taskTopic)
+task_submit <- function(taskName, taskTopic = "TASK_DEFINE", snapTopic = "SNAP") {
+  path <- getTaskPath(taskName, taskTopic)
   if(fs::file_exists(path)) {
     meta <- readRDS(path)
     if(!is.null(meta$snapId)) {
@@ -192,34 +192,34 @@ task_submit <- function(taskId, taskTopic = "TASK_DEFINE", snapTopic = "SNAP") {
       newMeta$snapId <- NULL
       saveRDS(newMeta, path)
     } else {
-      warning("No Snap Need to Submit: ", taskId)
+      warning("No Snap Need to Submit: ", taskName)
     }
-    return(taskId)
+    return(taskName)
   } else {
-    stop("No Task Define: ", taskId)
+    stop("No Task Define: ", taskName)
   }
 }
 
 #' @title 删除任务
 #' @export
-task_remove <- function(taskId, taskTopic = "TASK_DEFINE") {
-  path <- getTaskPath(taskId, taskTopic)
+task_remove <- function(taskName, taskTopic = "TASK_DEFINE") {
+  path <- getTaskPath(taskName, taskTopic)
   if(fs::file_exists(path)) {
     fs::file_delete(path)
-    message("Task Removed: ", taskId)
-    return(taskId)
+    message("Task Removed: ", taskName)
+    return(taskName)
   } else {
-    warning("No Task Define: ", taskId)
+    warning("No Task Define: ", taskName)
   }
 }
 
 #' @title 读取任务
-#' @param taskId 任务标识
+#' @param taskName 任务标识
 #' @param taskTopic 保存任务定义的存储主题文件夹
 #' @family task-define function
 #' @export
-task_read <- function(taskId, snap = FALSE, taskTopic = "TASK_DEFINE", snapTopic = "SNAP") {
-  path <- getTaskPath(taskId, taskTopic)
+task_read <- function(taskName, snap = FALSE, taskTopic = "TASK_DEFINE", snapTopic = "SNAP") {
+  path <- getTaskPath(taskName, taskTopic)
   if(fs::file_exists(path)) {
     x <- readRDS(path)
     x$task_path = path
@@ -228,24 +228,24 @@ task_read <- function(taskId, snap = FALSE, taskTopic = "TASK_DEFINE", snapTopic
         pathSnap <- getTaskSnapPath(x$snapId, taskTopic, snapTopic)
         return(readRDS(pathSnap))
       } else {
-        warning("Snap Not Exist for task: ", taskId)
+        warning("Snap Not Exist for task: ", taskName)
         return(x)
       }
     } else {
       return(x)
     }
   } else {
-    stop("No Task Define before reading: ", taskId)
+    stop("No Task Define before reading: ", taskName)
   }
 }
 
 #' @title 判断任务定义文件是否存在
-#' @param taskId 任务标识
+#' @param taskName 任务标识
 #' @param taskTopic 主题域
 #' @family task-define function
 #' @export
-task_exists <- function(taskId, taskTopic = "TASK_DEFINE") {
-  path <- getTaskPath(taskId, taskTopic)
+task_exists <- function(taskName, taskTopic = "TASK_DEFINE") {
+  path <- getTaskPath(taskName, taskTopic)
   fs::file_exists(path)
 }
 
@@ -267,9 +267,9 @@ task_search <- function(taskMatch = ".*", typeMatch = ".*", taskTopic = "TASK_DE
           x$online <- x$online %empty% TRUE
           x
         }) |>
-        filter(stringr::str_detect(taskId, taskMatch)) |>
+        filter(stringr::str_detect(taskName, taskMatch)) |>
         filter(stringr::str_detect(taskType, typeMatch)) |>
-        select(taskId, online, taskType, itemsCount, extention, everything())
+        select(taskName, online, taskType, itemsCount, extention, everything())
     } else {
       tibble()
     }
@@ -282,14 +282,14 @@ task_search <- function(taskMatch = ".*", typeMatch = ".*", taskTopic = "TASK_DE
 #' @description 
 #' \code{task_run}可以仅执行到第\code{task_run}步结束，但不包括附加脚本（如队列）
 #' @param taskTopic 保存任务定义的存储主题文件夹
-#' @param taskId 任务标识
+#' @param taskName 任务标识
 #' @param withQueue 是否在运行队列中显示状态
 #' @param snap 当snap为TRUE时，执行编辑模式下的任务快照
 #' @param stepToRun 执行到第N条脚本即结束（默认为较大的10000条）
 #' @param runMode 运行模式（默认为进程内执行，改为r或r_bg为子进程执行）
 #' @family task-define function
 #' @export
-task_run <- function(taskId,
+task_run <- function(taskName,
                      withQueue = FALSE,
                      withEnv = FALSE,
                      snap = FALSE,
@@ -299,9 +299,9 @@ task_run <- function(taskId,
   paramInfo <- list(...)
   ## 设置运行环境
   batchId <- gen_batchNum()
-  taskMeta <- task_read(taskId, snap = snap)
+  taskMeta <- task_read(taskName, snap = snap)
   if(is.na(taskMeta$items) || is_empty(taskMeta$items)) {
-    warning("Empty Task: ", taskId)
+    warning("Empty Task: ", taskName)
     return(NULL)
   }
   ## 支持队列日志
@@ -312,13 +312,13 @@ task_run <- function(taskId,
         ## expression in task-run
         item <- task_queue_item(
           id = batchId,
-          taskId = taskId,
+          taskName = taskName,
           taskTopic = `@task`$taskTopic)
         item |> mutate(`@from` = "task_run()") |> ds_append(`@task`$queueDataset, `@task`$cacheTopic)
         ##
       }),
       "params" = NA,
-      "globalVars" = list(list("taskId" = taskId, "batchId" = batchId)),
+      "globalVars" = list(list("taskName" = taskName, "batchId" = batchId)),
       "inputAssign" = NA,
       "outputAssign" = NA
     )
@@ -333,7 +333,7 @@ task_run <- function(taskId,
         ##
       }),
       "params" = NA,
-      "globalVars" = list(list("taskId" = taskId, "batchId" = batchId,
+      "globalVars" = list(list("taskName" = taskName, "batchId" = batchId,
                            "yamlParams" = paramInfo |> yaml::as.yaml())),
       "inputAssign" = NA,
       "outputAssign" = NA
@@ -354,7 +354,7 @@ task_run <- function(taskId,
     stop(
       e,
       "task_run Failed: ",
-      "<", taskId, "> ",
+      "<", taskName, "> ",
       paramInfo |> unlist() |> paste(collapse = ","))
   })
 }

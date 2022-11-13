@@ -5,7 +5,7 @@
 \title{更新任务脚本}
 \usage{
 script_item_update(
-  taskId,
+  taskName,
   rowNum,
   script = NA,
   params = NA,
@@ -18,7 +18,7 @@ script_item_update(
 )
 }
 \arguments{
-\item{taskId}{任务标识}
+\item{taskName}{任务标识}
 
 \item{rowNum}{要更新的脚本序号}
 

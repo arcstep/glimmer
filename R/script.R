@@ -1,6 +1,6 @@
 
 #' @title 增加子任务
-#' @param taskId 任务标识
+#' @param taskName 任务标识
 #' @param script 执行脚本或函数名、文件名、目录名
 #' @param params 执行函数参数映射
 #' @param globalVars 设置全局变量
@@ -12,7 +12,7 @@
 #' @family task-script function
 #' @export
 script_item_add <- function(
-    taskId,
+    taskName,
     script = NA,
     params = NA,
     globalVars = NA,
@@ -21,7 +21,7 @@ script_item_add <- function(
     touchFiles = TRUE,
     taskTopic = "TASK_DEFINE",
     type = "var") {
-  path <- getTaskPath(taskId, taskTopic)
+  path <- getTaskPath(taskName, taskTopic)
   if(fs::file_exists(path)) {
     ## 任务定义配置文件
     meta <- readRDS(path)
@@ -31,7 +31,7 @@ script_item_add <- function(
       meta <- readRDS(path)
     }
   } else {
-    stop("Can't Add Task Scripts Before Task Define: ", taskId)
+    stop("Can't Add Task Scripts Before Task Define: ", taskName)
   }
   item <- tibble(
     "type" = type,
@@ -53,7 +53,7 @@ script_item_add <- function(
     if(type == "dir") task_script_dir_create(script)
   }
   ## 支持管道定义
-  taskId
+  taskName
 }
 
 # 创建脚本文件
@@ -80,7 +80,7 @@ task_script_dir_create <- function(scriptDir, scriptsTopic = "TASK_SCRIPTS") {
 
 
 #' @title 更新任务脚本
-#' @param taskId 任务标识
+#' @param taskName 任务标识
 #' @param rowNum 要更新的脚本序号
 #' @param script 执行脚本或函数名、文件名、目录名
 #' @param params 执行函数参数映射
@@ -93,7 +93,7 @@ task_script_dir_create <- function(scriptDir, scriptsTopic = "TASK_SCRIPTS") {
 #' @family task-script function
 #' @export
 script_item_update <- function(
-    taskId,
+    taskName,
     rowNum,
     script = NA,
     params = NA,
@@ -103,7 +103,7 @@ script_item_update <- function(
     touchFiles = TRUE,
     taskTopic = "TASK_DEFINE",
     type = "global") {
-  path <- getTaskPath(taskId, taskTopic)
+  path <- getTaskPath(taskName, taskTopic)
   if(fs::file_exists(path)) {
     meta <- readRDS(path)
     if(!is.null(meta$snapId)) {
@@ -112,7 +112,7 @@ script_item_update <- function(
       meta <- readRDS(path)
     }
   } else {
-    stop("Can't Update Task Scripts Before Task Define: ", taskId)
+    stop("Can't Update Task Scripts Before Task Define: ", taskName)
   }
   item <- tibble(
     "type" = type,
@@ -127,7 +127,7 @@ script_item_update <- function(
                         item,
                         tail(meta$item, nrow(meta$item) - rowNum))
   } else {
-    stop("rowNum [", rowNum, "] is invalid for task: ", taskId)
+    stop("rowNum [", rowNum, "] is invalid for task: ", taskName)
   }
   meta |> saveRDS(path)
   ## 使用模板创建脚本
@@ -136,20 +136,20 @@ script_item_update <- function(
     if(type == "dir") script_script_dir_create(script)
   }
   ## 支持管道定义
-  taskId
+  taskName
 }
 
 #' @title 删除任务脚本
-#' @param taskId 任务标识
+#' @param taskName 任务标识
 #' @param rowNum 要更新的脚本序号
 #' @param taskTopic 任务主题存储位置
 #' @family task-script function
 #' @export
 script_item_remove <- function(
-    taskId,
+    taskName,
     rowNum,
     taskTopic = "TASK_DEFINE") {
-  path <- getTaskPath(taskId, taskTopic)
+  path <- getTaskPath(taskName, taskTopic)
   if(fs::file_exists(path)) {
     meta <- readRDS(path)
     if(!is.null(meta$snapId)) {
@@ -157,33 +157,33 @@ script_item_remove <- function(
       meta <- readRDS(path)
     }
   } else {
-    stop("Can't Remove Task Scripts Before Task Define: ", taskId)
+    stop("Can't Remove Task Scripts Before Task Define: ", taskName)
   }
   if(rowNum >= 1 && rowNum <= nrow(meta$items)) {
     meta$items <- rbind(head(meta$item, rowNum - 1),
                         tail(meta$item, nrow(meta$item) - rowNum))
   } else {
-    stop("rowNum [", rowNum, "] is invalid for task: ", taskId)
+    stop("rowNum [", rowNum, "] is invalid for task: ", taskName)
   }
   meta |> saveRDS(path)
   ## 支持管道定义
-  taskId
+  taskName
 }
 
 
 #' @title 调整任务脚本顺序
-#' @param taskId 任务标识
+#' @param taskName 任务标识
 #' @param rowNumOld 脚本旧序号
 #' @param rowNumNew 脚本新序号
 #' @param taskTopic 任务主题存储位置
 #' @family task-script function
 #' @export
 script_item_exchange <- function(
-    taskId,
+    taskName,
     rowNumA,
     rowNumB,
     taskTopic = "TASK_DEFINE") {
-  path <- getTaskPath(taskId, taskTopic)
+  path <- getTaskPath(taskName, taskTopic)
   if(fs::file_exists(path)) {
     meta <- readRDS(path)
     if(!is.null(meta$snapId)) {
@@ -191,7 +191,7 @@ script_item_exchange <- function(
       meta <- readRDS(path)
     }
   } else {
-    stop("Can't Remove Task Scripts Before Task Define: ", taskId)
+    stop("Can't Remove Task Scripts Before Task Define: ", taskName)
   }
   if(rowNumA >= 1 && rowNumA <= nrow(meta$items) &&
      rowNumB >= 1 && rowNumB <= nrow(meta$items)) {
@@ -202,11 +202,11 @@ script_item_exchange <- function(
     }
     meta$items <- slice(meta$items, unique(rows))
   } else {
-    stop("rowNum [", rowNumA, ", ", rowNumB, "] is invalid for task: ", taskId)
+    stop("rowNum [", rowNumA, ", ", rowNumB, "] is invalid for task: ", taskName)
   }
   meta |> saveRDS(path)
   ## 支持管道定义
-  taskId
+  taskName
 }
 
 #' @title 为任务增加函数任务脚本

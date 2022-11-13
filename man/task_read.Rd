@@ -4,10 +4,15 @@
 \alias{task_read}
 \title{读取任务}
 \usage{
-task_read(taskId, snap = FALSE, taskTopic = "TASK_DEFINE", snapTopic = "SNAP")
+task_read(
+  taskName,
+  snap = FALSE,
+  taskTopic = "TASK_DEFINE",
+  snapTopic = "SNAP"
+)
 }
 \arguments{
-\item{taskId}{任务标识}
+\item{taskName}{任务标识}
 
 \item{taskTopic}{保存任务定义的存储主题文件夹}
 }

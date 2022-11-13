@@ -4,7 +4,7 @@
 \alias{task_clone}
 \title{克隆任务}
 \usage{
-task_clone(taskId, newTaskId, taskTopic = "TASK_DEFINE", snapTopic = "SNAP")
+task_clone(taskName, newTaskId, taskTopic = "TASK_DEFINE", snapTopic = "SNAP")
 }
 \description{
 克隆任务

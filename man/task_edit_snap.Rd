@@ -4,7 +4,7 @@
 \alias{task_edit_snap}
 \title{进入编辑模式}
 \usage{
-task_edit_snap(taskId, taskTopic = "TASK_DEFINE", snapTopic = "SNAP")
+task_edit_snap(taskName, taskTopic = "TASK_DEFINE", snapTopic = "SNAP")
 }
 \description{
 针对任务中的脚本可使用编辑模式，

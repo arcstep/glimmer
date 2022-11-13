@@ -1,10 +1,13 @@
 mod_preview_DT_ui <- function(id) {
   ns <- NS(id)
   tagList(
+    ## 选列
     mod_preview_DT_select_ui(ns("DT-select")),
     tabset(
       tabs = list(
+        ##
         list(menu = "摘要", id = ns("sum-tab"), content = mod_preview_DT_summary_ui(ns("summary"))),
+        ##
         list(menu = "明细", id = ns("detail-tab"), content = semantic_DTOutput(ns("DT")))),
       active = ns("detail-tab"),
       id = ns("DT-tab")

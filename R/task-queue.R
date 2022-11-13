@@ -7,7 +7,7 @@ task_queue_init <- function(dsName = "__TASK_QUEUE__", cacheTopic = "CACHE") {
   sampleData <- tibble(
     "id" = dt_string(),
     "taskTopic" = dt_string(),
-    "taskId" = dt_string(),
+    "taskName" = dt_string(),
     "ymlParams" = dt_string(),
     "todo" = dt_bool(),
     "runAt" = dt_datetime(),
@@ -32,13 +32,13 @@ task_queue_param_to_yaml <- function(params) params |> yaml::as.yaml()
 #' @title 构造队列中的一条数据
 #' @family queue function
 #' @export
-task_queue_item <- function(taskId, yamlParams = "[]\n", id = gen_batchNum(),
+task_queue_item <- function(taskName, yamlParams = "[]\n", id = gen_batchNum(),
                               taskTopic = "TASK_DEFINE", cacheTopic = "CACHE") {
   runAt <- now(tzone = "Asia/Shanghai")
   tibble(
     "id" = id,
     "taskTopic" = taskTopic,
-    "taskId" = taskId,
+    "taskName" = taskName,
     "ymlParams" = yamlParams,
     "todo" = TRUE,
     "runAt" = runAt,
@@ -54,7 +54,7 @@ task_queue_search <- function(b_todo = TRUE, taskMatch = ".*", dsName = "__TASK_
     filter(todo %in% b_todo) |>
     collect()
   if(!is_empty(all)) {
-    all |> filter(stringr::str_detect(taskId, taskMatch)) |>
+    all |> filter(stringr::str_detect(taskName, taskMatch)) |>
       arrange(desc(runAt))
   }
 }

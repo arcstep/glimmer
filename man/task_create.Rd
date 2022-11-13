@@ -5,7 +5,7 @@
 \title{创建任务执行框架}
 \usage{
 task_create(
-  taskId,
+  taskName,
   online = FALSE,
   force = FALSE,
   taskType = "__UNKNOWN__",
@@ -21,7 +21,7 @@ task_create(
 )
 }
 \arguments{
-\item{taskId}{任务唯一标识，每个\code{taskId}会保存为一个独立文件}
+\item{taskName}{任务唯一标识，每个\code{taskName}会保存为一个独立文件}
 
 \item{online}{如果任务下线，在推荐可执行任务时将忽略}
 

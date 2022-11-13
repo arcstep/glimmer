@@ -4,7 +4,7 @@
 \alias{task_submit}
 \title{提交修改内容，并结束编辑}
 \usage{
-task_submit(taskId, taskTopic = "TASK_DEFINE", snapTopic = "SNAP")
+task_submit(taskName, taskTopic = "TASK_DEFINE", snapTopic = "SNAP")
 }
 \description{
 提交修改内容，并结束编辑

@@ -4,7 +4,7 @@
 \alias{task_save}
 \title{保存修改内容，并继续编辑}
 \usage{
-task_save(taskId, taskTopic = "TASK_DEFINE", snapTopic = "SNAP")
+task_save(taskName, taskTopic = "TASK_DEFINE", snapTopic = "SNAP")
 }
 \description{
 保存修改内容，并继续编辑

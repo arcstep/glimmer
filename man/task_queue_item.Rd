@@ -5,7 +5,7 @@
 \title{构造队列中的一条数据}
 \usage{
 task_queue_item(
-  taskId,
+  taskName,
   yamlParams = "[]\\n",
   id = gen_batchNum(),
   taskTopic = "TASK_DEFINE",

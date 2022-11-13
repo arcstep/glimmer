@@ -4,7 +4,7 @@
 \alias{task_discard}
 \title{放弃修改，重新编辑}
 \usage{
-task_discard(taskId, taskTopic = "TASK_DEFINE", snapTopic = "SNAP")
+task_discard(taskName, taskTopic = "TASK_DEFINE", snapTopic = "SNAP")
 }
 \description{
 放弃修改，重新编辑

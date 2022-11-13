@@ -4,10 +4,10 @@
 \alias{task_exists}
 \title{判断任务定义文件是否存在}
 \usage{
-task_exists(taskId, taskTopic = "TASK_DEFINE")
+task_exists(taskName, taskTopic = "TASK_DEFINE")
 }
 \arguments{
-\item{taskId}{任务标识}
+\item{taskName}{任务标识}
 
 \item{taskTopic}{主题域}
 }

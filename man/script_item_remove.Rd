@@ -4,10 +4,10 @@
 \alias{script_item_remove}
 \title{删除任务脚本}
 \usage{
-script_item_remove(taskId, rowNum, taskTopic = "TASK_DEFINE")
+script_item_remove(taskName, rowNum, taskTopic = "TASK_DEFINE")
 }
 \arguments{
-\item{taskId}{任务标识}
+\item{taskName}{任务标识}
 
 \item{rowNum}{要更新的脚本序号}
 

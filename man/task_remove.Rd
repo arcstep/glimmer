@@ -4,7 +4,7 @@
 \alias{task_remove}
 \title{删除任务}
 \usage{
-task_remove(taskId, taskTopic = "TASK_DEFINE")
+task_remove(taskName, taskTopic = "TASK_DEFINE")
 }
 \description{
 删除任务

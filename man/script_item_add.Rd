@@ -5,7 +5,7 @@
 \title{增加子任务}
 \usage{
 script_item_add(
-  taskId,
+  taskName,
   script = NA,
   params = NA,
   globalVars = NA,
@@ -17,7 +17,7 @@ script_item_add(
 )
 }
 \arguments{
-\item{taskId}{任务标识}
+\item{taskName}{任务标识}
 
 \item{script}{执行脚本或函数名、文件名、目录名}
 
