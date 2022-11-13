@@ -378,7 +378,9 @@ test_that("获取任务执行参数", {
     script_item_add(type = "func",
                     script = "ds_arrange",
                     params = list(columns = "displ", desc = TRUE, by_group = T),
-                    inputAssign = list(desc = "desc", group = "by_group"))
+                    inputAssign = list(desc = "desc", by_group = "mygroup"))
+  task_run(taskName, N = 4, desc = T, mygroup = F)
+  task_params_assign(taskName)
   
   identical(c("ds_demo", "ds_head", "ds_arrange"),
             task_read(taskName)$items$script) |>
@@ -386,7 +388,7 @@ test_that("获取任务执行参数", {
 
   ##
   toAssign <- task_params_assign(taskName)
-  toAssign$paramName |> identical(c("n", "desc", "group")) |>
+  toAssign$taskParam |> identical(c("N", "desc", "mygroup")) |>
     testthat::expect_true()
   toAssign$value[[1]] |> testthat::expect_equal(2)
   toAssign$value[[2]] |> testthat::expect_true()

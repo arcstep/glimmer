@@ -293,22 +293,30 @@ task_params_assign <- function(taskName, taskTopic = "TASK_DEFINE") {
   task_read(taskName, taskTopic = taskTopic)$items |>
     purrr::pmap_df(function(type, script, params, globalVars, inputAssign, outputAssign) {
       insideAssign <<- c(names(globalVars), unlist(outputAssign)) |> unique()
+      assignTarget <- names(inputAssign) |>
+        purrr::keep(~ type == "func" &&
+                      stringr::str_detect(inputAssign[[.x]], "^@", negate = T) &&
+                      inputAssign[[.x]] %nin% insideAssign)
+      if(!rlang::is_empty(inputAssign) && !rlang::is_empty(assignTarget)) {
+        assignName <- assignTarget |> purrr::map_chr(~ inputAssign[[.x]])
+      } else {
+        assignName <- NULL
+      }
       list(
-        "paramName" = names(inputAssign) |>
-          purrr::keep(~ type == "func" &&
-                        stringr::str_detect(inputAssign[[.x]], "^@", negate = T) &&
-                        inputAssign[[.x]] %nin% insideAssign),
         "funcName" = script,
+        "paramName" = assignTarget,
+        "assignName" = assignName,
         "params" = list(params %empty% list())
       )
     }) |>
     filter(!is.na(paramName)) |>
-    purrr::pmap_df(function(funcName, paramName, params) {
+    purrr::pmap_df(function(funcName, paramName, assignName, params) {
       list(
-        funcName = funcName,
-        paramName = paramName,
+        taskParam = assignName,
         value = list("default" = params[[paramName]]),
-        meta = list(get_fun_schema(funcName, "params", paramName))
+        meta = list(get_fun_schema(funcName, "params", assignName)),
+        funcParam = paramName,
+        funcName = funcName
       )
     })
 }
